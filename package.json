@@ -1,7 +1,7 @@
 {
-  "name": "template-web-nodejs-pugjs",
+  "name": "eco-track",
   "version": "1.0.0",
-  "main": "scaffold.js",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "cron:fetch": "node scripts/fetch-and-save.js",
