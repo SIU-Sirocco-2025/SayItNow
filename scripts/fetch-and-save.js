@@ -99,7 +99,7 @@ async function fetchOneCity(city, attempt = 1) {
     // Retry khi bị giới hạn
     if (http === 429 || message.includes('too many requests')) {
       if (attempt < MAX_RETRY) {
-        const backoff = 10000 * attempt; // backoff 10s, 20s, ...
+        const backoff = 50000 * attempt; // backoff 50s, 100s, ...
         console.log(`[RATE LIMIT] ${city} -> chờ ${backoff / 1000}s rồi thử lại (#${attempt + 1})`);
         await sleep(backoff);
         return fetchOneCity(city, attempt + 1);
