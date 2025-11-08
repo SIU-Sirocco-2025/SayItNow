@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "concurrently -k -n web,cron -c green,cyan \"node index.js\" \"node scripts/fetch-and-save.js\"",
     "cron:fetch": "node scripts/fetch-and-save.js",
     "dev": "npx nodemon --inspect index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
