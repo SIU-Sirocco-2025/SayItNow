@@ -7,6 +7,10 @@ const session = require('express-session');
 const flash = require('express-flash');
 const moment = require('moment')
 
+// database connection
+const database = require('./config/database')
+database.connect();
+
 // Route
 const clientRoutes = require('./routers/client/index.route');
 const adminRoutes = require('./routers/admin/index.route');

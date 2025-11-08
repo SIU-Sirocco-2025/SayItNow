@@ -7,5 +7,13 @@ module.exports = {
   District5Reading: require('./district5.model'),
   District6Reading: require('./district6.model'),
   District7Reading: require('./district7.model'),
-  District8Reading: require('./district8.model')
+  District9Reading: require('./district9.model'),
+  District10Reading: require('./district10.model'),
+  BinhThanhReading: require('./binhThanh.model'),
+  PhuNhuanReading: require('./phuNhuan.model'),
+  TanPhuReading: require('./tanPhu.model'),
+  ThuDucReading: require('./thuDuc.model'),
+  HCMCReading: require('./hcmc.model'),
+  District11Reading: require('./district11.model'),
+  BinhTanReading: require('./binhTan.model')
 };

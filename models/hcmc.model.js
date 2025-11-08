@@ -2,6 +2,6 @@ const mongoose = require('mongoose');
 const buildBaseReadingSchema = require('./baseReadingSchema');
 
 const schema = buildBaseReadingSchema();
-schema.set('collection', 'district8_readings');
+schema.set('collection', 'hcmc_readings');
 
-module.exports = mongoose.model('District8Reading', schema);
+module.exports = mongoose.model('HCMCReading', schema);
