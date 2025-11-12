@@ -15,7 +15,8 @@ const COUNTRY = process.env.COUNTRY || 'vietnam';
 const DELAY_MS = parseInt(process.env.API_DELAY_MS || '6500', 10); // tránh rate limit
 const MAX_RETRY = parseInt(process.env.API_MAX_RETRY || '3', 10);
 let isRunning = false;
-
+const CRON_ENABLED = String(process.env.CRON_ENABLED || '').toLowerCase() === '1' 
+  || String(process.env.CRON_ENABLED || '').toLowerCase() === 'true';
 // Bản đồ city -> model (14 quận)
 const CITY_MAP = [
   { keys: ['ho chi minh city'], model: models.HCMCReading, label: 'Thành phố Hồ Chí Minh' },
@@ -170,10 +171,14 @@ async function runAll() {
 }
 
 // Cron mỗi giờ (phút 00), job tự tránh chồng lấn
-cron.schedule('0 * * * *', () => {
-  console.log(`[${new Date().toISOString()}] Cron tick hourly -> runAll()`);
-  runAll();
-});
+if (CRON_ENABLED) {
+  cron.schedule('0 * * * *', () => {
+    console.log(`[${new Date().toISOString()}] Cron tick hourly -> runAll()`);
+    runAll();
+  });
+} else {
+  console.log('[CRON] Disabled (set CRON_ENABLED=1 to enable)');
+}
 
 // Chạy ngay khi start
 runAll();

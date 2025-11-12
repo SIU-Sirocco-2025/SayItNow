@@ -3,14 +3,27 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "concurrently -k -n web,cron -c green,cyan \"node index.js\" \"node scripts/fetch-and-save.js\"",
+    "start": "npm run start:all",
+    "start:all": "concurrently -k -n web,worker -c green,cyan \"npm run start:web\" \"npm run start:worker\"",
+    "start:web": "node index.js",
+    "start:worker": "node scripts/fetch-and-save.js",
     "cron:fetch": "node scripts/fetch-and-save.js",
-    "dev": "npx nodemon --inspect index.js",
+    "dev": "concurrently -k -n web,worker -c yellow,magenta \"nodemon index.js\" \"nodemon scripts/fetch-and-save.js\"",
+    "dev:web": "nodemon index.js",
+    "dev:worker": "nodemon scripts/fetch-and-save.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/eco-track.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/eco-track/issues"
+  },
+  "homepage": "https://github.com/your-org/eco-track#readme",
   "description": "",
   "dependencies": {
     "axios": "^1.13.2",

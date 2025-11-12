@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('express-flash');
 const moment = require('moment')
-
+require('dotenv').config(); 
 // database connection
 const database = require('./config/database')
 database.connect();
@@ -32,7 +32,12 @@ app.set('view engine', 'pug');
 
 //Flash message
 app.use(cookieParser('afasdhgwerw'));
-app.use(session({ cookie: { maxAge: 60000 }}));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'change_this_secret', 
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 60000 }
+}));
 app.use(flash());
 
 // App local variables
