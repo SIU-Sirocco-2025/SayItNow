@@ -1,0 +1,73 @@
+//- AQI UI mixins – structure-only; data is filled by client JS
+
+mixin aqiStatusbar()
+  .aqi-statusbar.card.border-0.mb-3
+    .card-body.d-flex.align-items-center.justify-content-between.flex-wrap.gap-3
+      .d-flex.align-items-center.gap-3
+        i.bi.bi-shield-exclamation.display-6.opacity-75
+        .status-copy
+          h3.h5.mb-1#aqi-status-text Trang thai chat luong khong khi
+          p.small.mb-0.text-muted#aqi-status-sub Cap nhat tu cac tram moi nhat.
+      .d-flex.align-items-center.gap-3.flex-wrap
+        .d-flex.align-items-center.gap-2
+          span.badge.bg-light.text-body.secondary-label Trung binh
+          span.fw-bold.fs-5#aqi-avg --
+        .vr.d-none.d-md-block
+        .d-flex.align-items-center.gap-2
+          span.badge.bg-light.text-body.secondary-label Cao nhat
+          span.fw-bold#aqi-max --
+        .d-flex.align-items-center.gap-2
+          span.badge.bg-light.text-body.secondary-label Thap nhat
+          span.fw-bold#aqi-min --
+
+mixin aqiLegendInline()
+  .aqi-legend.card.border-0.shadow-sm.small.mb-3
+    .card-body.d-flex.align-items-center.flex-wrap.gap-3
+      .me-1.fw-semibold AQI
+      -
+        const aqiLegendItems = [
+          { c:'#2ecc71', t:'0-50 Tốt' },
+          { c:'#f1c40f', t:'51-100 Trung bình' },
+          { c:'#e67e22', t:'101-200 Xấu/Nhạy cảm' },
+          { c:'#8e44ad', t:'201-300 Rất xấu' },
+          { c:'#e74c3c', t:'300+ Nguy hại' }
+        ];
+      each item in aqiLegendItems
+        .d-inline-flex.align-items-center.gap-2
+          span(style=`display:inline-block;width:12px;height:12px;border-radius:2px;background:${item.c}`)
+          span= item.t
+
+mixin aqiMapControls()
+  .aqi-map-controls.card.border-0.shadow-sm.mb-3
+    .card-body.d-flex.align-items-center.flex-wrap.gap-3
+      .btn-group(role='group', aria-label='Toggle map layers')
+        button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='heat')
+          i.bi.bi-fire.me-1
+          | Ban do nhiet
+        button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='markers')
+          i.bi.bi-geo-alt.me-1
+          | Diem tram
+      .btn-group(role='group', aria-label='Base map styles')
+        button.btn.btn-sm.btn-outline-secondary.active(type='button', data-map-style='Carto Light') Sang
+        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='Dark Matter') Toi
+        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='OpenStreetMap') Co dien
+      button.btn.btn-sm.btn-outline-success(type='button', data-map-action='locate')
+        i.bi.bi-crosshair.me-1
+        | Vi tri cua toi
+
+mixin aqiMapCard()
+  .aqi-map-card.card.border-0.shadow-sm
+    .card-body
+      #aqi-map(style='width:100%;height:520px;border-radius:12px;overflow:hidden;')
+      p.small.text-muted.mt-2
+        | Nen ban do tu OpenStreetMap/Carto. Vung mau the hien muc do AQI tu cac tram.
+
+mixin aqiStationGrid()
+  .aqi-stations.mt-4
+    .d-flex.justify-content-between.align-items-end.flex-wrap.gap-2.mb-3
+      h2.h5.mb-0 Chi tiet cac tram
+      span.text-muted.small(data-stations-updated) --
+    #aqi-city-hero.mb-3
+    .row.row-cols-1.row-cols-md-2.g-3#aqi-stations
+      .col.text-center.text-muted.py-4(data-empty-state)
+        | Dang tai du lieu AQI...

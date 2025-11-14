@@ -1,0 +1,27 @@
+doctype html 
+html 
+    head 
+        title #{title}
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
+        link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
+        link(rel="stylesheet", href="/client/css/style.css")
+        // Leaflet CSS
+        link(rel="stylesheet", href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=", crossorigin="")
+        link(rel="icon" type="image/png" href="/client/image/logo.png" sizes="32x32")
+    body 
+        include ../partials/header.pug
+
+        block main
+
+        include ../partials/footer.pug
+
+        // Thư viện nền
+        script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js") 
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js") 
+        script(src="/tinymce/tinymce.min.js")  
+        script(src="/client/js/tinymce-config.js")
+        // Leaflet JS + Heat plugin (PHẢI trước script.js)
+        script(src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=", crossorigin="")
+        script(src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js")
+        script(src="/client/js/script.js") 

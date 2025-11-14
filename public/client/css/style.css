@@ -95,3 +95,129 @@ body{ background-color: var(--brand-50); }
 .aqi-hazardous{ background:#e74c3c; color:#fff; }
 
 .weather-pill{ background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.25); }
+
+#aqi-map { min-height: 520px; border-radius: 12px; border:1px solid rgba(0,0,0,.05); }
+
+.aqi-info.card{
+  min-width: 260px;
+  border: 0;
+  border-radius: 8px;
+}
+
+/* AQI statusbar themes */
+.aqi-statusbar.card { border-radius: 10px; }
+.aqi-theme-good    { background: linear-gradient(135deg,#e8f7ee,#bff0d3); }
+.aqi-theme-moderate{ background: linear-gradient(135deg,#fff8e1,#ffe082); }
+.aqi-theme-unhealthy{ background: linear-gradient(135deg,#ffe6d5,#ffb27a); }
+.aqi-theme-very-unhealthy{ background: linear-gradient(135deg,#f0e6ff,#c9b2ff); }
+.aqi-theme-hazardous{ background: linear-gradient(135deg,#ffe3e3,#ffb3b3); }
+
+/* Pulsing marker for high AQI */
+.pm-dot{
+  position: relative; display:inline-block; width:14px; height:14px; border-radius:50%;
+  box-shadow:0 0 0 2px rgba(34,34,34,.6);
+}
+.pm-dot.pm-city{ width:18px; height:18px; box-shadow:0 0 0 3px rgba(0,0,0,.4); }
+.pm-dot.good{ background:#2ecc71; }
+.pm-dot.moderate{ background:#f1c40f; }
+.pm-dot.unhealthy{ background:#e67e22; }
+.pm-dot.very-unhealthy{ background:#8e44ad; }
+.pm-dot.hazardous{ background:#e74c3c; }
+.pm-dot.need-pulse::after{
+  content:""; position:absolute; left:50%; top:50%; width:14px; height:14px; border-radius:50%;
+  transform:translate(-50%,-50%); box-shadow:0 0 0 0 currentColor; opacity:.6; animation: pm-pulse 1.6s infinite;
+}
+.pm-dot.pm-city.need-pulse::after{ width:18px; height:18px; }
+@keyframes pm-pulse{ to { box-shadow: 0 0 0 12px rgba(0,0,0,0); opacity: 0; } }
+
+/* Ambient cue on body */
+body.aqi-danger .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(231,76,60,.2); }
+body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(46,204,113,.15); }
+
+/* Inline legend spacing */
+.aqi-legend .card-body > .d-inline-flex{ margin-right: .5rem; }
+
+/* Map controls + toolbar */
+.aqi-map-controls .btn{
+  min-width: 120px;
+  border-radius: 999px;
+}
+.aqi-map-controls .btn-outline-primary.active,
+.aqi-map-controls .btn-outline-primary:hover{
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color:#fff;
+}
+.aqi-map-controls .btn-outline-secondary.active,
+.aqi-map-controls .btn-outline-secondary:hover{
+  background:#37474f;
+  border-color:#37474f;
+  color:#fff;
+}
+.aqi-map-controls .btn-outline-success{
+  border-radius: 999px;
+}
+
+.aqi-map-card{ border-radius: 16px; }
+.aqi-map-card .card-body{
+  border:1px solid rgba(0,0,0,.05);
+  border-radius:16px;
+}
+
+/* Citywide hero */
+#aqi-city-hero{
+  min-height: 0;
+}
+#aqi-city-hero:empty{
+  display:none;
+}
+.aqi-city-hero-card{
+  border-radius:18px;
+  background: linear-gradient(120deg, rgba(31,170,83,.12), rgba(31,170,83,.32));
+  border:0;
+  cursor:pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.aqi-city-hero-card:hover{
+  transform: translateY(-4px);
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+}
+.aqi-city-chip{
+  display:inline-block;
+  padding:.2rem .75rem;
+  border-radius:999px;
+  font-weight:600;
+  background: rgba(255,255,255,.7);
+}
+
+/* Station cards */
+.aqi-station-card.card{
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.05);
+  transition: transform .2s ease, box-shadow .2s ease;
+  cursor:pointer;
+}
+.aqi-station-card.card:hover{
+  transform: translateY(-4px);
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+.aqi-card-badge{
+  font-size:.85rem;
+  font-weight:600;
+  padding:.15rem .6rem;
+  border-radius:999px;
+}
+.aqi-card-good{ border-top:4px solid #2ecc71; }
+.aqi-card-moderate{ border-top:4px solid #f1c40f; }
+.aqi-card-unhealthy{ border-top:4px solid #e67e22; }
+.aqi-card-very-unhealthy{ border-top:4px solid #8e44ad; }
+.aqi-card-hazardous{ border-top:4px solid #e74c3c; }
+.aqi-station-meta{
+  font-size:.9rem;
+  color:#5f6b73;
+}
+
+.aqi-stations [data-empty-state]{
+  border:1px dashed rgba(0,0,0,.2);
+  border-radius:12px;
+}

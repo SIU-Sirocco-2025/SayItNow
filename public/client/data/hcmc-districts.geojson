@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "code": "Q1", "name": "Quận 1" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[106.692,10.800],[106.709,10.800],[106.709,10.775],[106.692,10.775],[106.692,10.800]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "code": "PN", "name": "Phú Nhuận" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[106.670,10.815],[106.695,10.815],[106.695,10.790],[106.670,10.790],[106.670,10.815]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "code": "BT", "name": "Bình Thạnh" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[106.700,10.825],[106.740,10.825],[106.740,10.790],[106.700,10.790],[106.700,10.825]]]
+      }
+    }
+  ]
+}

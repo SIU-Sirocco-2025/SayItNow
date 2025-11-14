@@ -1,0 +1,13 @@
+extends ../../layouts/heatmap.pug
+include ../../mixins/moment.pug
+include ../../mixins/aqi.pug
+include ../../mixins/aqi-ui.pug
+
+block main
+  .container.py-4
+    h1.h4.mb-3 Ban do vung chat luong khong khi
+    +aqiStatusbar()
+    +aqiLegendInline()
+    +aqiMapControls()
+    +aqiMapCard()
+    +aqiStationGrid()
