@@ -221,3 +221,33 @@ body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(46,204,113,.15); }
   border:1px dashed rgba(0,0,0,.2);
   border-radius:12px;
 }
+
+/* Forecast chart styles */
+.forecast-chart-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,.2) transparent;
+}
+
+.forecast-chart-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.forecast-chart-wrapper::-webkit-scrollbar-track {
+  background: rgba(0,0,0,.05);
+  border-radius: 4px;
+}
+
+.forecast-chart-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.2);
+  border-radius: 4px;
+}
+
+.forecast-chart-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,.3);
+}
+
+/* Hover effect cho cột biểu đồ */
+.forecast-chart-wrapper > div:hover > div {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0,0,0,.15) !important;
+}

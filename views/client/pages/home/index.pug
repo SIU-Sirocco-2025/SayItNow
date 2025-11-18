@@ -95,10 +95,51 @@ block main
     else
       .alert.alert-secondary.mb-0 Không có dữ liệu thời tiết hiển thị.
 
-  // Forecast placeholder
+  // Forecast section
   .container.py-4#forecast
-    h2.h4.mb-3 Dự báo (đang cập nhật)
-    .card.border-0.shadow-sm
-      .card-body.text-secondary
-        i.bi.bi-calendar-week.me-2
-        | Tính năng dự báo sẽ sớm được bổ sung.
+    h2.h4.mb-3 Dự báo AQI 24 giờ tới
+    .row.g-3.mb-3
+      .col-md-6
+        label.form-label Chọn quận để dự báo
+        select#district-select.form-select
+          option(value='') -- Chọn quận --
+      .col-md-6.d-flex.align-items-end
+        button#btn-forecast.btn.btn-success.w-100(type='button')
+          i.bi.bi-graph-up-arrow.me-2
+          | Xem dự báo
+    
+    #forecast-loading.d-none
+      .card.border-0.shadow-sm
+        .card-body.text-center.py-4
+          .spinner-border.text-primary.mb-2(role='status')
+          p.mb-0.text-muted Đang tải dự báo...
+    
+    #forecast-error.alert.alert-danger.d-none(role='alert')
+    
+    #forecast-result.d-none
+      .card.border-0.shadow-sm.mb-3
+        .card-body
+          h5.mb-3
+            i.bi.bi-info-circle.me-2
+            | Thông tin dự báo
+          .row.g-3
+            .col-md-3
+              .text-muted.small Quận
+              .fw-bold#forecast-district --
+            .col-md-3
+              .text-muted.small AQI trung bình
+              .fw-bold#forecast-mean --
+            .col-md-3
+              .text-muted.small AQI cao nhất
+              .fw-bold#forecast-max --
+            .col-md-3
+              .text-muted.small AQI thấp nhất
+              .fw-bold#forecast-min --
+      
+      .card.border-0.shadow-sm
+        .card-body
+          h5.mb-3
+            i.bi.bi-calendar-week.me-2
+            | Chi tiết 24 giờ
+          #forecast-chart.mb-3
+          #forecast-table-container
