@@ -21,7 +21,7 @@
     const info = aqiClass(Number(aqi || 0));
     valueEl.textContent = aqi ?? '--';
     root.classList.remove(
-      'aqi-good','aqi-moderate','aqi-unhealthy','aqi-very-unhealthy','aqi-hazardous','aqi-unknown'
+      'aqi-good', 'aqi-moderate', 'aqi-unhealthy', 'aqi-very-unhealthy', 'aqi-hazardous', 'aqi-unknown'
     );
     root.classList.add(`aqi-${info.key}`);
     root.title = `Cap nhat: ${formatTime(ts)} • ${info.label}`;
@@ -31,7 +31,7 @@
   fetch('/aqi/latest-reading')
     .then(r => r.json())
     .then(d => { if (d?.success) updateHeaderBadges(d.aqius, d.tp, d.ts); })
-    .catch(()=>{});
+    .catch(() => { });
 
   // Kiểm tra map
   const mapEl = document.getElementById('aqi-map');
@@ -606,19 +606,102 @@
 
 const showAlert = document.querySelector('[show-alert]');
 if (showAlert) {
-    const dataTime = parseInt(showAlert.getAttribute('data-time'));
-    setTimeout(() => {
-        showAlert.classList.add('alert-hidden');
-    }, dataTime)
-    const closeAlert = showAlert.querySelector('[close-alert]')
-    if (closeAlert) {
-        closeAlert.addEventListener('click', () => {
-            showAlert.classList.add('alert-hidden');
-        })
-    }
+  const dataTime = parseInt(showAlert.getAttribute('data-time'));
+  setTimeout(() => {
+    showAlert.classList.add('alert-hidden');
+  }, dataTime)
+  const closeAlert = showAlert.querySelector('[close-alert]')
+  if (closeAlert) {
+    closeAlert.addEventListener('click', () => {
+      showAlert.classList.add('alert-hidden');
+    })
+  }
 }
 
 // End Show Alert Message
 
 
+(function () {
+  const formRequest = document.getElementById('form-request');
+  const formVerify = document.getElementById('form-verify');
+  const backBtn = document.getElementById('btn-back');
 
+  if (formRequest && formVerify) {
+    formRequest.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(formRequest);
+      const email = fd.get('email');
+      formRequest.querySelector('button[type="submit"]').disabled = true;
+      try {
+        const res = await fetch(formRequest.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Gửi OTP thất bại');
+        // chuyển sang bước verify
+        formVerify.classList.remove('d-none');
+        formRequest.classList.add('d-none');
+        formVerify.email.value = email;
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        formRequest.querySelector('button[type="submit"]').disabled = false;
+      }
+    });
+
+    formVerify.addEventListener('submit', async e => {
+      e.preventDefault();
+      const fd = new FormData(formVerify);
+      const payload = {
+        email: fd.get('email'),
+        otp: fd.get('otp'),
+        password: fd.get('password')
+      };
+      formVerify.querySelector('button[type="submit"]').disabled = true;
+      try {
+        const res = await fetch(formVerify.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Xác thực OTP thất bại');
+        alert('Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+        window.location.href = '/auth/login';
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        formVerify.querySelector('button[type="submit"]').disabled = false;
+      }
+    });
+  }
+
+  if (backBtn && formRequest && formVerify) {
+    backBtn.addEventListener('click', () => {
+      formVerify.classList.add('d-none');
+      formRequest.classList.remove('d-none');
+    });
+  }
+})();
+
+
+const togglePassword = document.getElementById('togglePassword');
+const passwordField = document.getElementById('password');
+if (togglePassword && passwordField) {
+    togglePassword.addEventListener('click', function () {
+    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordField.setAttribute('type', type);
+
+    // Toggle icon
+    const icon = this.querySelector('i');
+    if (type === 'password') {
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    } else {
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    }
+  });
+}

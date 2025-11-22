@@ -84,26 +84,9 @@ block main
                                     .form-check
                                         input#rememberMe.form-check-input(type="checkbox" name="remember")
                                         label.form-check-label.small(for="rememberMe") Ghi nhớ đăng nhập
-                                    a.small.accent-link.text-decoration-none.text-success(
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#forgotPasswordModal"
-                                    ) Quên mật khẩu?
-                                #forgotPasswordModal.modal.fade(tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true")
-                                    .modal-dialog.modal-dialog-centered
-                                        .modal-content
-                                            .modal-header
-                                                h5#forgotPasswordModalLabel.modal-title Quên mật khẩu
-                                                button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Đóng")
-                                            .modal-body
-                                                p.mb-3 Vui lòng liên hệ quản trị viên hệ thống để được cấp lại mật khẩu.
-                                                .alert.alert-info.small.mb-0
-                                                    i.bi.bi-envelope.me-2
-                                                    | Email: support@eco-track.com
-                                            .modal-footer
-                                                button.btn.btn-success(type="button" data-bs-dismiss="modal")
-                                                    i.bi.bi-check2.me-1
-                                                    | Đã hiểu
+                                    a.text-decoration-none.text-success.fw-medium(href="/auth/forgot-password")
+                                        i.bi.bi-key.me-1
+                                        | Quên mật khẩu?
                                 button.btn.btn-success.w-100.py-2.fw-semibold(type="submit")
                                     i.bi.bi-box-arrow-in-right.me-2
                                     | Đăng nhập
@@ -117,3 +100,4 @@ block main
                                     a.text-decoration-none.text-secondary(href="/") 
                                         i.bi.bi-arrow-left.me-1
                                         | Về trang chủ
+    
