@@ -24,4 +24,8 @@ router.post('/forgot-password', controller.forgotPasswordPost);
 router.get('/otp', controller.otp);
 router.post('/otp', controller.verifyOtpAndReset);
 
+// API Key management
+router.get('/api-key', ensureAuth, controller.getApiKey);
+router.post('/api-key/regenerate', ensureAuth, controller.regenerateApiKey);
+
 module.exports = router;

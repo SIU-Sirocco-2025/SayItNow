@@ -172,3 +172,61 @@ module.exports.latestCityReading = async (req, res) => {
     return res.json({ success: false });
   }
 };
+
+// [GET] /aqi/by-datetime/:cityKey?startDate=...&endDate=...
+module.exports.byDateTime = async (req, res) => {
+  try {
+    const cityKey = String(req.params.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'Unknown cityKey' });
+
+    const { startDate, endDate } = req.query;
+    
+    // Tạo query filter cho khoảng thời gian
+    const filter = { 'current.pollution.ts': { $exists: true } };
+    
+    if (startDate) {
+      const start = new Date(startDate);
+      if (isNaN(start.getTime())) {
+        return res.status(400).json({ error: 'Invalid startDate format' });
+      }
+      filter['current.pollution.ts'] = { ...filter['current.pollution.ts'], $gte: start.toISOString() };
+    }
+    
+    if (endDate) {
+      const end = new Date(endDate);
+      if (isNaN(end.getTime())) {
+        return res.status(400).json({ error: 'Invalid endDate format' });
+      }
+      filter['current.pollution.ts'] = { ...filter['current.pollution.ts'], $lte: end.toISOString() };
+    }
+
+    const docs = await Model.find(filter)
+      .sort({ 'current.pollution.ts': -1 })
+      .select('city current.pollution current.weather')
+      .lean();
+
+    const readings = docs.map(d => ({
+      ts: d.current?.pollution?.ts,
+      aqius: d.current?.pollution?.aqius,
+      mainus: d.current?.pollution?.mainus,
+      temperature: d.current?.weather?.tp,
+      humidity: d.current?.weather?.hu,
+      pressure: d.current?.weather?.pr,
+      windSpeed: d.current?.weather?.ws,
+      meta: aqiMeta(d.current?.pollution?.aqius || 0)
+    })).filter(r => r.ts);
+
+    res.json({
+      success: true,
+      city: docs?.[0]?.city || cityKey,
+      cityKey,
+      count: readings.length,
+      startDate,
+      endDate,
+      readings
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to load data by datetime', details: e.message });
+  }
+};

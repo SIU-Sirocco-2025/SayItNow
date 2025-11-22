@@ -416,3 +416,62 @@ module.exports.otp = (req, res) => {
     prefillEmail: email
   });
 };
+
+// [GET] /auth/api-key - Lấy API key hiện tại
+module.exports.getApiKey = async (req, res) => {
+  try {
+    if (!req.session?.user?._id) {
+      return res.status(401).json({ success: false, message: 'Bạn cần đăng nhập!' });
+    }
+
+    const user = await User.findById(req.session.user._id)
+      .select('apiKey email fullName')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Tài khoản không tồn tại!' });
+    }
+
+    return res.json({
+      success: true,
+      apiKey: user.apiKey,
+      email: user.email,
+      fullName: user.fullName
+    });
+  } catch (error) {
+    console.error('Get API key error:', error);
+    return res.status(500).json({ success: false, message: 'Có lỗi xảy ra!', error: error.message });
+  }
+};
+
+// [POST] /auth/api-key/regenerate - Tạo lại API key mới
+module.exports.regenerateApiKey = async (req, res) => {
+  try {
+    if (!req.session?.user?._id) {
+      return res.status(401).json({ success: false, message: 'Bạn cần đăng nhập!' });
+    }
+
+    const newApiKey = generate.generaterandomString(64);
+    
+    const user = await User.findByIdAndUpdate(
+      req.session.user._id,
+      { apiKey: newApiKey },
+      { new: true }
+    ).select('apiKey email fullName').lean();
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Tài khoản không tồn tại!' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Tạo API key mới thành công!',
+      apiKey: user.apiKey,
+      email: user.email,
+      fullName: user.fullName
+    });
+  } catch (error) {
+    console.error('Regenerate API key error:', error);
+    return res.status(500).json({ success: false, message: 'Có lỗi xảy ra!', error: error.message });
+  }
+};
