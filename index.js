@@ -49,6 +49,10 @@ app.locals.prefixAdmin = system.prefixAdmin;
 app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce')));
 // End TinyMCE
 
+// Inject currentUser into templates
+const { injectUser } = require('./middlewares/auth.middleware');
+app.use(injectUser);
+
 clientRoutes(app);
 adminRoutes(app);
 apiRoutes(app); // Thêm dòng này

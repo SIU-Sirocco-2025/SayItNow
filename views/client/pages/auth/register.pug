@@ -1,43 +1,103 @@
-extends ../../layouts/default.pug
-include ../../mixins/box-head.pug
+extends ../../layouts/auth.pug
 include ../../mixins/alert.pug
+include ../../mixins/auth-form.pug
+include ../../mixins/auth-modal.pug
+include ../../mixins/auth-brand.pug
+
 block main
     +showAlertSuccess(5000)
     +showAlertError(5000)
-    .container.my-3
-        .row
-            .col-lg-8.mx-auto
-                +box-head(title)
 
-                form(
-                    action="/user/register"
-                    method="POST"
-                )
-                    .mb-3
-                        label.form-label(for="fullName") Họ và tên
-                        input.form-control(
-                            type="text"
-                            id="fullName"
-                            name="fullName"
-                            required
-                        )
-                    .mb-3
-                        label.form-label(for="email") Email
-                        input.form-control(
-                            type="email"
-                            id="email"
-                            name="email"
-                            required
-                        )
-                    .mb-3
-                        label.form-label(for="password") Mật khẩu
-                        input.form-control(
-                            type="password"
-                            id="password"
-                            name="password"
-                            required
-                        )
-                    .d-grid
-                        button.btn.btn-primary(
-                            type="submit"
-                        ) Đăng ký
+    .register-page-wrapper.min-vh-100.d-flex.align-items-center.py-5
+        .container
+            .row.g-5.align-items-center
+                //- Left brand / intro
+                .col-lg-6.order-2.order-lg-1
+                    - 
+                        const features = [
+                            { icon: 'check-circle-fill', text: 'Tài khoản miễn phí trọn đời' },
+                            { icon: 'check-circle-fill', text: 'Truy cập đầy đủ dữ liệu AQI' },
+                            { icon: 'check-circle-fill', text: 'Nhận cảnh báo chất lượng không khí' },
+                            { icon: 'check-circle-fill', text: 'Lưu trữ lịch sử quan sát cá nhân' }
+                        ];
+                        const buttons = [
+                            { class: 'btn btn-success btn-sm', href: '/', icon: 'house-door', text: 'Trang chủ' },
+                            { class: 'btn btn-outline-success btn-sm', href: '/aqi', icon: 'map', text: 'Xem bản đồ AQI' }
+                        ];
+                    
+                    +authBrandIntro(features, buttons)
+                        | Tham gia cùng chúng tôi để theo dõi và bảo vệ chất lượng không khí TP. Hồ Chí Minh.
+
+                //- Right form
+                .col-lg-5.ms-lg-auto.order-1.order-lg-2
+                    .card.border-0.shadow-lg.register-card
+                        .card-body.p-4.p-md-5
+                            +authCardHeader('person-plus-fill', 'Tạo tài khoản mới', 'Đăng ký để bắt đầu theo dõi')
+                            
+                            form(action="/auth/register" method="POST" novalidate)
+                                +authInput(
+                                    'fullName',
+                                    'fullName',
+                                    'text',
+                                    'Họ và tên',
+                                    'person-fill',
+                                    'Nguyễn Văn A',
+                                    true,
+                                    3
+                                )
+                                
+                                +authInput(
+                                    'email',
+                                    'email',
+                                    'email',
+                                    'Email',
+                                    'envelope-fill',
+                                    'your-email@example.com'
+                                )
+                                
+                                +authPasswordInput(
+                                    'password',
+                                    'password',
+                                    'Mật khẩu',
+                                    'lock-fill',
+                                    '••••••••'
+                                )
+                                .form-text.small
+                                    i.bi.bi-info-circle.me-1
+                                    | Tối thiểu 6 ký tự
+                                
+                                +authPasswordInput(
+                                    'confirmPassword',
+                                    'confirmPassword',
+                                    'Xác nhận mật khẩu',
+                                    'shield-lock-fill',
+                                    '••••••••'
+                                )
+                                
+                                - 
+                                    const termsLinks = [
+                                        { text: 'Điều khoản dịch vụ', modal: true, target: '#termsModal' },
+                                        { text: 'Chính sách bảo mật', modal: true, target: '#privacyModal' }
+                                    ];
+                                +authCheckbox(
+                                    'acceptTerms',
+                                    'acceptTerms',
+                                    'Tôi đồng ý với',
+                                    termsLinks
+                                )
+                                
+                                +termsModal()
+                                +privacyModal()
+                                
+                                +authSubmitButton('Đăng ký tài khoản', 'person-plus')
+                                
+                                .text-center.mt-4
+                                    +authLinkText(
+                                        'Đã có tài khoản?',
+                                        'Đăng nhập ngay',
+                                        '/auth/login',
+                                        'box-arrow-in-right'
+                                    )
+                                
+                                +authDivider()
+                                +authBackLink()

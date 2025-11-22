@@ -8,13 +8,11 @@
     "start:web": "node index.js",
     "start:airvisual": "node scripts/fetch-and-save.js",
     "start:openaq": "node scripts/fetch-openaq-hours.js",
-    
     "dev": "npm run dev:all",
     "dev:all": "concurrently -k -n web,airvisual,openaq -c yellow,cyan,magenta \"npm run dev:web\" \"npm run dev:airvisual\" \"npm run dev:openaq\"",
     "dev:web": "nodemon index.js",
     "dev:airvisual": "nodemon scripts/fetch-and-save.js",
     "dev:openaq": "nodemon scripts/fetch-openaq-hours.js",
-    
     "worker": "npm run worker:all",
     "worker:all": "concurrently -k -n airvisual,openaq -c cyan,magenta \"npm run start:airvisual\" \"npm run start:openaq\"",
     "worker:dev": "concurrently -k -n airvisual,openaq -c cyan,magenta \"npm run dev:airvisual\" \"npm run dev:openaq\"",
@@ -50,6 +48,7 @@
     "mongoose-slug-updater": "^3.3.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
     "path": "^0.12.7",
     "pug": "^3.0.3",
     "qs": "^6.14.0"

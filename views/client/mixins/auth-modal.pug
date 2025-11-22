@@ -1,0 +1,67 @@
+//- Modal template
+mixin authModal(id, title, sections)
+    div(
+        id=id
+        class="modal fade"
+        tabindex="-1"
+        aria-labelledby=`${id}Label`
+        aria-hidden="true"
+    )
+        .modal-dialog.modal-dialog-centered.modal-lg
+            .modal-content
+                .modal-header
+                    h5(id=`${id}Label` class="modal-title")= title
+                    button.btn-close(
+                        type="button"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng"
+                    )
+                .modal-body
+                    each section in sections
+                        h6= section.title
+                        p.small= section.content
+                        if section !== sections[sections.length - 1]
+                            .mt-3
+                .modal-footer
+                    button.btn.btn-success(
+                        type="button"
+                        data-bs-dismiss="modal"
+                    ) Đã hiểu
+
+//- Terms of Service Modal
+mixin termsModal()
+    - 
+        const sections = [
+            {
+                title: '1. Chấp nhận điều khoản',
+                content: 'Bằng việc sử dụng Eco-Track, bạn đồng ý tuân thủ các điều khoản này.'
+            },
+            {
+                title: '2. Sử dụng dịch vụ',
+                content: 'Bạn có trách nhiệm bảo mật thông tin tài khoản và không chia sẻ cho bên thứ ba.'
+            },
+            {
+                title: '3. Dữ liệu và quyền riêng tư',
+                content: 'Chúng tôi cam kết bảo vệ dữ liệu cá nhân của bạn theo chính sách bảo mật.'
+            }
+        ]
+    +authModal('termsModal', 'Điều khoản dịch vụ', sections)
+
+//- Privacy Policy Modal
+mixin privacyModal()
+    - 
+        const sections = [
+            {
+                title: 'Thu thập thông tin',
+                content: 'Chúng tôi chỉ thu thập thông tin cần thiết: email, họ tên để phục vụ việc quản lý tài khoản.'
+            },
+            {
+                title: 'Sử dụng thông tin',
+                content: 'Thông tin của bạn chỉ được sử dụng để cung cấp dịch vụ và cải thiện trải nghiệm người dùng.'
+            },
+            {
+                title: 'Bảo mật',
+                content: 'Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn để bảo vệ dữ liệu của bạn.'
+            }
+        ]
+    +authModal('privacyModal', 'Chính sách bảo mật', sections)

@@ -23,7 +23,6 @@ header.site-header
           li.nav-item
             a.nav-link(href='/about') Giới thiệu
         .ms-lg-3.d-flex.align-items-center.flex-wrap.gap-2
-          // Chỉ số AQI
           .aqi-badge.status-badge.rounded-pill
             i.bi.bi-wind
             span.fw-semibold AQI:
@@ -31,6 +30,27 @@ header.site-header
           
           // Nút Login/Admin
           .vr.d-none.d-md-block.mx-2
-          a.btn.btn-outline-light.btn-sm.rounded-pill(href=`/auth/login`)
-            i.bi.bi-box-arrow-in-right.me-1
-            span Đăng nhập
+          if !currentUser
+            a.btn.btn-outline-light.btn-sm.rounded-pill(href=`/auth/login`)
+              i.bi.bi-box-arrow-in-right.me-1
+              span Đăng nhập
+          else
+            .dropdown
+              button.btn.btn-success.btn-sm.rounded-pill.dropdown-toggle(
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              )
+                i.bi.bi-person-circle.me-1
+                | #{currentUser.fullName}
+              ul.dropdown-menu.dropdown-menu-end
+                li
+                  a.dropdown-item(href="/auth/settings")
+                    i.bi.bi-gear.me-2
+                    | Cài đặt
+                li
+                  hr.dropdown-divider
+                li
+                  a.dropdown-item.text-danger(href="/auth/logout")
+                    i.bi.bi-box-arrow-right.me-2
+                    | Đăng xuất

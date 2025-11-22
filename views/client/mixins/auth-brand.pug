@@ -1,0 +1,53 @@
+//- Logo circle cho auth pages
+mixin authLogo(size=80)
+    span.d-inline-flex.align-items-center.justify-content-center.rounded-circle.brand-circle-light(
+        style=`background: #e8f7ee; width: ${size}px; height: ${size}px;`
+    )
+        block
+
+//- Brand header cho auth card
+mixin authCardHeader(icon, title, subtitle)
+    .text-center.mb-4
+        +authLogo()
+            i(class=`bi bi-${icon} fs-2 text-success`)
+        h2.h5.mt-3.mb-1.fw-semibold.text-dark= title
+        p.small.text-muted= subtitle
+
+//- Brand intro section (left side)
+mixin authBrandIntro(features, buttons)
+    .brand-intro
+        .d-inline-flex.align-items-center.mb-4.gap-3
+            img.rounded-circle.shadow(
+                src="/client/image/logo.png"
+                alt="Eco-Track"
+                width="72"
+                height="72"
+                style="object-fit:cover;border:3px solid #2ecc71"
+            )
+            h1.h3.mb-0.fw-semibold.text-dark Eco-Track
+        
+        p.text-secondary.small.mb-4(style="max-width:540px")
+            block description
+        
+        if features
+            ul.list-unstyled.small.text-secondary.mb-4.feature-points
+                each feature in features
+                    li.mb-2
+                        i(class=`bi bi-${feature.icon} text-success me-2`)
+                        | #{feature.text}
+        
+        if buttons
+            .d-flex.flex-wrap.gap-2
+                each button in buttons
+                    a(
+                        class=button.class
+                        href=button.href
+                    )
+                        i(class=`bi bi-${button.icon} me-1`)
+                        | #{button.text}
+
+//- Feature point item
+mixin featurePoint(icon, text)
+    li.mb-2
+        i(class=`bi bi-${icon} text-success me-2`)
+        | #{text}

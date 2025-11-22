@@ -1,8 +1,10 @@
 extends ../../layouts/default.pug
 include ../../mixins/moment.pug
 include ../../mixins/aqi.pug
-
+include ../../mixins/alert.pug
 block main
+  +showAlertSuccess(5000)
+  +showAlertError(5000)
   // Hero
   .container.py-5
     .row.align-items-center.gy-4

@@ -1,0 +1,68 @@
+.register-page-wrapper {
+    background: linear-gradient(135deg, #e8f7ee 0%, #ffffff 100%);
+}
+
+.register-card {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.brand-circle-light {
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.15);
+}
+
+.feature-points li {
+    padding-left: 0;
+    transition: transform 0.2s;
+}
+
+.feature-points li:hover {
+    transform: translateX(5px);
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: 0;
+}
+
+.input-group .form-control {
+    border-left: 0;
+}
+
+.input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #2ecc71;
+}
+
+.input-password-group .btn {
+    border-left: 1px solid #dee2e6;
+}
+
+.input-password-group .form-control:focus~.btn {
+    border-color: #2ecc71;
+}
+
+#togglePassword:hover,
+#toggleConfirmPassword:hover {
+    background-color: #f8f9fa;
+}
+
+.form-check-input:checked {
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+}
+
+@media (max-width: 991.98px) {
+    .brand-intro {
+        text-align: center;
+    }
+
+    .brand-intro .d-inline-flex {
+        justify-content: center;
+    }
+
+    .feature-points {
+        text-align: left;
+        display: inline-block;
+    }
+}

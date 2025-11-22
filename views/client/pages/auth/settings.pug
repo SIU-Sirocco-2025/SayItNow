@@ -1,0 +1,79 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+  +showAlertSuccess(5000)
+  +showAlertError(5000)
+
+  .container.py-5
+    h1.h4.mb-4 Cài đặt tài khoản
+
+    if currentUser
+      // Thông tin cơ bản
+      .card.border-0.shadow-sm.mb-4
+        .card-body
+          h5.mb-3 Basics
+          form(action="/auth/settings/profile" method="POST" novalidate)
+            .mb-3
+              label.form-label(for="fullName") Họ tên
+              input#fullName.form-control(type="text" name="fullName" required value=currentUser.fullName placeholder="Họ tên")
+            .mb-3
+              label.form-label(for="email") Email
+              input#email.form-control(type="email" name="email" required value=currentUser.email placeholder="email@example.com")
+            button.btn.btn-success(type="submit")
+              i.bi.bi-save.me-1
+              | Lưu thay đổi
+
+      // Đổi mật khẩu
+      .card.border-0.shadow-sm.mb-4
+        .card-body
+          h5.mb-3 Đổi mật khẩu
+          form(action="/auth/settings/password" method="POST" novalidate)
+            .mb-3
+              label.form-label(for="currentPassword") Mật khẩu hiện tại
+              input#currentPassword.form-control(type="password" name="currentPassword" required minlength="6" placeholder="••••••••")
+            .mb-3
+              label.form-label(for="newPassword") Mật khẩu mới
+              input#newPassword.form-control(type="password" name="newPassword" required minlength="6" placeholder="••••••••")
+            .mb-3
+              label.form-label(for="confirmPassword") Xác nhận mật khẩu mới
+              input#confirmPassword.form-control(type="password" name="confirmPassword" required minlength="6" placeholder="••••••••")
+            button.btn.btn-success(type="submit")
+              i.bi.bi-key.me-1
+              | Đổi mật khẩu
+
+      // API Key
+      - const apiKey = currentUser.apiKey || 'Chưa có API key';
+      .card.border-0.shadow-sm
+        .card-body
+          h5.mb-3 API Key
+          .input-group.mb-3
+            input#apiKeyField.form-control(type="text" readonly value=apiKey)
+          .d-flex.gap-2
+            button#btnCopyApi.btn.btn-outline-secondary.btn-sm(type="button")
+              i.bi.bi-clipboard.me-1
+              | Sao chép
+            //- form(action="/auth/settings/regenerate-key" method="POST" class="d-inline")
+            //-   button.btn.btn-success.btn-sm(type="submit")
+            //-     i.bi.bi-arrow-clockwise.me-1
+            //-     | Tạo lại
+          p.small.text-muted.mb-0 API Key dùng để truy cập các endpoint dữ liệu (giữ bí mật).
+
+    else
+      .alert.alert-danger Chưa đăng nhập.
+
+  script.
+    (function(){
+      const btn = document.getElementById('btnCopyApi');
+      if(btn){
+        btn.addEventListener('click', () => {
+          const field = document.getElementById('apiKeyField');
+          if(!field) return;
+          navigator.clipboard.writeText(field.value).then(()=>{
+            const old = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i>Đã sao chép';
+            setTimeout(()=> btn.innerHTML = old,1500);
+          });
+        });
+      }
+    })();

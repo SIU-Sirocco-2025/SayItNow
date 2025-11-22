@@ -2,8 +2,10 @@ extends ../../layouts/heatmap.pug
 include ../../mixins/moment.pug
 include ../../mixins/aqi.pug
 include ../../mixins/aqi-ui.pug
-
+include ../../mixins/alert.pug
 block main
+  +showAlertSuccess(5000)
+  +showAlertError(5000)
   .container.py-4
     h1.h4.mb-3 Ban do vung chat luong khong khi
     +aqiStatusbar()

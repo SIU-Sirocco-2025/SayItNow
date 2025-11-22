@@ -1,0 +1,88 @@
+//- Input group với icon
+mixin authInput(id, name, type, label, icon, placeholder, required=true, minlength=null)
+    .mb-3
+        label.form-label.fw-medium(for=id)= label
+        .input-group
+            span.input-group-text
+                i(class=`bi bi-${icon} text-success`)
+            input(
+                id=id
+                class="form-control"
+                type=type
+                name=name
+                placeholder=placeholder
+                required=required
+                minlength=minlength
+            )
+
+//- Password input với toggle visibility
+mixin authPasswordInput(id, name, label, icon, placeholder, required=true, minlength=6)
+    .mb-3
+        label.form-label.fw-medium(for=id)= label
+        .input-group.input-password-group
+            span.input-group-text
+                i(class=`bi bi-${icon} text-success`)
+            input(
+                id=id
+                class="form-control"
+                type="password"
+                name=name
+                placeholder=placeholder
+                required=required
+                minlength=minlength
+            )
+            button(
+                id=`toggle${id.charAt(0).toUpperCase() + id.slice(1)}`
+                class="btn btn-outline-secondary border-start-0"
+                type="button"
+                tabindex="-1"
+                aria-label="Hiển thị / ẩn mật khẩu"
+            )
+                i.bi.bi-eye-slash
+
+//- Checkbox với label và link
+mixin authCheckbox(id, name, text, links)
+    .mb-4
+        .form-check
+            input(
+                id=id
+                class="form-check-input"
+                type="checkbox"
+                name=name
+                required
+            )
+            label.form-check-label.small(for=id)
+                | #{text} 
+                each link, index in links
+                    a.text-success.text-decoration-none(
+                        href=link.href
+                        data-bs-toggle=link.modal ? "modal" : null
+                        data-bs-target=link.target || null
+                    )= link.text
+                    if index < links.length - 1
+                        |  và 
+
+//- Submit button
+mixin authSubmitButton(text, icon)
+    button.btn.btn-success.w-100.py-2.fw-semibold(type="submit")
+        i(class=`bi bi-${icon} me-2`)
+        | #{text}
+
+//- Divider với text
+mixin authDivider()
+    hr.my-3
+
+//- Link helper text
+mixin authLinkText(question, linkText, linkHref, icon)
+    .text-center
+        .small.text-muted.mb-2= question
+        a.text-decoration-none.text-success.fw-medium(href=linkHref)
+            i(class=`bi bi-${icon} me-1`)
+            | #{linkText}
+
+//- Back to home link
+mixin authBackLink(text="Về trang chủ", href="/")
+    .text-center.small
+        a.text-decoration-none.text-secondary(href=href)
+            i.bi.bi-arrow-left.me-1
+            | #{text}

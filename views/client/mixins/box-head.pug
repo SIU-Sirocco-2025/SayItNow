@@ -1,0 +1,16 @@
+mixin box-head(title, description)
+    - var iconClass = attributes.icon || 'bi-bag-heart'
+    - var badgeText = attributes.badge || null
+    - var badgeVariant = attributes.badgeVariant || 'success'
+
+    .box-head-container.mb-4.p-4.bg-white.border.rounded-3.shadow-sm.text-center
+        .d-flex.flex-column.align-items-center.gap-2
+            h1.mb-1.text-body-emphasis.fs-4.fs-md-3
+                | #{title}
+                if badgeText
+                    span.badge.ms-2(class='bg-' + badgeVariant) #{badgeText}
+            if description
+                p.mb-0.text-secondary.small !{description}
+        if block
+            .mt-3.d-flex.justify-content-center.flex-wrap.gap-2
+                block

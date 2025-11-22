@@ -1,7 +1,9 @@
 extends ../../layouts/default.pug
 include ../../mixins/about.pug
-
+include ../../mixins/alert.pug
 block main
+  +showAlertSuccess(5000)
+  +showAlertError(5000)
   // Hero Section
   +heroSection(
     'Về Eco-Track',
