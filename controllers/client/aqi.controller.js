@@ -230,3 +230,328 @@ module.exports.byDateTime = async (req, res) => {
     res.status(500).json({ error: 'Failed to load data by datetime', details: e.message });
   }
 };
+
+// [GET] /aqi/compare - So sánh AQI giữa tất cả các quận
+module.exports.compareDistricts = async (req, res) => {
+  try {
+    const comparisons = [];
+    
+    for (const [cityKey, Model] of Object.entries(CITY_MODEL_MAP)) {
+      const doc = await Model.findOne({ 'current.pollution.ts': { $exists: true } })
+        .sort({ 'current.pollution.ts': -1 })
+        .select('city current.pollution.aqius current.pollution.ts current.weather')
+        .lean();
+
+      if (doc && doc.current?.pollution?.aqius != null) {
+        const aqius = doc.current.pollution.aqius;
+        comparisons.push({
+          cityKey,
+          city: doc.city,
+          aqius,
+          ts: doc.current.pollution.ts,
+          temperature: doc.current?.weather?.tp,
+          meta: aqiMeta(aqius)
+        });
+      }
+    }
+
+    comparisons.sort((a, b) => a.aqius - b.aqius);
+    const best = comparisons[0];
+    const worst = comparisons[comparisons.length - 1];
+    const average = comparisons.reduce((sum, c) => sum + c.aqius, 0) / comparisons.length;
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      total: comparisons.length,
+      statistics: {
+        best: { city: best?.city, cityKey: best?.cityKey, aqius: best?.aqius, meta: best?.meta },
+        worst: { city: worst?.city, cityKey: worst?.cityKey, aqius: worst?.aqius, meta: worst?.meta },
+        average: Math.round(average * 100) / 100,
+        averageMeta: aqiMeta(average)
+      },
+      districts: comparisons
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to compare districts', details: e.message });
+  }
+};
+
+// [GET] /aqi/statistics/:cityKey - Thống kê AQI (min, max, avg, median, phân bố)
+module.exports.statistics = async (req, res) => {
+  try {
+    const cityKey = String(req.params.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'Unknown cityKey' });
+
+    const hours = parseInt(req.query.hours || '24', 10);
+    const limit = Math.min(Math.max(hours, 1), 168);
+
+    const docs = await Model.find({ 'current.pollution.ts': { $exists: true } })
+      .sort({ 'current.pollution.ts': -1 })
+      .limit(limit)
+      .select('current.pollution.aqius current.pollution.ts')
+      .lean();
+
+    if (!docs || docs.length === 0) {
+      return res.json({ success: false, message: 'No data available' });
+    }
+
+    const values = docs.map(d => d.current?.pollution?.aqius).filter(v => v != null);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
+    const sorted = [...values].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+
+    const distribution = { good: 0, moderate: 0, unhealthy: 0, veryUnhealthy: 0, hazardous: 0 };
+    values.forEach(v => {
+      if (v <= 50) distribution.good++;
+      else if (v <= 100) distribution.moderate++;
+      else if (v <= 200) distribution.unhealthy++;
+      else if (v <= 300) distribution.veryUnhealthy++;
+      else distribution.hazardous++;
+    });
+
+    res.json({
+      success: true,
+      cityKey,
+      period: { hours: limit, dataPoints: values.length },
+      statistics: {
+        min: { value: min, meta: aqiMeta(min) },
+        max: { value: max, meta: aqiMeta(max) },
+        average: { value: Math.round(avg * 100) / 100, meta: aqiMeta(avg) },
+        median: { value: median, meta: aqiMeta(median) }
+      },
+      distribution
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to get statistics', details: e.message });
+  }
+};
+
+// [GET] /aqi/trend/:cityKey - Phân tích xu hướng tăng/giảm
+module.exports.trend = async (req, res) => {
+  try {
+    const cityKey = String(req.params.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'Unknown cityKey' });
+
+    const hours = parseInt(req.query.hours || '24', 10);
+    const limit = Math.min(Math.max(hours, 6), 168);
+
+    const docs = await Model.find({ 'current.pollution.ts': { $exists: true } })
+      .sort({ 'current.pollution.ts': -1 })
+      .limit(limit)
+      .select('current.pollution.aqius current.pollution.ts')
+      .lean();
+
+    if (!docs || docs.length < 2) {
+      return res.json({ success: false, message: 'Not enough data for trend analysis' });
+    }
+
+    const points = docs
+      .map(d => ({ ts: new Date(d.current?.pollution?.ts), aqius: d.current?.pollution?.aqius }))
+      .filter(p => p.ts && p.aqius != null)
+      .sort((a, b) => a.ts - b.ts);
+
+    const first = points[0].aqius;
+    const last = points[points.length - 1].aqius;
+    const change = last - first;
+    const changePercent = (change / first) * 100;
+
+    let increases = 0, decreases = 0;
+    for (let i = 1; i < points.length; i++) {
+      if (points[i].aqius > points[i - 1].aqius) increases++;
+      else if (points[i].aqius < points[i - 1].aqius) decreases++;
+    }
+
+    let trend = 'stable';
+    if (Math.abs(changePercent) < 5) trend = 'stable';
+    else if (changePercent > 0) trend = 'increasing';
+    else trend = 'decreasing';
+
+    res.json({
+      success: true,
+      cityKey,
+      period: { hours: limit, dataPoints: points.length },
+      trend: {
+        direction: trend,
+        change: Math.round(change * 100) / 100,
+        changePercent: Math.round(changePercent * 100) / 100,
+        first: { value: first, meta: aqiMeta(first), ts: points[0].ts },
+        last: { value: last, meta: aqiMeta(last), ts: points[points.length - 1].ts }
+      },
+      analysis: {
+        increases,
+        decreases,
+        stable: points.length - 1 - increases - decreases
+      }
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to analyze trend', details: e.message });
+  }
+};
+
+// [GET] /aqi/filter - Lọc dữ liệu theo điều kiện (AQI, nhiệt độ, level)
+module.exports.filter = async (req, res) => {
+  try {
+    const cityKey = String(req.query.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'cityKey parameter required' });
+
+    const { minAqi, maxAqi, level, minTemp, maxTemp, limit = 50 } = req.query;
+    const query = { 'current.pollution.ts': { $exists: true } };
+
+    if (minAqi) query['current.pollution.aqius'] = { $gte: parseInt(minAqi, 10) };
+    if (maxAqi) {
+      query['current.pollution.aqius'] = { 
+        ...query['current.pollution.aqius'], 
+        $lte: parseInt(maxAqi, 10) 
+      };
+    }
+
+    if (minTemp) query['current.weather.tp'] = { $gte: parseFloat(minTemp) };
+    if (maxTemp) {
+      query['current.weather.tp'] = { 
+        ...query['current.weather.tp'], 
+        $lte: parseFloat(maxTemp) 
+      };
+    }
+
+    const docs = await Model.find(query)
+      .sort({ 'current.pollution.ts': -1 })
+      .limit(parseInt(limit, 10))
+      .select('current.pollution current.weather')
+      .lean();
+
+    let results = docs.map(d => ({
+      ts: d.current?.pollution?.ts,
+      aqius: d.current?.pollution?.aqius,
+      temperature: d.current?.weather?.tp,
+      humidity: d.current?.weather?.hu,
+      meta: aqiMeta(d.current?.pollution?.aqius || 0)
+    }));
+
+    if (level) {
+      results = results.filter(r => r.meta.level === level);
+    }
+
+    res.json({
+      success: true,
+      cityKey,
+      filters: { minAqi, maxAqi, level, minTemp, maxTemp },
+      count: results.length,
+      results
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to filter data', details: e.message });
+  }
+};
+
+// [GET] /aqi/export/:cityKey - Export dữ liệu CSV hoặc JSON
+module.exports.exportData = async (req, res) => {
+  try {
+    const cityKey = String(req.params.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'Unknown cityKey' });
+
+    const format = (req.query.format || 'json').toLowerCase();
+    const hours = parseInt(req.query.hours || '24', 10);
+    const limit = Math.min(Math.max(hours, 1), 168);
+
+    const docs = await Model.find({ 'current.pollution.ts': { $exists: true } })
+      .sort({ 'current.pollution.ts': -1 })
+      .limit(limit)
+      .select('city current.pollution current.weather')
+      .lean();
+
+    const data = docs.map(d => ({
+      timestamp: d.current?.pollution?.ts,
+      city: d.city,
+      aqi: d.current?.pollution?.aqius,
+      mainPollutant: d.current?.pollution?.mainus,
+      temperature: d.current?.weather?.tp,
+      humidity: d.current?.weather?.hu,
+      pressure: d.current?.weather?.pr,
+      windSpeed: d.current?.weather?.ws,
+      level: aqiMeta(d.current?.pollution?.aqius || 0).label
+    }));
+
+    if (format === 'csv') {
+      const headers = Object.keys(data[0] || {});
+      const csvRows = [
+        headers.join(','),
+        ...data.map(row => headers.map(h => JSON.stringify(row[h] || '')).join(','))
+      ];
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${cityKey}_aqi_export.csv"`);
+      return res.send(csvRows.join('\n'));
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${cityKey}_aqi_export.json"`);
+    res.json({
+      exportDate: new Date().toISOString(),
+      cityKey,
+      totalRecords: data.length,
+      data
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to export data', details: e.message });
+  }
+};
+
+// [GET] /aqi/hourly-average/:cityKey - Trung bình AQI theo từng giờ trong ngày
+module.exports.hourlyAverage = async (req, res) => {
+  try {
+    const cityKey = String(req.params.cityKey || '').toLowerCase();
+    const Model = CITY_MODEL_MAP[cityKey];
+    if (!Model) return res.status(404).json({ error: 'Unknown cityKey' });
+
+    const days = parseInt(req.query.days || '7', 10);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    const docs = await Model.find({
+      'current.pollution.ts': { $gte: cutoff.toISOString(), $exists: true }
+    })
+      .select('current.pollution.aqius current.pollution.ts')
+      .lean();
+
+    const hourlyData = {};
+    docs.forEach(d => {
+      const ts = new Date(d.current?.pollution?.ts);
+      const hour = ts.getHours();
+      const aqius = d.current?.pollution?.aqius;
+      
+      if (aqius != null) {
+        if (!hourlyData[hour]) hourlyData[hour] = [];
+        hourlyData[hour].push(aqius);
+      }
+    });
+
+    const hourlyAverages = Object.keys(hourlyData).map(hour => {
+      const values = hourlyData[hour];
+      const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
+      return {
+        hour: parseInt(hour, 10),
+        average: Math.round(avg * 100) / 100,
+        samples: values.length,
+        min: Math.min(...values),
+        max: Math.max(...values),
+        meta: aqiMeta(avg)
+      };
+    }).sort((a, b) => a.hour - b.hour);
+
+    res.json({
+      success: true,
+      cityKey,
+      period: `Last ${days} days`,
+      hourlyAverages
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to calculate hourly averages', details: e.message });
+  }
+};

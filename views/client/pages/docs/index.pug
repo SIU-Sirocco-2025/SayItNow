@@ -1,0 +1,640 @@
+doctype html
+html(lang='vi')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title= title
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
+    link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap')
+    link(rel='stylesheet', href='/client/css/docs.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css')
+    
+  body
+    header.docs-header
+      .container
+        .header-content
+          .logo
+            i.fas.fa-leaf
+            span Eco-Track API
+          nav.header-nav
+            a(href='/') Trang chủ
+            a(href='/aqi') Bản đồ AQI
+            a(href='/auth/settings') Cài đặt
+            a.btn-primary(href='/auth/login') Đăng nhập
+    
+    .docs-layout
+      aside.docs-sidebar
+        .sidebar-content
+          .sidebar-section
+            h3 Bắt đầu
+            ul
+              li
+                a(href='#introduction') Giới thiệu
+              li
+                a(href='#authentication') Xác thực API
+              li
+                a(href='#endpoints') Danh sách Endpoints
+              li
+                a(href='#errors') Xử lý lỗi
+          
+          .sidebar-section
+            h3 API Endpoints
+            ul
+              li
+                a(href='#compare') So sánh quận
+              li
+                a(href='#history') Lịch sử 72h
+              li
+                a(href='#by-datetime') Dữ liệu theo thời gian
+              li
+                a(href='#statistics') Thống kê
+              li
+                a(href='#trend') Xu hướng
+              li
+                a(href='#filter') Lọc dữ liệu
+              li
+                a(href='#export') Export dữ liệu
+              li
+                a(href='#hourly-average') Trung bình theo giờ
+              li
+                a(href='#latest') Dữ liệu mới nhất
+          
+          .sidebar-section
+            h3 Quản lý tài khoản
+            ul
+              li
+                a(href='#get-api-key') Lấy API Key
+              li
+                a(href='#regenerate-api-key') Tạo lại API Key
+
+      main.docs-main
+        .docs-content
+          section#introduction.docs-section
+            h1 
+              i.fas.fa-book
+              |  API Documentation
+            p.lead Chào mừng đến với Eco-Track API - nền tảng cung cấp dữ liệu chất lượng không khí thời gian thực cho TP.HCM
+            
+            .info-box
+              i.fas.fa-info-circle
+              div
+                strong API Version: 
+                | v1.0
+                br
+                strong Base URL: 
+                code http://localhost:3000
+          
+          section#authentication.docs-section
+            h2 
+              i.fas.fa-key
+              |  Xác thực API
+            p Hầu hết các endpoint cần API key để truy cập. Có 3 cách để gửi API key:
+            
+            .auth-methods
+              .auth-method
+                h4 1. Header x-api-key
+                .code-block
+                  .code-header
+                    span.language curl
+                    button.copy-btn(onclick='copyCode(this)')
+                      i.fas.fa-copy
+                  pre
+                    code.language-bash.
+                      curl -H "x-api-key: YOUR_API_KEY" \
+                        http://localhost:3000/aqi/history/quan1
+              
+              .auth-method
+                h4 2. Authorization Bearer
+                .code-block
+                  .code-header
+                    span.language curl
+                    button.copy-btn(onclick='copyCode(this)')
+                      i.fas.fa-copy
+                  pre
+                    code.language-bash.
+                      curl -H "Authorization: Bearer YOUR_API_KEY" \
+                        http://localhost:3000/aqi/history/quan1
+              
+              .auth-method
+                h4 3. Query Parameter
+                .code-block
+                  .code-header
+                    span.language curl
+                    button.copy-btn(onclick='copyCode(this)')
+                      i.fas.fa-copy
+                  pre
+                    code.language-bash.
+                      curl http://localhost:3000/aqi/history/quan1?apiKey=YOUR_API_KEY
+            
+            .warning-box
+              i.fas.fa-exclamation-triangle
+              div
+                strong Lưu ý: 
+                | Không chia sẻ API key của bạn công khai. Bạn có thể tạo lại API key mới bất cứ lúc nào trong trang cài đặt.
+
+          section#endpoints.docs-section
+            h2 
+              i.fas.fa-list
+              |  Danh sách Endpoints
+            
+            .endpoint-grid
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-balance-scale
+                span.endpoint-name So sánh quận
+                span.endpoint-path GET /aqi/compare
+                span.endpoint-auth.no-auth Không cần auth
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-history
+                span.endpoint-name Lịch sử 72h
+                span.endpoint-path GET /aqi/history/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-calendar-alt
+                span.endpoint-name Theo thời gian
+                span.endpoint-path GET /aqi/by-datetime/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-chart-bar
+                span.endpoint-name Thống kê
+                span.endpoint-path GET /aqi/statistics/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-chart-line
+                span.endpoint-name Xu hướng
+                span.endpoint-path GET /aqi/trend/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-filter
+                span.endpoint-name Lọc dữ liệu
+                span.endpoint-path GET /aqi/filter
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-download
+                span.endpoint-name Export
+                span.endpoint-path GET /aqi/export/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+              
+              .endpoint-card
+                .endpoint-icon
+                  i.fas.fa-clock
+                span.endpoint-name Theo giờ
+                span.endpoint-path GET /aqi/hourly-average/:cityKey
+                span.endpoint-auth.auth-required Cần API key
+
+          section#compare.docs-section
+            h2 
+              i.fas.fa-balance-scale
+              |  So sánh AQI giữa các quận
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/compare
+              span.auth-badge.no-auth Không cần API key
+            
+            p So sánh chất lượng không khí giữa tất cả các quận, tìm quận tốt nhất/xấu nhất.
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "total": 15,
+                    "statistics": {
+                      "best": {
+                        "city": "Quận 1",
+                        "cityKey": "quan1",
+                        "aqius": 45
+                      },
+                      "worst": {
+                        "city": "Quận 10",
+                        "aqius": 120
+                      },
+                      "average": 78.5
+                    },
+                    "districts": [...]
+                  }
+
+          section#history.docs-section
+            h2 
+              i.fas.fa-history
+              |  Lịch sử AQI 72 giờ gần nhất
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/history/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Xem lịch sử dữ liệu AQI trong 72 giờ gần nhất (hoặc custom).
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code cityKey
+                  td Path
+                  td Mã quận (quan1, quan2, hochiminhcity, thuduc...)
+                tr
+                  td
+                    code limit
+                  td Query
+                  td Số lượng records (1-168), mặc định: 24
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -H "x-api-key: YOUR_API_KEY" \
+                    "http://localhost:3000/aqi/history/quan1?limit=72"
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "city": "Quận 1",
+                    "cityKey": "quan1",
+                    "points": [
+                      { "ts": "2025-11-23T10:00:00Z", "aqius": 65 },
+                      { "ts": "2025-11-23T09:00:00Z", "aqius": 70 }
+                    ]
+                  }
+
+          section#by-datetime.docs-section
+            h2 
+              i.fas.fa-calendar-alt
+              |  Dữ liệu theo ngày giờ cụ thể
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/by-datetime/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Lấy dữ liệu AQI trong khoảng thời gian cụ thể.
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code cityKey
+                  td Path
+                  td Mã quận
+                tr
+                  td
+                    code startDate
+                  td Query
+                  td Ngày bắt đầu (ISO 8601)
+                tr
+                  td
+                    code endDate
+                  td Query
+                  td Ngày kết thúc (ISO 8601)
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -H "x-api-key: YOUR_API_KEY" \
+                    "http://localhost:3000/aqi/by-datetime/quan1?startDate=2025-11-20&endDate=2025-11-22"
+
+          section#statistics.docs-section
+            h2 
+              i.fas.fa-chart-bar
+              |  Thống kê AQI
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/statistics/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Thống kê chi tiết: min, max, average, median, phân bố theo level.
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code cityKey
+                  td Path
+                  td Mã quận
+                tr
+                  td
+                    code hours
+                  td Query
+                  td Số giờ thống kê (1-168), mặc định: 24
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "statistics": {
+                      "min": { "value": 35 },
+                      "max": { "value": 95 },
+                      "average": { "value": 65 },
+                      "median": { "value": 60 }
+                    },
+                    "distribution": {
+                      "good": 12,
+                      "moderate": 18
+                    }
+                  }
+
+          section#trend.docs-section
+            h2 
+              i.fas.fa-chart-line
+              |  Phân tích xu hướng
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/trend/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Phân tích xu hướng AQI đang tăng, giảm hay ổn định.
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "trend": {
+                      "direction": "decreasing",
+                      "change": -15,
+                      "changePercent": -18.75
+                    },
+                    "analysis": {
+                      "increases": 3,
+                      "decreases": 8
+                    }
+                  }
+
+          section#filter.docs-section
+            h2 
+              i.fas.fa-filter
+              |  Lọc dữ liệu nâng cao
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/filter
+              span.auth-badge.auth Cần API key
+            
+            p Lọc dữ liệu theo AQI range, nhiệt độ, level.
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code cityKey
+                  td Query (required)
+                  td Mã quận
+                tr
+                  td
+                    code minAqi
+                  td Query
+                  td AQI tối thiểu
+                tr
+                  td
+                    code maxAqi
+                  td Query
+                  td AQI tối đa
+                tr
+                  td
+                    code level
+                  td Query
+                  td Level (good, moderate...)
+                tr
+                  td
+                    code limit
+                  td Query
+                  td Số records, mặc định: 50
+
+          section#export.docs-section
+            h2 
+              i.fas.fa-download
+              |  Export dữ liệu
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/export/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Export dữ liệu ra định dạng CSV hoặc JSON.
+            
+            h4 Request Examples
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  # Export CSV
+                  curl -H "x-api-key: YOUR_API_KEY" \
+                    "http://localhost:3000/aqi/export/quan1?format=csv" -o data.csv
+                  
+                  # Export JSON
+                  curl -H "x-api-key: YOUR_API_KEY" \
+                    "http://localhost:3000/aqi/export/quan1?format=json" -o data.json
+
+          section#hourly-average.docs-section
+            h2 
+              i.fas.fa-clock
+              |  Trung bình theo giờ
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/hourly-average/:cityKey
+              span.auth-badge.auth Cần API key
+            
+            p Tính AQI trung bình cho từng giờ (0-23h).
+
+          section#latest.docs-section
+            h2 
+              i.fas.fa-sync-alt
+              |  Dữ liệu mới nhất
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /aqi/latest-reading
+              span.auth-badge.no-auth Không cần API key
+            
+            p Lấy dữ liệu AQI mới nhất của TP.HCM.
+
+          section#get-api-key.docs-section
+            h2 
+              i.fas.fa-user-shield
+              |  Quản lý API Key
+            
+            h3 Lấy API Key hiện tại
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /auth/api-key
+              span.auth-badge.session Cần đăng nhập
+            
+            p Lấy thông tin API key của tài khoản đã đăng nhập.
+
+          section#regenerate-api-key.docs-section
+            h3 
+              i.fas.fa-redo
+              |  Tạo lại API Key mới
+            
+            .endpoint-info
+              span.http-method.post POST
+              code.endpoint-url /auth/api-key/regenerate
+              span.auth-badge.session Cần đăng nhập
+            
+            p Tạo API key mới (key cũ sẽ không còn hoạt động).
+
+          section#errors.docs-section
+            h2 
+              i.fas.fa-exclamation-circle
+              |  Xử lý lỗi
+            
+            p API sử dụng các HTTP status code chuẩn:
+            
+            table.params-table
+              thead
+                tr
+                  th Status Code
+                  th Ý nghĩa
+              tbody
+                tr
+                  td
+                    code 200
+                  td OK - Request thành công
+                tr
+                  td
+                    code 400
+                  td Bad Request
+                tr
+                  td
+                    code 401
+                  td Unauthorized - Thiếu API key
+                tr
+                  td
+                    code 403
+                  td Forbidden - API key không hợp lệ
+                tr
+                  td
+                    code 404
+                  td Not Found
+                tr
+                  td
+                    code 500
+                  td Internal Server Error
+
+          section.docs-section
+            h2 
+              i.fas.fa-map-marked-alt
+              |  Danh sách City Keys
+            
+            p Các cityKey hợp lệ:
+            
+            .city-keys-grid
+              .city-key-item
+                code hochiminhcity
+                span TP. Hồ Chí Minh
+              .city-key-item
+                code quan1
+                span Quận 1
+              .city-key-item
+                code quan2
+                span Quận 2
+              .city-key-item
+                code quan3
+                span Quận 3
+              .city-key-item
+                code quan4
+                span Quận 4
+              .city-key-item
+                code quan5
+                span Quận 5
+              .city-key-item
+                code quan6
+                span Quận 6
+              .city-key-item
+                code quan7
+                span Quận 7
+              .city-key-item
+                code quan9
+                span Quận 9
+              .city-key-item
+                code quan10
+                span Quận 10
+              .city-key-item
+                code quan11
+                span Quận 11
+              .city-key-item
+                code thuduc
+                span Thủ Đức
+
+    footer.docs-footer
+      .container
+        p &copy; 2025 Eco-Track. All rights reserved.
+        .footer-links
+          a(href='/') Trang chủ
+          a(href='/aqi') Bản đồ
+          a(href='/api/docs') API Docs
+
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js')
+    script(src='/client/js/docs.js')
