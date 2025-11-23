@@ -12,35 +12,108 @@ block main
       // Thông tin cơ bản
       .card.border-0.shadow-sm.mb-4
         .card-body
-          h5.mb-3 Basics
+          h5.mb-3 Thông tin cơ bản
           form(action="/auth/settings/profile" method="POST" novalidate)
             .mb-3
               label.form-label(for="fullName") Họ tên
-              input#fullName.form-control(type="text" name="fullName" required value=currentUser.fullName placeholder="Họ tên")
+              input#fullName.form-control(
+                type="text"
+                name="fullName"
+                required
+                value=currentUser.fullName
+                placeholder="Họ tên"
+              )
             .mb-3
               label.form-label(for="email") Email
-              input#email.form-control(type="email" name="email" required value=currentUser.email placeholder="email@example.com")
+              input#email.form-control(
+                type="email"
+                name="email"
+                required
+                value=currentUser.email
+                placeholder="email@example.com"
+              )
             button.btn.btn-success(type="submit")
               i.bi.bi-save.me-1
               | Lưu thay đổi
 
-      // Đổi mật khẩu
+      // Mật khẩu - hiển thị cho tất cả users
+      - const hasPassword = currentUser.password && currentUser.password.length > 0;
+      - const isGoogleUser = currentUser.googleId && currentUser.googleId.length > 0;
+      
       .card.border-0.shadow-sm.mb-4
         .card-body
-          h5.mb-3 Đổi mật khẩu
-          form(action="/auth/settings/password" method="POST" novalidate)
-            .mb-3
-              label.form-label(for="currentPassword") Mật khẩu hiện tại
-              input#currentPassword.form-control(type="password" name="currentPassword" required minlength="6" placeholder="••••••••")
-            .mb-3
-              label.form-label(for="newPassword") Mật khẩu mới
-              input#newPassword.form-control(type="password" name="newPassword" required minlength="6" placeholder="••••••••")
-            .mb-3
-              label.form-label(for="confirmPassword") Xác nhận mật khẩu mới
-              input#confirmPassword.form-control(type="password" name="confirmPassword" required minlength="6" placeholder="••••••••")
-            button.btn.btn-success(type="submit")
-              i.bi.bi-key.me-1
-              | Đổi mật khẩu
+          if isGoogleUser && !hasPassword
+            // Google user chưa có password - hiển thị form TẠO mật khẩu
+            .alert.alert-info.mb-3
+              i.bi.bi-info-circle.me-2
+              | Bạn đang đăng nhập bằng Google. Tạo mật khẩu để có thể đăng nhập bằng email/password.
+            
+            h5.mb-3 Tạo mật khẩu
+            form(action="/auth/settings/password" method="POST" novalidate)
+              .mb-3
+                label.form-label(for="newPassword") Mật khẩu mới
+                input#newPassword.form-control(
+                  type="password"
+                  name="newPassword"
+                  required
+                  minlength="6"
+                  placeholder="••••••••"
+                )
+                .form-text.small
+                  i.bi.bi-info-circle.me-1
+                  | Tối thiểu 6 ký tự
+              .mb-3
+                label.form-label(for="confirmPassword") Xác nhận mật khẩu
+                input#confirmPassword.form-control(
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  minlength="6"
+                  placeholder="••••••••"
+                )
+              button.btn.btn-success(type="submit")
+                i.bi.bi-shield-lock.me-1
+                | Tạo mật khẩu
+          
+          else if hasPassword
+            // User đã có password (local hoặc Google đã tạo pass)
+            if isGoogleUser
+              .alert.alert-success.mb-3
+                i.bi.bi-check-circle.me-2
+                | Bạn có thể đăng nhập bằng cả Google và Email/Password.
+            
+            h5.mb-3 Đổi mật khẩu
+            form(action="/auth/settings/password" method="POST" novalidate)
+              .mb-3
+                label.form-label(for="currentPassword") Mật khẩu hiện tại
+                input#currentPassword.form-control(
+                  type="password"
+                  name="currentPassword"
+                  required
+                  minlength="6"
+                  placeholder="••••••••"
+                )
+              .mb-3
+                label.form-label(for="newPassword") Mật khẩu mới
+                input#newPassword.form-control(
+                  type="password"
+                  name="newPassword"
+                  required
+                  minlength="6"
+                  placeholder="••••••••"
+                )
+              .mb-3
+                label.form-label(for="confirmPassword") Xác nhận mật khẩu mới
+                input#confirmPassword.form-control(
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  minlength="6"
+                  placeholder="••••••••"
+                )
+              button.btn.btn-success(type="submit")
+                i.bi.bi-key.me-1
+                | Đổi mật khẩu
 
       // API Key
       - const apiKey = currentUser.apiKey || 'Chưa có API key';
@@ -48,15 +121,15 @@ block main
         .card-body
           h5.mb-3 API Key
           .input-group.mb-3
-            input#apiKeyField.form-control(type="text" readonly value=apiKey)
+            input#apiKeyField.form-control(
+              type="text"
+              readonly
+              value=apiKey
+            )
           .d-flex.gap-2
             button#btnCopyApi.btn.btn-outline-secondary.btn-sm(type="button")
               i.bi.bi-clipboard.me-1
               | Sao chép
-            //- form(action="/auth/settings/regenerate-key" method="POST" class="d-inline")
-            //-   button.btn.btn-success.btn-sm(type="submit")
-            //-     i.bi.bi-arrow-clockwise.me-1
-            //-     | Tạo lại
           p.small.text-muted.mb-0 API Key dùng để truy cập các endpoint dữ liệu (giữ bí mật).
 
     else

@@ -90,6 +90,15 @@ block main
                                 button.btn.btn-success.w-100.py-2.fw-semibold(type="submit")
                                     i.bi.bi-box-arrow-in-right.me-2
                                     | Đăng nhập
+                                //- Divider
+                                .position-relative.my-4
+                                    hr
+                                    span.position-absolute.top-50.start-50.translate-middle.bg-white.px-3.small.text-muted hoặc
+                                
+                                //- Google Login Button
+                                a.btn.btn-outline-dark.w-100.py-2(href="/auth/google")
+                                    i.bi.bi-google.me-2
+                                    | Đăng nhập với Google
                                 .text-center.mt-4
                                     .small.text-muted.mb-2 Chưa có tài khoản?
                                     a.text-decoration-none.text-success.fw-medium(href="/auth/register")

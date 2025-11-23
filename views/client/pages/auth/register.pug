@@ -34,6 +34,14 @@ block main
                         .card-body.p-4.p-md-5
                             +authCardHeader('person-plus-fill', 'Tạo tài khoản mới', 'Đăng ký để bắt đầu theo dõi')
                             
+                            //- Google Register Button (thêm phần này)
+                            a.btn.btn-outline-dark.w-100.py-2.mb-3(href="/auth/google")
+                                i.bi.bi-google.me-2
+                                | Đăng ký với Google
+                            
+                            .position-relative.my-4
+                                hr
+                                span.position-absolute.top-50.start-50.translate-middle.bg-white.px-3.small.text-muted hoặc
                             //- FORM 1: Nhập email và gửi OTP
                             form#form-request-otp.needs-validation(novalidate)
                                 +authInput(

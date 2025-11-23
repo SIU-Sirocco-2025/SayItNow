@@ -2,6 +2,7 @@ const User = require('../../models/user.model');
 const Otp = require('../../models/otp.model');
 const generate = require('../../helpers/generate');
 const sendMailHelper = require('../../helpers/sendMail');
+const passport = require('passport');
 const md5 = require('md5')
 // [GET] /login
 module.exports.login = (req, res) => {
@@ -75,7 +76,6 @@ module.exports.registerPost = async (req, res) => {
   }
 };
 
-
 // [POST] /login
 module.exports.loginPost = async (req, res) => {
   try {
@@ -135,7 +135,7 @@ module.exports.logout = (req, res) => {
     res.redirect('/auth/login');
   });
 };
-
+// [GET] /auth/settings
 module.exports.settings = async (req, res) => {
   if (!req.session?.user?._id) {
     req.flash('error', 'Bạn cần đăng nhập!');
@@ -143,15 +143,15 @@ module.exports.settings = async (req, res) => {
   }
   try {
     const user = await User.findById(req.session.user._id)
-      .select('fullName email apiKey')
+      .select('fullName email apiKey googleId password') // Thêm googleId và password
       .lean();
 
     if (!user) {
       req.flash('error', 'Tài khoản không tồn tại!');
       return res.redirect('/auth/login');
     }
-
-    // Render với dữ liệu mới nhất (ghi đè currentUser nếu middleware có set cũ)
+    
+    // Render với dữ liệu mới nhất
     return res.render('client/pages/auth/settings.pug', {
       title: 'Cài đặt tài khoản',
       currentUser: user
@@ -219,8 +219,31 @@ module.exports.updatePassword = async (req, res) => {
   }
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      req.flash('error', 'Vui lòng nhập đầy đủ các trường mật khẩu!');
+    
+    const user = await User.findById(req.session.user._id).lean();
+    if (!user) {
+      req.flash('error', 'Không tìm thấy tài khoản!');
+      return res.redirect('/auth/settings');
+    }
+
+    // Kiểm tra xem user có password chưa (Google user không có password)
+    const hasPassword = user.password && user.password.length > 0;
+
+    // Nếu đã có password, yêu cầu nhập password hiện tại
+    if (hasPassword) {
+      if (!currentPassword) {
+        req.flash('error', 'Vui lòng nhập mật khẩu hiện tại!');
+        return res.redirect('/auth/settings');
+      }
+      if (user.password !== md5(currentPassword)) {
+        req.flash('error', 'Mật khẩu hiện tại không đúng!');
+        return res.redirect('/auth/settings');
+      }
+    }
+
+    // Validate mật khẩu mới
+    if (!newPassword || !confirmPassword) {
+      req.flash('error', 'Vui lòng nhập đầy đủ mật khẩu mới!');
       return res.redirect('/auth/settings');
     }
     if (newPassword !== confirmPassword) {
@@ -232,18 +255,20 @@ module.exports.updatePassword = async (req, res) => {
       return res.redirect('/auth/settings');
     }
 
-    const user = await User.findById(req.session.user._id).lean();
-    if (!user) {
-      req.flash('error', 'Không tìm thấy tài khoản!');
-      return res.redirect('/auth/settings');
-    }
-    if (user.password !== md5(currentPassword)) {
-      req.flash('error', 'Mật khẩu hiện tại không đúng!');
-      return res.redirect('/auth/settings');
+    // Cập nhật mật khẩu và đổi authProvider về 'local' nếu cần
+    const updateData = { password: md5(newPassword) };
+    if (user.googleId && !hasPassword) {
+      // User đăng nhập bằng Google và đang tạo password lần đầu
+      updateData.authProvider = 'local'; // Cho phép dùng cả 2 phương thức
     }
 
-    await User.findByIdAndUpdate(user._id, { password: md5(newPassword) });
-    req.flash('success', 'Đổi mật khẩu thành công!');
+    await User.findByIdAndUpdate(user._id, updateData);
+    
+    const successMsg = hasPassword 
+      ? 'Đổi mật khẩu thành công!' 
+      : 'Tạo mật khẩu thành công! Bạn có thể đăng nhập bằng email/password.';
+    
+    req.flash('success', successMsg);
     return res.redirect('/auth/settings');
   } catch (e) {
     console.error('Update password error:', e);
@@ -525,3 +550,44 @@ module.exports.sendRegisterOTP = async (req, res) => {
     return res.redirect('/auth/register');
   }
 };
+
+// [GET] /auth/google - Redirect to Google
+module.exports.googleAuth = passport.authenticate('google', { 
+  scope: ['profile', 'email'] 
+});
+
+// [GET] /auth/google/callback - Google callback
+module.exports.googleAuthCallback = (req, res, next) => {
+  passport.authenticate('google', (err, user, info) => {
+    if (err) {
+      console.error('Google auth error:', err);
+      req.flash('error', 'Đăng nhập Google thất bại!');
+      return res.redirect('/auth/login');
+    }
+    
+    if (!user) {
+      req.flash('error', 'Không thể xác thực tài khoản Google!');
+      return res.redirect('/auth/login');
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        console.error('Login error:', err);
+        req.flash('error', 'Lỗi khi đăng nhập!');
+        return res.redirect('/auth/login');
+      }
+
+      // Lưu vào session
+      req.session.user = {
+        _id: user._id,
+        fullName: user.fullName,
+        email: user.email
+      };
+
+      req.flash('success', 'Đăng nhập Google thành công!');
+      return res.redirect('/');
+    });
+  })(req, res, next);
+};
+
+

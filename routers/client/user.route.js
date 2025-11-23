@@ -6,6 +6,11 @@ router.get('/login', controller.login);
 
 router.post('/login', controller.loginPost);
 
+// Google OAuth routes
+router.get('/google', controller.googleAuth);
+router.get('/google/callback', controller.googleAuthCallback);
+
+
 router.get('/register', controller.register);
 router.post('/register/send-otp', controller.sendRegisterOTP);
 router.post('/register', controller.registerPost);

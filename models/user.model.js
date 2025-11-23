@@ -4,7 +4,9 @@ const generate = require('../helpers/generate');
 const userSchema = new mongoose.Schema({
     fullName: String,
     email: String,
-    password: String,
+    password: String, // Optional cho Google users
+    googleId: String, // Thêm field mới
+    avatar: String,
     tokenUser: {
         type: String,
         default: generate.generaterandomString(32)
@@ -13,13 +15,17 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: generate.generaterandomString(64)
     },
-    avatar: String,
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local'
+    },
     status: {
         type: String,
         default: 'active'
     },
     deleted: {
-        type : Boolean,
+        type: Boolean,
         default: false
     },
     deletedAt: Date,

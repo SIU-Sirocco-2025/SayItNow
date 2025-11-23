@@ -6,7 +6,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('express-flash');
 const moment = require('moment')
-require('dotenv').config(); 
+require('dotenv').config();
+const passport = require('./config/passport'); 
 // database connection
 const database = require('./config/database')
 database.connect();
@@ -40,6 +41,10 @@ app.use(session({
   cookie: { maxAge: 60000 }
 }));
 app.use(flash());
+
+// Passport middleware - Thêm phần này
+app.use(passport.initialize());
+app.use(passport.session());
 
 // App local variables
 app.locals.moment = moment;
