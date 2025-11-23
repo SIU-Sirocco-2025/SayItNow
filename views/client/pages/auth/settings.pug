@@ -24,13 +24,14 @@ block main
                 placeholder="Họ tên"
               )
             .mb-3
-              label.form-label(for="email") Email
+              label.form-label(for="email") Email (địa chỉ email không thể thay đổi)
               input#email.form-control(
                 type="email"
                 name="email"
                 required
                 value=currentUser.email
                 placeholder="email@example.com"
+                readonly = true
               )
             button.btn.btn-success(type="submit")
               i.bi.bi-save.me-1

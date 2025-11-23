@@ -170,26 +170,15 @@ module.exports.updateProfile = async (req, res) => {
     return res.redirect('/auth/login');
   }
   try {
-    const { fullName, email } = req.body;
-    if (!fullName || !email) {
-      req.flash('error', 'Thiếu họ tên hoặc email!');
-      return res.redirect('/auth/settings');
-    }
-
-    // Email đã dùng bởi user khác?
-    const exists = await User.findOne({
-      _id: { $ne: req.session.user._id },
-      email,
-      deleted: false
-    }).lean();
-    if (exists) {
-      req.flash('error', 'Email đã được sử dụng bởi tài khoản khác!');
+    const { fullName } = req.body;
+    if (!fullName) {
+      req.flash('error', 'Thiếu họ tên!');
       return res.redirect('/auth/settings');
     }
 
     const updated = await User.findByIdAndUpdate(
       req.session.user._id,
-      { fullName, email },
+      { fullName },
       { new: true }
     ).lean();
 
@@ -200,7 +189,6 @@ module.exports.updateProfile = async (req, res) => {
 
     // Cập nhật lại session
     req.session.user.fullName = updated.fullName;
-    req.session.user.email = updated.email;
 
     req.flash('success', 'Cập nhật thông tin thành công!');
     return res.redirect('/auth/settings');
