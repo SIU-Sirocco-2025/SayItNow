@@ -1,7 +1,25 @@
-aside.sider.bg-dark.text-white.border-end.min-vh-100
-    .inner-menu.p-3
-        ul.nav.nav-pills.flex-column.gap-1
-            li.nav-item
-                a.nav-link.text-white.d-flex.align-items-center.gap-2(href=`${prefixAdmin}/dashboard`)
-                    i.bi.bi-speedometer2
-                    span Tổng quan
+aside.sidebar
+    .sidebar-brand
+        i.bi.bi-leaf
+        h6 EcoTrack
+    ul.sidebar-nav
+        li
+            a(href="/admin/dashboard")
+                i.bi.bi-speedometer2
+                span Dashboard
+        li
+            a(href="/admin/aqi")
+                i.bi.bi-cloud-slash
+                span AQI Monitor
+        li
+            a(href="/admin/weather")
+                i.bi.bi-cloud-sun
+                span Weather
+        li
+            a(href="/admin/user")
+                i.bi.bi-people
+                span User
+        li
+            a(href="#settings")
+                i.bi.bi-gear
+                span Settings

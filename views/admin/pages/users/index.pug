@@ -1,0 +1,48 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        .row.mb-3
+            .col
+                h1.mb-0
+                    i.bi.bi-people.me-2
+                    | Quản lý Users
+            .col-auto
+                form(method='post', action= prefixAdmin + '/users')
+                    .input-group
+                        input.form-control(type='text', name='username', placeholder='Username', required)
+                        input.form-control(type='email', name='email', placeholder='Email', required)
+                        input.form-control(type='password', name='password', placeholder='Mật khẩu', required)
+                        select.form-select(name='role')
+                            option(value='user') user
+                            option(value='admin') admin
+                        button.btn.btn-primary(type='submit') Thêm
+
+        .row
+            .col
+                .card.border-0.shadow-sm
+                    .card-body
+                        if users && users.length > 0
+                            .table-responsive
+                                table.table.table-sm
+                                    thead
+                                        tr
+                                            th# ID
+                                            th FullName
+                                            th Email
+                                            th.text-center Hành động
+                                    tbody
+                                        each user in users
+                                            tr
+                                                td= user._id
+                                                td= user.fullName
+                                                td= user.email
+                                                td.text-center
+                                                    form.d-inline(method='post', action= prefixAdmin + '/users/' + user._id + '?_method=DELETE')
+                                                        button.btn.btn-sm.btn-danger(type='submit') Xoá
+                        else
+                            .alert.alert-info Chưa có user nào

@@ -1,0 +1,114 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/pagination.pug
+include ../../mixins/search.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        .row.mb-4
+            .col-md-8
+                h1.mb-0 
+                    i.bi.bi-cloud-sun.me-2
+                    | Quản lý Thời tiết
+            .col-md-4.text-end
+                a.btn.btn-success.me-2(href="/admin/weather/export?format=csv")
+                    i.bi.bi-download.me-1
+                    | Export CSV
+                a.btn.btn-primary(href="/admin/weather/export?format=json")
+                    i.bi.bi-download.me-1
+                    | Export JSON
+
+        // Bảng dữ liệu Thời tiết
+        .card
+            .card-header.bg-primary.text-white
+                h5.mb-0
+                    i.bi.bi-table.me-2
+                    | Dữ liệu Thời tiết Thực thời của các quận
+            .card-body
+                if data && data.length > 0
+                    .table-responsive
+                        table.table.table-hover.table-sm
+                            thead.table-light
+                                tr
+                                    th.text-center #
+                                    th Quận/Huyện
+                                    th Thành phố
+                                    th.text-center Nhiệt độ (°C)
+                                    th.text-center Độ ẩm (%)
+                                    th.text-center Áp suất (mb)
+                                    th.text-center Tốc độ gió (m/s)
+                                    th Thời gian cập nhật
+                                    th.text-center Hành động
+                            tbody
+                                each item, index in data
+                                    tr
+                                        td.text-center
+                                            strong= index + 1
+                                        td
+                                            strong= item.districtName
+                                        td= item.city || 'N/A'
+                                        td.text-center
+                                            span.badge.bg-info
+                                                = typeof item.temperature === 'number' ? item.temperature + '°C' : 'N/A'
+                                        td.text-center
+                                            = typeof item.humidity === 'number' ? item.humidity + '%' : 'N/A'
+                                        td.text-center
+                                            = typeof item.pressure === 'number' ? item.pressure + ' mb' : 'N/A'
+                                        td.text-center
+                                            = typeof item.windSpeed === 'number' ? item.windSpeed + ' m/s' : 'N/A'
+                                        td.small= item.formattedTime
+                                        td.text-center
+                                            a.btn.btn-sm.btn-info(href=`/admin/weather/detail/${item.districtId}`, title="Xem chi tiết")
+                                                i.bi.bi-eye
+                                else
+                                    tr
+                                        td.text-center(colspan="9")
+                                            em Chưa có dữ liệu thời tiết
+                else
+                    .alert.alert-warning
+                        i.bi.bi-exclamation-triangle.me-2
+                        | Chưa có dữ liệu thời tiết để hiển thị
+
+        // Thống kê nhanh
+        .row.mt-4
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Số quận có dữ liệu
+                        h3.mb-0
+                            if data
+                                strong= data.length
+                            else
+                                strong 0
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Nhiệt độ Cao nhất
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const maxTemp = Math.max(...data.map(d => typeof d.temperature === 'number' ? d.temperature : -273))
+                                strong= maxTemp === -273 ? 'N/A' : maxTemp + '°C'
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Nhiệt độ Trung bình
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const avgTemp = (data.reduce((sum, item) => sum + (typeof item.temperature === 'number' ? item.temperature : 0), 0) / data.length).toFixed(1)
+                                strong= avgTemp + '°C'
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Cập nhật lần cuối
+                        .small
+                            if data && data[0]
+                                = data[0].formattedTime
+                            else
+                                | N/A

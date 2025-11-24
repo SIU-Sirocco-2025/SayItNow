@@ -1,0 +1,432 @@
+extends ../../layouts/default.pug
+
+block main
+    .user-header
+        h2 Quản lý User
+        button.btn-add(onclick="openAddModal()") + Thêm User Mới
+
+    .user-container
+        table.user-table
+            thead
+                tr
+                    th #
+                    th FullName
+                    th Email
+                    th Ngày tạo
+                    th Hành động
+            tbody#userTable
+                tr
+                    td(colspan="6", style="text-align: center; padding: 2rem; color: #94a3b8;") Đang tải...
+
+    // Add/Edit Modal
+    .modal#userModal
+        .modal-content
+            .modal-header
+                h3#modalTitle Thêm User Mới
+                button.modal-close(onclick="closeUserModal()") ✕
+            .modal-body
+                .form-group
+                    label FullName
+                    input#inputFullName(type="text", placeholder="Nhập full name")
+                .form-group
+                    label Email
+                    input#inputEmail(type="email", placeholder="Nhập email")
+                .form-group
+                    label Password
+                    input#inputPassword(type="password", placeholder="Nhập mật khẩu (để trống nếu không đổi)")
+            .modal-footer
+                button.btn-cancel(onclick="closeUserModal()") Hủy
+                button.btn-submit(onclick="saveUser()") Lưu
+
+    style.
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--slate-200);
+        }
+
+        .user-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+
+        .btn-add {
+            background: var(--green-500);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-add:hover {
+            background: var(--green-600);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .user-container {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.75rem;
+            border: 1px solid var(--slate-200);
+            overflow-x: auto;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .user-table thead {
+            background: var(--slate-50);
+        }
+
+        .user-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--slate-900);
+            border-bottom: 2px solid var(--slate-200);
+        }
+
+        .user-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--slate-100);
+            color: var(--slate-700);
+        }
+
+        .user-table tbody tr:hover {
+            background: var(--slate-50);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-blocked {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--slate-200);
+            color: var(--slate-800);
+        }
+
+        .role-badge.admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-badge.moderator {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 0.375rem 0.75rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--slate-200);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--slate-900);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--slate-400);
+            transition: color 0.25s;
+        }
+
+        .modal-close:hover {
+            color: var(--slate-900);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--slate-900);
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--slate-200);
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--green-500);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            border-top: 1px solid var(--slate-200);
+        }
+
+        .btn-cancel, .btn-submit {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-cancel {
+            background: var(--slate-200);
+            color: var(--slate-900);
+        }
+
+        .btn-cancel:hover {
+            background: var(--slate-300);
+        }
+
+        .btn-submit {
+            background: var(--green-500);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: var(--green-600);
+        }
+
+    script.
+        let editingUserId = null;
+
+        function loadUsers() {
+            fetch('/admin/user/api/list')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) return;
+                    const tbody = document.getElementById('userTable');
+                    tbody.innerHTML = '';
+                    data.users.forEach((user, idx) => {
+                        const createdAt = new Date(user.createdAt).toLocaleDateString('vi-VN');
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${idx + 1}</td>
+                            <td>${user.fullName}</td>
+                            <td>${user.email}</td>
+                            <td>${createdAt}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-edit" onclick="editUser('${user._id}', '${user.fullName}', '${user.email}')">Sửa</button>
+                                    <button class="btn-delete" onclick="deleteUser('${user._id}')">Xóa</button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        function openAddModal() {
+            editingUserId = null;
+            document.getElementById('modalTitle').textContent = 'Thêm User Mới';
+            document.getElementById('inputFullName').value = '';
+            document.getElementById('inputEmail').value = '';
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function editUser(id, fullName, email) {
+            editingUserId = id;
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa User';
+            document.getElementById('inputFullName').value = fullName;
+            document.getElementById('inputEmail').value = email;
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('active');
+        }
+
+        function saveUser() {
+            const fullName = document.getElementById('inputFullName').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+
+            if (!fullName || !email) {
+                alert('Vui lòng nhập họ tên và email');
+                return;
+            }
+
+            if (editingUserId) {
+                // Update
+                const payload = { fullName, email };
+                if (password) payload.password = password;
+                
+                fetch(`/admin/user/api/update/${editingUserId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cập nhật thành công');
+                        closeUserModal();
+                        loadUsers();
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                });
+            } else {
+                // Create
+                if (!password) {
+                    alert('Vui lòng nhập mật khẩu');
+                    return;
+                }
+                fetch('/admin/user/api/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, password })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Tạo user thành công');
+                        closeUserModal();
+                        loadUsers();
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                });
+            }
+        }
+
+        function deleteUser(id) {
+            if (confirm('Bạn chắc chắn muốn xóa user này?')) {
+                fetch(`/admin/user/api/delete/${id}`, { method: 'DELETE' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Xóa thành công');
+                            loadUsers();
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                        }
+                    });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadUsers);
+        } else {
+            loadUsers();
+        }

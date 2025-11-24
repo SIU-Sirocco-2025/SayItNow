@@ -1,0 +1,203 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        // Breadcrumb
+        nav(aria-label="breadcrumb").mb-4
+            ol.breadcrumb
+                li.breadcrumb-item
+                    a(href="/admin/dashboard") Dashboard
+                li.breadcrumb-item
+                    a(href="/admin/weather") Thời tiết
+                li.breadcrumb-item.active= districtLabel
+
+        .row.mb-4
+            .col-md-8
+                h1.mb-0 
+                    i.bi.bi-cloud-sun.me-2
+                    = districtLabel
+                    small.text-muted.d-block
+                        = `Chi tiết thời tiết`
+            .col-md-4.text-end
+                a.btn.btn-success.me-2(href=`/admin/weather/export?district=${district}&format=csv`)
+                    i.bi.bi-download.me-1
+                    | Export CSV
+                a.btn.btn-primary(href="/admin/weather")
+                    i.bi.bi-arrow-left.me-1
+                    | Quay lại
+
+        // Biểu đồ Thời tiết
+        .card.mb-4
+            .card-header.bg-primary.text-white
+                h5.mb-0
+                    i.bi.bi-thermometer.me-2
+                    | Xu hướng Thời tiết - 30 lần đo gần nhất
+            .card-body
+                canvas#weatherChart
+                p.text-muted.small.mt-3
+                    em Biểu đồ hiển thị nhiệt độ, độ ẩm, và tốc độ gió
+
+        // Bảng chi tiết
+        .card
+            .card-header.bg-secondary.text-white
+                h5.mb-0
+                    i.bi.bi-table.me-2
+                    | Chi tiết 30 lần đo gần nhất
+            .card-body
+                if data && data.length > 0
+                    .table-responsive
+                        table.table.table-sm.table-hover
+                            thead.table-light
+                                tr
+                                    th.text-center #
+                                    th Thành phố
+                                    th.text-center Nhiệt độ
+                                    th.text-center Độ ẩm
+                                    th.text-center Áp suất
+                                    th.text-center Tốc độ gió
+                                    th.text-center Hướng gió
+                                    th.text-center Chỉ số nhiệt
+                                    th Thời gian
+                            tbody
+                                each item, index in data
+                                    tr
+                                        td.text-center
+                                            strong= index + 1
+                                        td= item.city || 'N/A'
+                                        td.text-center
+                                            span.badge.bg-info
+                                                = typeof item.current?.weather?.tp === 'number' ? item.current.weather.tp + '°C' : 'N/A'
+                                        td.text-center
+                                            = typeof item.current?.weather?.hu === 'number' ? item.current.weather.hu + '%' : 'N/A'
+                                        td.text-center
+                                            = typeof item.current?.weather?.pr === 'number' ? item.current.weather.pr + ' mb' : 'N/A'
+                                        td.text-center
+                                            = typeof item.current?.weather?.ws === 'number' ? item.current.weather.ws + ' m/s' : 'N/A'
+                                        td.text-center
+                                            = typeof item.current?.weather?.wd === 'number' ? item.current.weather.wd + '°' : 'N/A'
+                                        td.text-center
+                                            = typeof item.current?.weather?.heatIndex === 'number' ? item.current.weather.heatIndex + '°C' : 'N/A'
+                                        td.small= item.formattedTime
+                else
+                    .alert.alert-warning
+                        i.bi.bi-exclamation-triangle.me-2
+                        | Chưa có dữ liệu chi tiết cho quận này
+
+        // Thông tin nhanh
+        .row.mt-4
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Số lần đo
+                        h3.mb-0
+                            if data
+                                strong= data.length
+                            else
+                                strong 0
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Nhiệt độ Cao nhất
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const maxTemp = Math.max(...data.map(d => typeof d.current?.weather?.tp === 'number' ? d.current.weather.tp : -273))
+                                strong= maxTemp === -273 ? 'N/A' : (maxTemp + '°C')
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Nhiệt độ Trung bình
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const avgTemp = (data.reduce((sum, d) => sum + (typeof d.current?.weather?.tp === 'number' ? d.current.weather.tp : 0), 0) / data.length).toFixed(1)
+                                strong= avgTemp + '°C'
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Độ ẩm Trung bình
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const avgHumidity = (data.reduce((sum, d) => sum + (typeof d.current?.weather?.hu === 'number' ? d.current.weather.hu : 0), 0) / data.length).toFixed(0)
+                                strong= avgHumidity + '%'
+                            else
+                                strong N/A
+
+        .row.mt-4
+            .col-12
+                script.
+                    // Tải và vẽ biểu đồ thời tiết
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const district = '#{district}';
+                        fetch(`/admin/weather/api/chart/${district}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const ctx = document.getElementById('weatherChart').getContext('2d');
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: data,
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: 'top',
+                                                labels: {
+                                                    usePointStyle: true,
+                                                    padding: 15,
+                                                    font: { size: 12 }
+                                                }
+                                            },
+                                            title: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'left',
+                                                title: {
+                                                    display: true,
+                                                    text: 'Nhiệt độ (°C)'
+                                                }
+                                            },
+                                            y1: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'right',
+                                                title: {
+                                                    display: true,
+                                                    text: 'Độ ẩm (%)'
+                                                },
+                                                grid: {
+                                                    drawOnChartArea: false
+                                                }
+                                            },
+                                            y2: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'left',
+                                                title: {
+                                                    display: true,
+                                                    text: 'Tốc độ gió (m/s)'
+                                                },
+                                                offset: true
+                                            }
+                                        },
+                                        interaction: {
+                                            mode: 'index',
+                                            intersect: false
+                                        }
+                                    }
+                                });
+                            })
+                            .catch(error => console.error('Error loading chart data:', error));
+                    });

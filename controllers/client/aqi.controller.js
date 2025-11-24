@@ -93,7 +93,6 @@ module.exports.latestPoints = async (req, res) => {
         .sort({ 'current.pollution.ts': -1 })
         .select('city state country location current.pollution.aqius current.pollution.ts')
         .lean();
-
       const coords = doc?.location?.coordinates; // [lon, lat]
       const aqius = doc?.current?.pollution?.aqius;
       const ts = doc?.current?.pollution?.ts;

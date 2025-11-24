@@ -43,6 +43,10 @@ function buildUrl(city) {
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// Control whether this script is allowed to write to the database.
+// Set ALLOW_DB_WRITE=1 (or 'true') in your .env to enable DB writes.
+const ALLOW_DB_WRITE = String(process.env.ALLOW_DB_WRITE || '').toLowerCase() === '1' || String(process.env.ALLOW_DB_WRITE || '').toLowerCase() === 'true';
+
 function toDoc(root) {
   const d = root.data || {};
   const pollution = d.current?.pollution || {};
@@ -131,6 +135,11 @@ async function saveWithModel(Model, root, label) {
     console.log(`[SKIP] ${label} thiếu pollution.ts`);
     return;
   }
+  if (!ALLOW_DB_WRITE) {
+    console.log(`[DRY RUN] (ALLOW_DB_WRITE not set) Would save ${label} ts=${ts.toISOString()} aqius=${doc.current.pollution.aqius}`);
+    return;
+  }
+
   await Model.findOneAndUpdate(
     { 'current.pollution.ts': ts },
     doc,

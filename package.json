@@ -15,7 +15,8 @@
     "dev:openaq": "nodemon scripts/fetch-openaq-hours.js",
     "worker": "npm run worker:all",
     "worker:all": "concurrently -k -n airvisual,openaq -c cyan,magenta \"npm run start:airvisual\" \"npm run start:openaq\"",
-    "worker:dev": "concurrently -k -n airvisual,openaq -c cyan,magenta \"npm run dev:airvisual\" \"npm run dev:openaq\""
+    "worker:dev": "concurrently -k -n airvisual,openaq -c cyan,magenta \"npm run dev:airvisual\" \"npm run dev:openaq\"",
+    "create-admin": "node scripts/create-admin.js"
   },
   "keywords": [],
   "author": "",

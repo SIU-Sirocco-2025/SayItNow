@@ -1,0 +1,68 @@
+doctype html
+html
+    head
+        title #{title}
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
+        link(rel="stylesheet", href="/admin/css/admin-login.css")
+    body
+        .login-container
+            .login-card
+                .text-center.mb-4
+                    .logo-circle
+                        i.bi.bi-shield-lock-fill
+                    h2.h4.fw-bold.mb-1 Admin Panel
+                    p.text-muted.small Đăng nhập để quản lý hệ thống
+                
+                //- Flash messages
+                if messages.error
+                    .alert.alert-danger.alert-dismissible.fade.show(role="alert")
+                        i.bi.bi-exclamation-circle.me-2
+                        = messages.error
+                        button.btn-close(type="button" data-bs-dismiss="alert")
+                
+                if messages.success
+                    .alert.alert-success.alert-dismissible.fade.show(role="alert")
+                        i.bi.bi-check-circle.me-2
+                        = messages.success
+                        button.btn-close(type="button" data-bs-dismiss="alert")
+                
+                form(action=`${prefixAdmin}/auth/login` method="POST" autocomplete="off")
+                    .mb-3
+                        label.form-label.fw-semibold(for="email") Email
+                        .input-group
+                            span.input-group-text
+                                i.bi.bi-envelope-fill
+                            input#email.form-control(
+                                type="email"
+                                name="email"
+                                required
+                                placeholder="admin@ecotrack.com"
+                                autocomplete="username"
+                            )
+                    
+                    .mb-4
+                        label.form-label.fw-semibold(for="password") Mật khẩu
+                        .input-group
+                            span.input-group-text
+                                i.bi.bi-lock-fill
+                            input#password.form-control(
+                                type="password"
+                                name="password"
+                                required
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                            )
+                    
+                    button.btn.btn-primary.btn-login.w-100(type="submit")
+                        i.bi.bi-box-arrow-in-right.me-2
+                        | Đăng nhập
+                
+                .text-center.mt-4
+                    a.text-decoration-none.text-muted.small(href="/")
+                        i.bi.bi-arrow-left.me-1
+                        | Về trang chủ
+        
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js")

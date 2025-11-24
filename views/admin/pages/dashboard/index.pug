@@ -1,8 +1,328 @@
 extends ../../layouts/default.pug
-include ../../mixins/alert.pug
 
 block main
-    +showAlertSuccess(5000)
-    +showAlertError(5000)
-    
-    h1 Dashboard
+    .stat-cards
+        .stat-card
+            .stat-card-content
+                .stat-card-text
+                    p Tổng Quận
+                    h3 16
+                .stat-card-icon
+                    i.bi.bi-map
+
+        .stat-card
+            .stat-card-content
+                .stat-card-text
+                    p AQI Data
+                    h3#aqiCount -
+                .stat-card-icon
+                    i.bi.bi-cloud-slash
+
+        .stat-card
+            .stat-card-content
+                .stat-card-text
+                    p Weather Data
+                    h3#tempCount -
+                .stat-card-icon
+                    i.bi.bi-cloud-sun
+
+        .stat-card
+            .stat-card-content
+                .stat-card-text
+                    p Avg AQI
+                    h3#avgAqi -
+                .stat-card-icon
+                    i.bi.bi-speedometer
+
+    // RANKING SECTION (TOP PRIORITY)
+    .ranking-section
+        .ranking-card
+            .ranking-header
+                i.bi.bi-emoji-smile(style="color: #22c55e;")
+                h4 Top 3 Quận Tốt
+            #bestList.ranking-list
+
+        .ranking-card
+            .ranking-header
+                i.bi.bi-emoji-frown(style="color: #ef4444;")
+                h4 Top 3 Quận Xấu
+            #worstList.ranking-list
+
+        .ranking-card
+            .ranking-header
+                i.bi.bi-pie-chart
+                h4 Tỷ lệ Vượt Ngưỡng
+            #ratioChart
+
+    // ALERTS SECTION
+    .alert-section
+        .alert-header
+            i.bi.bi-exclamation-triangle
+            h3 Cảnh báo vượt ngưỡng (AQI ≥ 150)
+        #alertsList.alerts-list
+
+    // CHARTS SECTION (BOTTOM)
+    .chart-section
+        .chart-card
+            .chart-header
+                i.bi.bi-bar-chart
+                h3 AQI by District
+            #aqiChart
+
+        .chart-card
+            .chart-header
+                i.bi.bi-thermometer-half
+                h3 Temperature & Humidity
+            #tempChart
+
+    style.
+        .alert-section {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.75rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--slate-200);
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-header i {
+            font-size: 1.5rem;
+            color: #f97316;
+        }
+
+        .alert-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--slate-900);
+        }
+
+        .alerts-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .alert-item {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+        }
+
+        .alert-item-district {
+            font-weight: 600;
+            color: #991b1b;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .alert-item-aqi {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .alert-item-status {
+            font-size: 0.7rem;
+            color: #991b1b;
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+
+        .ranking-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .ranking-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--slate-200);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .ranking-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .ranking-header i {
+            font-size: 1.5rem;
+        }
+
+        .ranking-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--slate-900);
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .ranking-item {
+            padding: 0.6rem;
+            background: var(--slate-50);
+            border-radius: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ranking-item-name {
+            font-weight: 500;
+            color: var(--slate-800);
+            font-size: 0.85rem;
+        }
+
+        .ranking-item-value {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .ranking-item.best .ranking-item-value {
+            color: #22c55e;
+        }
+
+        .ranking-item.worst .ranking-item-value {
+            color: #ef4444;
+        }
+
+        .chart-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+    script.
+        function initDashboard() {
+            if (typeof ApexCharts === "undefined") {
+                setTimeout(initDashboard, 500);
+                return;
+            }
+
+            // AQI Chart
+            fetch("/admin/dashboard/api/aqi-chart").then(r => r.json()).then(data => {
+                if (!data.success) return;
+                const aqi = data.aqi || [];
+                const dists = data.districts || [];
+                const cnt = aqi.filter(v => v).length;
+                document.getElementById("aqiCount").textContent = cnt;
+                const avg = aqi.filter(v => v).reduce((a, b) => a + b, 0) / aqi.filter(v => v).length;
+                document.getElementById("avgAqi").textContent = avg.toFixed(1);
+                const colors = aqi.map(v => !v ? "#e5e7eb" : v <= 50 ? "#22c55e" : v <= 100 ? "#3b82f6" : v <= 150 ? "#eab308" : v <= 200 ? "#f97316" : "#ef4444");
+                new ApexCharts(document.getElementById("aqiChart"), {
+                    series: [{ name: "AQI US", data: aqi }],
+                    chart: { type: "bar", height: 350, toolbar: { show: true } },
+                    colors: colors,
+                    xaxis: { categories: dists, labels: { style: { fontSize: "12px" } } },
+                    yaxis: { title: { text: "AQI Value" } },
+                    plotOptions: { bar: { columnWidth: "60%", borderRadius: 6 } },
+                    tooltip: { y: { formatter: v => v ? Math.round(v) : "N/A" } }
+                }).render();
+            });
+
+            // Temp Chart (with Humidity on secondary axis)
+            fetch("/admin/dashboard/api/temp-chart").then(r => r.json()).then(data => {
+                if (!data.success) return;
+                const temps = data.temps || [];
+                const humidities = data.humidities || [];
+                const dists = data.districts || [];
+                const cnt = temps.filter(v => v).length;
+                document.getElementById("tempCount").textContent = cnt;
+                new ApexCharts(document.getElementById("tempChart"), {
+                    series: [
+                        { name: "Temperature (°C)", data: temps },
+                        { name: "Humidity (%)", data: humidities }
+                    ],
+                    chart: { type: "line", height: 350, toolbar: { show: true }, sparkline: { enabled: false } },
+                    colors: ["#3b82f6", "#06b6d4"],
+                    xaxis: { categories: dists, labels: { style: { fontSize: "12px" } } },
+                    yaxis: [
+                        { title: { text: "°C", style: { color: "#3b82f6" } }, labels: { style: { colors: "#3b82f6" } } },
+                        { opposite: true, title: { text: "%", style: { color: "#06b6d4" } }, labels: { style: { colors: "#06b6d4" } }, min: 0, max: 100 }
+                    ],
+                    stroke: { curve: "smooth", width: 2 },
+                    tooltip: { shared: true, intersect: false }
+                }).render();
+            });
+
+            // Ranking
+            fetch("/admin/dashboard/api/ranking").then(r => r.json()).then(data => {
+                if (!data.success) return;
+                
+                // Best districts
+                const bestList = document.getElementById("bestList");
+                bestList.innerHTML = "";
+                data.best.forEach((d, idx) => {
+                    const item = document.createElement("div");
+                    item.className = "ranking-item best";
+                    item.innerHTML = `<span class="ranking-item-name">#${idx+1} ${d.district}</span><span class="ranking-item-value">${d.aqi}</span>`;
+                    bestList.appendChild(item);
+                });
+
+                // Worst districts
+                const worstList = document.getElementById("worstList");
+                worstList.innerHTML = "";
+                data.worst.forEach((d, idx) => {
+                    const item = document.createElement("div");
+                    item.className = "ranking-item worst";
+                    item.innerHTML = `<span class="ranking-item-name">#${idx+1} ${d.district}</span><span class="ranking-item-value">${d.aqi}</span>`;
+                    worstList.appendChild(item);
+                });
+
+                // Ratio chart
+                const ratio = data.ratio;
+                new ApexCharts(document.getElementById("ratioChart"), {
+                    series: [ratio.exceeded, ratio.normal],
+                    chart: { type: "donut", height: 240 },
+                    labels: [`Vượt (${ratio.exceeded})`, `Bình thường (${ratio.normal})`],
+                    colors: ["#ef4444", "#22c55e"],
+                    plotOptions: { pie: { donut: { size: "70%" } } },
+                    tooltip: { y: { formatter: v => v + " quận" } }
+                }).render();
+            });
+
+            // Alerts
+            fetch("/admin/dashboard/api/alerts").then(r => r.json()).then(data => {
+                if (!data.success) return;
+                const alertsList = document.getElementById("alertsList");
+                alertsList.innerHTML = "";
+                if (data.alerts.length === 0) {
+                    alertsList.innerHTML = '<p style="color: #22c55e; font-weight: 600; text-align: center; padding: 1rem;">✓ Không có cảnh báo</p>';
+                } else {
+                    data.alerts.forEach(alert => {
+                        const item = document.createElement("div");
+                        item.className = "alert-item";
+                        item.innerHTML = `
+                            <div class="alert-item-district">${alert.district}</div>
+                            <div class="alert-item-aqi">${alert.aqi}</div>
+                            <div class="alert-item-status">${alert.status}</div>
+                        `;
+                        alertsList.appendChild(item);
+                    });
+                }
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initDashboard);
+        } else {
+            initDashboard();
+        }

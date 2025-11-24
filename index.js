@@ -58,6 +58,10 @@ app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce
 const { injectUser } = require('./middlewares/auth.middleware');
 app.use(injectUser);
 
+// Inject adminUser into admin templates
+const { injectAdminUser } = require('./middlewares/admin.middleware');
+app.use(injectAdminUser);
+
 clientRoutes(app);
 adminRoutes(app);
 apiRoutes(app); // Thêm dòng này

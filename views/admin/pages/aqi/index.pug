@@ -1,0 +1,128 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/pagination.pug
+include ../../mixins/search.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        .row.mb-4
+            .col-md-8
+                h1.mb-0 
+                    i.bi.bi-cloud.me-2
+                    | Quản lý AQI (Chất lượng không khí)
+            .col-md-4.text-end
+                a.btn.btn-success.me-2(href="/admin/aqi/export?format=csv")
+                    i.bi.bi-download.me-1
+                    | Export CSV
+                a.btn.btn-primary(href="/admin/aqi/export?format=json")
+                    i.bi.bi-download.me-1
+                    | Export JSON
+
+        // Bảng dữ liệu AQI
+        .card
+            .card-header.bg-primary.text-white
+                h5.mb-0
+                    i.bi.bi-table.me-2
+                    | Dữ liệu AQI Thực thời của các quận
+            .card-body
+                if data && data.length > 0
+                    .table-responsive
+                        table.table.table-hover.table-sm
+                            thead.table-light
+                                tr
+                                    th.text-center #
+                                    th Quận/Huyện
+                                    th Thành phố
+                                    th.text-center AQI US
+                                    th Main (US)
+                                    th.text-center AQI CN
+                                    th Main (CN)
+                                    th Thời gian cập nhật
+                                    th.text-center Hành động
+                            tbody
+                                each item, index in data
+                                    tr
+                                        td.text-center
+                                            strong= index + 1
+                                        td
+                                            strong= item.districtName
+                                        td= item.city || 'N/A'
+                                        td.text-center
+                                            - let us_class = 'bg-secondary';
+                                            - if (typeof item.aqius === 'number') {
+                                            -   if (item.aqius <= 50) us_class = 'bg-success';
+                                            -   else if (item.aqius <= 100) us_class = 'bg-info';
+                                            -   else if (item.aqius <= 150) us_class = 'bg-warning';
+                                            -   else if (item.aqius <= 200) us_class = 'bg-danger';
+                                            -   else us_class = 'bg-dark';
+                                            - }
+                                            span.badge(class=us_class)
+                                                = typeof item.aqius === 'number' ? item.aqius : 'N/A'
+                                        td= item.mainus || 'N/A'
+                                        td.text-center
+                                            - let cn_class = 'bg-secondary';
+                                            - if (typeof item.aqicn === 'number') {
+                                            -   if (item.aqicn <= 50) cn_class = 'bg-success';
+                                            -   else if (item.aqicn <= 100) cn_class = 'bg-info';
+                                            -   else if (item.aqicn <= 150) cn_class = 'bg-warning';
+                                            -   else if (item.aqicn <= 200) cn_class = 'bg-danger';
+                                            -   else cn_class = 'bg-dark';
+                                            - }
+                                            span.badge(class=cn_class)
+                                                = typeof item.aqicn === 'number' ? item.aqicn : 'N/A'
+                                        td= item.maincn || 'N/A'
+                                        td.small= item.formattedTime
+                                        td.text-center
+                                            a.btn.btn-sm.btn-info(href=`/admin/aqi/detail/${item.districtId}`, title="Xem chi tiết")
+                                                i.bi.bi-eye
+                                else
+                                    tr
+                                        td.text-center(colspan="9")
+                                            em Chưa có dữ liệu AQI
+                else
+                    .alert.alert-warning
+                        i.bi.bi-exclamation-triangle.me-2
+                        | Chưa có dữ liệu AQI để hiển thị
+
+        // Thống kê nhanh
+        .row.mt-4
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Số quận có dữ liệu
+                        h3.mb-0
+                            if data
+                                strong= data.length
+                            else
+                                strong 0
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted AQI Cao nhất
+                        h3.mb-0
+                            if data && data[0]
+                                strong= typeof data[0].aqius === 'number' ? data[0].aqius : 'N/A'
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted AQI Trung bình
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const avg = (data.reduce((sum, item) => sum + (typeof item.aqius === 'number' ? item.aqius : 0), 0) / data.length).toFixed(0)
+                                strong= avg
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Cập nhật lần cuối
+                        .small
+                            if data && data[0]
+                                = data[0].formattedTime
+                            else
+                                | N/A

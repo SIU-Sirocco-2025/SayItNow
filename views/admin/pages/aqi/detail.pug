@@ -1,0 +1,192 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        // Breadcrumb
+        nav(aria-label="breadcrumb").mb-4
+            ol.breadcrumb
+                li.breadcrumb-item
+                    a(href="/admin/dashboard") Dashboard
+                li.breadcrumb-item
+                    a(href="/admin/aqi") AQI
+                li.breadcrumb-item.active= districtLabel
+
+        .row.mb-4
+            .col-md-8
+                h1.mb-0 
+                    i.bi.bi-graph-up.me-2
+                    = districtLabel
+                    small.text-muted.d-block
+                        = `Chi tiết chất lượng không khí (AQI)`
+            .col-md-4.text-end
+                a.btn.btn-success.me-2(href=`/admin/aqi/export?district=${district}&format=csv`)
+                    i.bi.bi-download.me-1
+                    | Export CSV
+                a.btn.btn-primary(href="/admin/aqi")
+                    i.bi.bi-arrow-left.me-1
+                    | Quay lại
+
+        // Biểu đồ AQI
+        .card.mb-4
+            .card-header.bg-primary.text-white
+                h5.mb-0
+                    i.bi.bi-bar-chart.me-2
+                    | Xu hướng AQI - 30 lần đo gần nhất
+            .card-body
+                canvas#aqiChart
+                p.text-muted.small.mt-3
+                    em Biểu đồ hiển thị AQI US và AQI CN theo thời gian
+
+        // Bảng chi tiết
+        .card
+            .card-header.bg-secondary.text-white
+                h5.mb-0
+                    i.bi.bi-table.me-2
+                    | Chi tiết 30 lần đo gần nhất
+            .card-body
+                if data && data.length > 0
+                    .table-responsive
+                        table.table.table-sm.table-hover
+                            thead.table-light
+                                tr
+                                    th.text-center #
+                                    th Thành phố
+                                    th.text-center AQI US
+                                    th Main US
+                                    th.text-center AQI CN
+                                    th Main CN
+                                    th Thời gian
+                            tbody
+                                each item, index in data
+                                    tr
+                                        td.text-center
+                                            strong= index + 1
+                                        td= item.city || 'N/A'
+                                        td.text-center
+                                            - let aqi_us = item.current?.pollution?.aqius;
+                                            - let usClass = 'bg-secondary';
+                                            - if (typeof aqi_us === 'number') {
+                                            -   if (aqi_us <= 50) usClass = 'bg-success';
+                                            -   else if (aqi_us <= 100) usClass = 'bg-info';
+                                            -   else if (aqi_us <= 150) usClass = 'bg-warning';
+                                            -   else if (aqi_us <= 200) usClass = 'bg-danger';
+                                            -   else usClass = 'bg-dark';
+                                            - }
+                                            span.badge(class=usClass)
+                                                = typeof aqi_us === 'number' ? aqi_us : 'N/A'
+                                        td= item.current?.pollution?.mainus || 'N/A'
+                                        td.text-center
+                                            - let aqi_cn = item.current?.pollution?.aqicn;
+                                            - let cnClass = 'bg-secondary';
+                                            - if (typeof aqi_cn === 'number') {
+                                            -   if (aqi_cn <= 50) cnClass = 'bg-success';
+                                            -   else if (aqi_cn <= 100) cnClass = 'bg-info';
+                                            -   else if (aqi_cn <= 150) cnClass = 'bg-warning';
+                                            -   else if (aqi_cn <= 200) cnClass = 'bg-danger';
+                                            -   else cnClass = 'bg-dark';
+                                            - }
+                                            span.badge(class=cnClass)
+                                                = typeof aqi_cn === 'number' ? aqi_cn : 'N/A'
+                                        td= item.current?.pollution?.maincn || 'N/A'
+                                        td.small= item.formattedTime
+                else
+                    .alert.alert-warning
+                        i.bi.bi-exclamation-triangle.me-2
+                        | Chưa có dữ liệu chi tiết cho quận này
+
+        // Thông tin nhanh
+        .row.mt-4
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted Số lần đo
+                        h3.mb-0
+                            if data
+                                strong= data.length
+                            else
+                                strong 0
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted AQI Cao nhất (US)
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const maxAQI = Math.max(...data.map(d => typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : 0))
+                                strong= maxAQI
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted AQI Trung bình (US)
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const avgAQI = (data.reduce((sum, d) => sum + (typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : 0), 0) / data.length).toFixed(0)
+                                strong= avgAQI
+                            else
+                                strong N/A
+            .col-md-3
+                .card.text-center
+                    .card-body
+                        h6.card-title.text-muted AQI Thấp nhất (US)
+                        h3.mb-0
+                            if data && data.length > 0
+                                - const minAQI = Math.min(...data.map(d => typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : Infinity))
+                                strong= minAQI === Infinity ? 'N/A' : minAQI
+                            else
+                                strong N/A
+
+        .row.mt-4
+            .col-12
+                script.
+                    // Tải và vẽ biểu đồ AQI
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const district = '#{district}';
+                        fetch(`/admin/aqi/api/chart/${district}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const ctx = document.getElementById('aqiChart').getContext('2d');
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: data,
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                position: 'top',
+                                                labels: {
+                                                    usePointStyle: true,
+                                                    padding: 15,
+                                                    font: { size: 12 }
+                                                }
+                                            },
+                                            title: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                type: 'linear',
+                                                display: true,
+                                                position: 'left',
+                                                title: {
+                                                    display: true,
+                                                    text: 'AQI US / AQI CN'
+                                                }
+                                            }
+                                        },
+                                        interaction: {
+                                            mode: 'index',
+                                            intersect: false
+                                        }
+                                    }
+                                });
+                            })
+                            .catch(error => console.error('Error loading chart data:', error));
+                    })
