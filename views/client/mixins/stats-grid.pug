@@ -1,0 +1,38 @@
+//- Stats Grid Component - Reusable metrics display
+//- Usage: +statsGrid(reading)
+mixin statsGrid(reading)
+  if reading
+    .stats-grid
+      .stat-card.stat-card--temperature
+        .stat-card__icon
+          i.bi.bi-thermometer-half
+        .stat-card__body
+          .stat-card__label Nhiệt độ
+          .stat-card__value= reading.tp + '°C'
+        .stat-card__bg
+      
+      .stat-card.stat-card--humidity
+        .stat-card__icon
+          i.bi.bi-droplet-half
+        .stat-card__body
+          .stat-card__label Độ ẩm
+          .stat-card__value= reading.hu + '%'
+        .stat-card__bg
+      
+      .stat-card.stat-card--wind
+        .stat-card__icon
+          i.bi.bi-wind
+        .stat-card__body
+          .stat-card__label Tốc độ gió
+          .stat-card__value= reading.ws + ' m/s'
+        .stat-card__bg
+      
+      .stat-card.stat-card--update
+        .stat-card__icon
+          i.bi.bi-clock-history
+        .stat-card__body
+          .stat-card__label Cập nhật
+          .stat-card__value
+            small
+              +formatDateTime(reading.ts)
+        .stat-card__bg
