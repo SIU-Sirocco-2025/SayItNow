@@ -7,7 +7,9 @@ function formatLabel(name) {
 
 async function index(req, res) {
   try {
-    res.render('admin/pages/dashboard/index', {});
+    res.render('admin/pages/dashboard/index', {
+      title: 'Dashboard Admin',
+    });
   } catch (err) {
     res.status(500).send('Dashboard render error');
   }

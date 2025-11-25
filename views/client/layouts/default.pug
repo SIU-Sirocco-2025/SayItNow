@@ -1,12 +1,88 @@
 doctype html 
-html 
+html(lang="vi")
     head 
-        title #{title}
+        title #{title != null ? title : 'Eco Track | Theo dõi chất lượng không khí TP.HCM'}
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        meta(name="description" content="Theo dõi chất lượng không khí TP. Hồ Chí Minh theo thời gian thực. Chuẩn hóa và lưu trữ từ AirVisual API. Xem chỉ số AQI hiện tại.")
+        meta(name="keywords" content="AQI, không khí, TP.HCM, air quality, Eco-Track, AirVisual, OpenAQ")
+        meta(name="author" content="Eco Track")
+        
+        //- // Canonical URL
+        link(rel="canonical" href="https://ecotrack.asia")
+        
+        //- // Open Graph / Facebook (PHẢI DÙNG URL TUYỆT ĐỐI)
+        meta(property="og:type" content="website")
+        meta(property="og:url" content="https://ecotrack.asia")
+        meta(property="og:site_name" content="Eco Track")
+        meta(property="og:title" content="Eco Track | Theo dõi chất lượng không khí TP.HCM")
+        meta(property="og:description" content="Theo dõi chất lượng không khí TP. Hồ Chí Minh theo thời gian thực. Chuẩn hóa và lưu trữ từ AirVisual API. Xem chỉ số AQI hiện tại.")
+        meta(property="og:image" content="https://ecotrack.asia/client/image/logo.png")
+        meta(property="og:image:secure_url" content="https://ecotrack.asia/client/image/logo.png")
+        meta(property="og:image:type" content="image/png")
+        meta(property="og:image:width" content="512")
+        meta(property="og:image:height" content="512")
+        meta(property="og:image:alt" content="Eco Track - Logo")
+        meta(property="og:locale" content="vi_VN")
+        
+        //- // Twitter Card (PHẢI DÙNG URL TUYỆT ĐỐI)
+        meta(name="twitter:card" content="summary_large_image")
+        meta(name="twitter:site" content="@ecotrack")
+        meta(name="twitter:creator" content="@ecotrack")
+        meta(name="twitter:url" content="https://ecotrack.asia")
+        meta(name="twitter:title" content="Eco Track | Theo dõi chất lượng không khí TP.HCM")
+        meta(name="twitter:description" content="Theo dõi chất lượng không khí TP. Hồ Chí Minh theo thời gian thực.")
+        meta(name="twitter:image" content="https://ecotrack.asia/client/image/logo.png")
+        meta(name="twitter:image:alt" content="Eco Track Logo")
+        
+        //- // Favicon và App Icons
+        link(rel="icon" type="image/png" href="/client/image/logo.png" sizes="32x32")
+        link(rel="icon" type="image/png" href="/client/image/logo.png" sizes="192x192")
+        link(rel="apple-touch-icon" href="/client/image/logo.png")
+        
+        //- // Structured Data cho Google (JSON-LD) - QUAN TRỌNG NHẤT!
+        script(type="application/ld+json").
+            {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "Eco Track",
+                "alternateName": "Eco Track Vietnam",
+                "url": "https://ecotrack.asia",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://ecotrack.asia/client/image/logo.png",
+                    "width": 512,
+                    "height": 512
+                },
+                "description": "Hệ thống theo dõi chất lượng không khí TP. Hồ Chí Minh theo thời gian thực",
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "Customer Service",
+                    "email": "thp.gia3@gmail.com"
+                },
+                "sameAs": [
+                    "https://ecotrack.asia"
+                ]
+            }
+        
+        script(type="application/ld+json").
+            {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                "name": "Eco Track",
+                "url": "https://ecotrack.asia",
+                "description": "Theo dõi chất lượng không khí TP. Hồ Chí Minh theo thời gian thực",
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://ecotrack.asia/aqi?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                }
+            }
+        
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css")
         link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
         link(rel="stylesheet", href="/client/css/style.css")
-        link(rel="icon" type="image/png" href="/client/image/logo.png" sizes="32x32")
     body 
         include ../partials/header.pug
 
@@ -14,9 +90,10 @@ html
 
         include ../partials/footer.pug
 
-        script(src="/client/js/script.js") 
-        script(src="/client/js/forecast.js") 
+        //- // Scripts
         script(src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js") 
         script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js") 
         script(src="/tinymce/tinymce.min.js")  
         script(src="/client/js/tinymce-config.js")
+        script(src="/client/js/script.js")
+        script(src="/client/js/forecast.js")

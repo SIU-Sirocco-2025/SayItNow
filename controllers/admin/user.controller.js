@@ -3,7 +3,9 @@ const md5 = require('md5');
 
 async function index(req, res) {
   try {
-    res.render('admin/pages/user/index', {});
+    res.render('admin/pages/user/index', {
+      title: 'Quản lý người dùng',
+    });
   } catch (err) {
     res.status(500).send('User page render error');
   }

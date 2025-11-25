@@ -3,7 +3,12 @@ const User = require('../../models/user.model');
 async function index(req, res) {
   try {
     const users = await User.find({}).lean().exec();
-    res.render('admin/pages/users/index', { users, prefixAdmin: req.app.locals.prefixAdmin, request: req });
+    res.render('admin/pages/users/index', {
+      title: 'Quản lý người dùng',
+      users,
+      prefixAdmin: req.app.locals.prefixAdmin,
+      request: req
+    });
   } catch (err) {
     req.flash('error', 'Lỗi khi load danh sách user');
     res.redirect(req.app.locals.prefixAdmin + '/dashboard');

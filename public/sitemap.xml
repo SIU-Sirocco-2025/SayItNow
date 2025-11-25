@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url>
+        <loc>https://ecotrack.asia/</loc>
+        <lastmod>2025-01-21</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://ecotrack.asia/client/image/logo.png</image:loc>
+            <image:caption>Eco Track Logo</image:caption>
+        </image:image>
+    </url>
+    <url>
+        <loc>https://ecotrack.asia/aqi</loc>
+        <changefreq>hourly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://ecotrack.asia/about</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+</urlset>
