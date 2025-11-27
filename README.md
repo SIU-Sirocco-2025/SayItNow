@@ -8,10 +8,10 @@
 
   [![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](LICENSE)
 
-  <a href="http://localhost:3000">
+  <a href="http://ecotrack.asia">
     <img src="https://img.shields.io/badge/🚀_Demo-Eco_Track-00C853?style=for-the-badge" alt="Demo System"/>
   </a>
-  <a href="http://localhost:3000/api/docs">
+  <a href="http://ecotrack.asia/api/docs">
     <img src="https://img.shields.io/badge/📚_Docs-Eco_Track-1976D2?style=for-the-badge" alt="Documentation"/>
   </a>
 
