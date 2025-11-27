@@ -3,6 +3,7 @@ const aqiRoute = require('./aqi.route');
 const weatherRoute = require('./weather.route');
 const usersRoute = require('./users.route');
 const userRoute = require('./user.route');
+const settingsRoute = require('./settings.route');
 const authRoute = require('./auth.route')
 const { requireAuth } = require('../../middlewares/admin.middleware');
 
@@ -18,4 +19,5 @@ module.exports = (app) => {
     app.use(PATH_ADMIN + '/weather', requireAuth, weatherRoute);
     app.use(PATH_ADMIN + '/users', requireAuth, usersRoute);
     app.use(PATH_ADMIN + '/user', requireAuth, userRoute);
+    app.use(PATH_ADMIN + '/settings', requireAuth, settingsRoute);
 };

@@ -54,33 +54,28 @@ block main
                             thead.table-light
                                 tr
                                     th.text-center #
-                                    th Thành phố
                                     th.text-center Nhiệt độ
                                     th.text-center Độ ẩm
                                     th.text-center Áp suất
                                     th.text-center Tốc độ gió
                                     th.text-center Hướng gió
-                                    th.text-center Chỉ số nhiệt
                                     th Thời gian
                             tbody
                                 each item, index in data
                                     tr
                                         td.text-center
                                             strong= index + 1
-                                        td= item.city || 'N/A'
                                         td.text-center
                                             span.badge.bg-info
-                                                = typeof item.current?.weather?.tp === 'number' ? item.current.weather.tp + '°C' : 'N/A'
+                                                = item.current && item.current.weather && typeof item.current.weather.tp === 'number' ? item.current.weather.tp + '°C' : 'N/A'
                                         td.text-center
-                                            = typeof item.current?.weather?.hu === 'number' ? item.current.weather.hu + '%' : 'N/A'
+                                            = item.current && item.current.weather && typeof item.current.weather.hu === 'number' ? item.current.weather.hu + '%' : 'N/A'
                                         td.text-center
-                                            = typeof item.current?.weather?.pr === 'number' ? item.current.weather.pr + ' mb' : 'N/A'
+                                            = item.current && item.current.weather && typeof item.current.weather.pr === 'number' ? item.current.weather.pr + ' mb' : 'N/A'
                                         td.text-center
-                                            = typeof item.current?.weather?.ws === 'number' ? item.current.weather.ws + ' m/s' : 'N/A'
+                                            = item.current && item.current.weather && typeof item.current.weather.ws === 'number' ? item.current.weather.ws + ' m/s' : 'N/A'
                                         td.text-center
-                                            = typeof item.current?.weather?.wd === 'number' ? item.current.weather.wd + '°' : 'N/A'
-                                        td.text-center
-                                            = typeof item.current?.weather?.heatIndex === 'number' ? item.current.weather.heatIndex + '°C' : 'N/A'
+                                            = item.current && item.current.weather && typeof item.current.weather.wd === 'number' ? item.current.weather.wd + '°' : 'N/A'
                                         td.small= item.formattedTime
                 else
                     .alert.alert-warning
