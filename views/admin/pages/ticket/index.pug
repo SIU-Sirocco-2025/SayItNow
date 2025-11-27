@@ -1,0 +1,234 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        .row.mb-4
+            .col-md-8
+                h1.mb-0
+                    i.bi.bi-chat-dots.me-2
+                    | Quản lý phản hồi
+            .col-md-4.text-end
+                button.btn.btn-primary#btnStats(type="button")
+                    i.bi.bi-bar-chart.me-1
+                    | Thống kê
+
+        // Bộ lọc
+        .card.mb-4
+            .card-body
+                form(method="GET" action="/admin/tickets")
+                    .row.g-3
+                        .col-md-3
+                            label.form-label Trạng thái:
+                            select.form-select(name="status")
+                                option(value="" selected=currentStatus === 'all') Tất cả
+                                option(value="pending" selected=currentStatus === 'pending') Chờ xử lý
+                                option(value="in-progress" selected=currentStatus === 'in-progress') Đang xử lý
+                                option(value="resolved" selected=currentStatus === 'resolved') Đã giải quyết
+                                option(value="closed" selected=currentStatus === 'closed') Đã đóng
+                        
+                        .col-md-3
+                            label.form-label Danh mục:
+                            select.form-select(name="category")
+                                option(value="" selected=currentCategory === 'all') Tất cả
+                                option(value="bug" selected=currentCategory === 'bug') Bug
+                                option(value="feature" selected=currentCategory === 'feature') Feature
+                                option(value="question" selected=currentCategory === 'question') Question
+                                option(value="other" selected=currentCategory === 'other') Other
+                        
+                        .col-md-3
+                            label.form-label Độ ưu tiên:
+                            select.form-select(name="priority")
+                                option(value="" selected=currentPriority === 'all') Tất cả
+                                option(value="low" selected=currentPriority === 'low') Thấp
+                                option(value="medium" selected=currentPriority === 'medium') Trung bình
+                                option(value="high" selected=currentPriority === 'high') Cao
+                                option(value="urgent" selected=currentPriority === 'urgent') Khẩn cấp
+                        
+                        .col-md-3.d-flex.align-items-end
+                            button.btn.btn-success.w-100(type="submit")
+                                i.bi.bi-funnel.me-1
+                                | Lọc
+
+        if !tickets || tickets.length === 0
+            .alert.alert-info
+                i.bi.bi-info-circle.me-2
+                | Không tìm thấy phản hồi nào
+        else
+            .card
+                .card-body
+                    .table-responsive
+                        table.table.table-hover
+                            thead.table-light
+                                tr
+                                    th #
+                                    th Người gửi
+                                    th Email
+                                    th Chủ đề
+                                    th Danh mục
+                                    th Trạng thái
+                                    th Độ ưu tiên
+                                    th Ngày gửi
+                                    th Hành động
+                            tbody
+                                each ticket, index in tickets
+                                    tr
+                                        td= index + 1
+                                        td= ticket.fullName
+                                        td= ticket.email
+                                        td= ticket.subject
+                                        td
+                                            case ticket.category
+                                                when 'bug'
+                                                    span.badge.bg-danger Bug
+                                                when 'feature'
+                                                    span.badge.bg-info Feature
+                                                when 'question'
+                                                    span.badge.bg-primary Question
+                                                default
+                                                    span.badge.bg-secondary Other
+                                        td
+                                            case ticket.status
+                                                when 'pending'
+                                                    span.badge.bg-warning Chờ xử lý
+                                                when 'in-progress'
+                                                    span.badge.bg-info Đang xử lý
+                                                when 'resolved'
+                                                    span.badge.bg-success Đã giải quyết
+                                                when 'closed'
+                                                    span.badge.bg-secondary Đã đóng
+                                        td
+                                            case ticket.priority
+                                                when 'low'
+                                                    span.badge.bg-secondary Thấp
+                                                when 'medium'
+                                                    span.badge.bg-primary Trung bình
+                                                when 'high'
+                                                    span.badge.bg-warning Cao
+                                                when 'urgent'
+                                                    span.badge.bg-danger Khẩn cấp
+                                        td.small= new Date(ticket.createdAt).toLocaleString('vi-VN')
+                                        td
+                                            a.btn.btn-sm.btn-info.me-1(href=`/admin/tickets/${ticket._id}`)
+                                                i.bi.bi-eye
+                                            form.d-inline(method='POST' action=`/admin/tickets/${ticket._id}?_method=DELETE`)
+                                                button.btn.btn-sm.btn-danger(type='submit' onclick="return confirm('Xác nhận xóa?')")
+                                                    i.bi.bi-trash
+
+    // Modal thống kê
+    .modal.fade#statsModal(tabindex="-1" aria-hidden="true")
+        .modal-dialog.modal-lg
+            .modal-content
+                .modal-header
+                    h5.modal-title
+                        i.bi.bi-graph-up.me-2
+                        | Thống kê phản hồi
+                    button.btn-close(type="button" data-bs-dismiss="modal")
+                .modal-body
+                    .row.g-3#statsContent
+                        .col-12.text-center
+                            .spinner-border(role="status")
+                                span.visually-hidden Đang tải...
+                .modal-footer
+                    button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Đóng
+
+    script.
+        // Thống kê
+        document.getElementById('btnStats')?.addEventListener('click', async () => {
+            const modal = new bootstrap.Modal(document.getElementById('statsModal'));
+            modal.show();
+            
+            try {
+                const res = await fetch('/admin/tickets/api/stats');
+                const data = await res.json();
+                
+                if (data.success) {
+                    const { stats } = data;
+                    document.getElementById('statsContent').innerHTML = `
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h3 class="text-primary">${stats.total}</h3>
+                                    <p class="mb-0">Tổng phản hồi</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h3 class="text-warning">${stats.byStatus.pending}</h3>
+                                    <p class="mb-0">Chờ xử lý</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <h3 class="text-info">${stats.byStatus.inProgress}</h3>
+                                    <p class="mb-0">Đang xử lý</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h3 class="text-success">${stats.byStatus.resolved}</h3>
+                                    <p class="mb-0">Đã giải quyết</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <h6 class="mt-3">Theo danh mục:</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Bug</span>
+                                    <span class="badge bg-danger">${stats.byCategory.bug || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Feature</span>
+                                    <span class="badge bg-info">${stats.byCategory.feature || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Question</span>
+                                    <span class="badge bg-primary">${stats.byCategory.question || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Other</span>
+                                    <span class="badge bg-secondary">${stats.byCategory.other || 0}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-12">
+                            <h6 class="mt-3">Theo độ ưu tiên:</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Khẩn cấp</span>
+                                    <span class="badge bg-danger">${stats.byPriority.urgent || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Cao</span>
+                                    <span class="badge bg-warning">${stats.byPriority.high || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Trung bình</span>
+                                    <span class="badge bg-primary">${stats.byPriority.medium || 0}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Thấp</span>
+                                    <span class="badge bg-secondary">${stats.byPriority.low || 0}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                document.getElementById('statsContent').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">Không thể tải thống kê</div>
+                    </div>
+                `;
+            }
+        });

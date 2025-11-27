@@ -1,0 +1,208 @@
+#feedbackButton.feedback-floating-btn(title="Gửi phản hồi")
+  i.bi.bi-chat-dots
+
+#feedbackModal.feedback-modal
+  .feedback-modal-content
+    .feedback-modal-header
+      h5.mb-0
+        i.bi.bi-envelope.me-2
+        | Gửi phản hồi
+      button.feedback-close(onclick="closeFeedbackModal()")
+        i.bi.bi-x-lg
+    
+    .feedback-modal-body
+      form#feedbackForm
+        .mb-3
+          label.form-label.fw-medium(for="feedbackName") Họ tên
+          input#feedbackName.form-control(
+            type="text"
+            name="fullName"
+            required
+            placeholder="Nhập họ tên của bạn"
+            value=currentUser ? currentUser.fullName : ''
+          )
+        
+        .mb-3
+          label.form-label.fw-medium(for="feedbackEmail") Email
+          input#feedbackEmail.form-control(
+            type="email"
+            name="email"
+            required
+            placeholder="email@example.com"
+            value=currentUser ? currentUser.email : ''
+          )
+        
+        .mb-3
+          label.form-label.fw-medium(for="feedbackCategory") Danh mục
+          select#feedbackCategory.form-select(name="category" required)
+            option(value="") -- Chọn danh mục --
+            option(value="bug") Báo lỗi
+            option(value="feature") Đề xuất tính năng
+            option(value="question") Câu hỏi
+            option(value="other") Khác
+        
+        .mb-3
+          label.form-label.fw-medium(for="feedbackSubject") Chủ đề
+          input#feedbackSubject.form-control(
+            type="text"
+            name="subject"
+            required
+            maxlength="200"
+            placeholder="Tóm tắt vấn đề của bạn"
+          )
+        
+        .mb-3
+          label.form-label.fw-medium(for="feedbackMessage") Nội dung
+          textarea#feedbackMessage.form-control(
+            name="message"
+            rows="5"
+            required
+            maxlength="2000"
+            placeholder="Mô tả chi tiết vấn đề hoặc đề xuất của bạn..."
+          )
+          .form-text.small
+            span#charCount 0
+            | /2000 ký tự
+        
+        .d-grid.gap-2
+          button.btn.btn-success(type="submit")
+            i.bi.bi-send.me-2
+            | Gửi phản hồi
+          button.btn.btn-outline-secondary(type="button" onclick="closeFeedbackModal()")
+            | Hủy
+
+style.
+  .feedback-floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    z-index: 999;
+    transition: all 0.3s ease;
+  }
+  
+  .feedback-floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+  }
+  
+  .feedback-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .feedback-modal.active {
+    display: flex;
+  }
+  
+  .feedback-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .feedback-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .feedback-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: #64748b;
+    transition: color 0.2s;
+  }
+  
+  .feedback-close:hover {
+    color: #ef4444;
+  }
+  
+  .feedback-modal-body {
+    padding: 1.5rem;
+  }
+
+script.
+  // Open modal
+  document.getElementById('feedbackButton').addEventListener('click', function() {
+    document.getElementById('feedbackModal').classList.add('active');
+  });
+  
+  // Close modal
+  function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.remove('active');
+    document.getElementById('feedbackForm').reset();
+    document.getElementById('charCount').textContent = '0';
+  }
+  
+  // Character counter
+  document.getElementById('feedbackMessage').addEventListener('input', function() {
+    document.getElementById('charCount').textContent = this.value.length;
+  });
+  
+  // Submit form
+  document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
+    
+    try {
+      const response = await fetch('/ticket/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('✅ ' + result.message);
+        closeFeedbackModal();
+      } else {
+        alert('❌ ' + result.message);
+      }
+    } catch (error) {
+      alert('❌ Có lỗi xảy ra, vui lòng thử lại!');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Gửi phản hồi';
+    }
+  });
+  
+  // Close on outside click
+  document.getElementById('feedbackModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeFeedbackModal();
+    }
+  });

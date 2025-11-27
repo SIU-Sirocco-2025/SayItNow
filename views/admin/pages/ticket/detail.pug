@@ -1,0 +1,175 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+
+block main
+    +showAlertSuccess(5000)
+    +showAlertError(5000)
+
+    .container-fluid.py-4
+        // Breadcrumb
+        nav(aria-label="breadcrumb").mb-4
+            ol.breadcrumb
+                li.breadcrumb-item
+                    a(href="/admin/dashboard") Dashboard
+                li.breadcrumb-item
+                    a(href="/admin/tickets") Phản hồi
+                li.breadcrumb-item.active Chi tiết
+
+        .row.mb-4
+            .col-md-8
+                h1.mb-0
+                    i.bi.bi-chat-square-text.me-2
+                    | Chi tiết phản hồi
+            .col-md-4.text-end
+                a.btn.btn-outline-primary(href="/admin/tickets")
+                    i.bi.bi-arrow-left.me-1
+                    | Quay lại
+
+        .row
+            // Thông tin chi tiết
+            .col-md-8
+                .card.mb-4
+                    .card-header.bg-primary.text-white
+                        h5.mb-0
+                            i.bi.bi-info-circle.me-2
+                            | Thông tin phản hồi
+                    .card-body
+                        .row.mb-3
+                            .col-md-6
+                                strong Người gửi:
+                                p= ticket.fullName
+                            .col-md-6
+                                strong Email:
+                                p
+                                    a(href=`mailto:${ticket.email}`)= ticket.email
+                        
+                        .row.mb-3
+                            .col-md-6
+                                strong Chủ đề:
+                                p= ticket.subject
+                            .col-md-6
+                                strong Danh mục:
+                                p
+                                    case ticket.category
+                                        when 'bug'
+                                            span.badge.bg-danger Bug
+                                        when 'feature'
+                                            span.badge.bg-info Feature
+                                        when 'question'
+                                            span.badge.bg-primary Question
+                                        default
+                                            span.badge.bg-secondary Other
+                        
+                        .mb-3
+                            strong Nội dung:
+                            .border.rounded.p-3.mt-2.bg-light
+                                p.mb-0(style="white-space: pre-wrap;")= ticket.message
+                        
+                        .row
+                            .col-md-6
+                                strong Ngày gửi:
+                                p
+                                    +formatDateTime(ticket.createdAt)
+                            .col-md-6
+                                strong Cập nhật lần cuối:
+                                p
+                                    +formatDateTime(ticket.updatedAt)
+
+                // Ghi chú admin
+                .card
+                    .card-header.bg-warning
+                        h5.mb-0
+                            i.bi.bi-pencil-square.me-2
+                            | Ghi chú của Admin
+                    .card-body
+                        form(method="POST" action=`/admin/tickets/${ticket._id}/note?_method=PATCH`)
+                            .mb-3
+                                textarea.form-control(
+                                    name="adminNote"
+                                    rows="4"
+                                    placeholder="Nhập ghi chú nội bộ..."
+                                )= ticket.adminNote || ''
+                            button.btn.btn-warning(type="submit")
+                                i.bi.bi-save.me-1
+                                | Lưu ghi chú
+
+            // Quản lý trạng thái
+            .col-md-4
+                // Trạng thái
+                .card.mb-3
+                    .card-header.bg-info.text-white
+                        h6.mb-0
+                            i.bi.bi-flag.me-2
+                            | Trạng thái
+                    .card-body
+                        form(method="POST" action=`/admin/tickets/${ticket._id}/status?_method=PATCH`)
+                            .mb-3
+                                label.form-label Trạng thái hiện tại:
+                                p
+                                    case ticket.status
+                                        when 'pending'
+                                            span.badge.bg-warning Chờ xử lý
+                                        when 'in-progress'
+                                            span.badge.bg-info Đang xử lý
+                                        when 'resolved'
+                                            span.badge.bg-success Đã giải quyết
+                                        when 'closed'
+                                            span.badge.bg-secondary Đã đóng
+                            
+                            .mb-3
+                                label.form-label Cập nhật trạng thái:
+                                select.form-select(name="status" required)
+                                    option(value="pending" selected=ticket.status === 'pending') Chờ xử lý
+                                    option(value="in-progress" selected=ticket.status === 'in-progress') Đang xử lý
+                                    option(value="resolved" selected=ticket.status === 'resolved') Đã giải quyết
+                                    option(value="closed" selected=ticket.status === 'closed') Đã đóng
+                            
+                            button.btn.btn-info.w-100(type="submit")
+                                i.bi.bi-check-circle.me-1
+                                | Cập nhật
+
+                // Độ ưu tiên
+                .card.mb-3
+                    .card-header.bg-danger.text-white
+                        h6.mb-0
+                            i.bi.bi-exclamation-triangle.me-2
+                            | Độ ưu tiên
+                    .card-body
+                        form(method="POST" action=`/admin/tickets/${ticket._id}/priority?_method=PATCH`)
+                            .mb-3
+                                label.form-label Độ ưu tiên hiện tại:
+                                p
+                                    case ticket.priority
+                                        when 'low'
+                                            span.badge.bg-secondary Thấp
+                                        when 'medium'
+                                            span.badge.bg-primary Trung bình
+                                        when 'high'
+                                            span.badge.bg-warning Cao
+                                        when 'urgent'
+                                            span.badge.bg-danger Khẩn cấp
+                            
+                            .mb-3
+                                label.form-label Cập nhật độ ưu tiên:
+                                select.form-select(name="priority" required)
+                                    option(value="low" selected=ticket.priority === 'low') Thấp
+                                    option(value="medium" selected=ticket.priority === 'medium') Trung bình
+                                    option(value="high" selected=ticket.priority === 'high') Cao
+                                    option(value="urgent" selected=ticket.priority === 'urgent') Khẩn cấp
+                            
+                            button.btn.btn-danger.w-100(type="submit")
+                                i.bi.bi-arrow-up-circle.me-1
+                                | Cập nhật
+
+                // Hành động
+                .card
+                    .card-header.bg-dark.text-white
+                        h6.mb-0
+                            i.bi.bi-gear.me-2
+                            | Hành động
+                    .card-body
+                        form(method="POST" action=`/admin/tickets/${ticket._id}?_method=DELETE` onsubmit="return confirm('Xác nhận xóa phản hồi này?')")
+                            button.btn.btn-danger.w-100(type="submit")
+                                i.bi.bi-trash.me-1
+                                | Xóa phản hồi
