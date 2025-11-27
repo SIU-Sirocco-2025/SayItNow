@@ -8,7 +8,7 @@ router.get('/', controller.index);
 // APIs
 router.get('/api/list', controller.getList);
 router.post('/api/create', controller.create);
-router.patch('/api/update/:id', controller.update);
+router.patch('/api/reset-password/:id', controller.resetPassword);
 router.delete('/api/delete/:id', controller.remove);
 
 module.exports = router;

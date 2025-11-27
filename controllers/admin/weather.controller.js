@@ -76,13 +76,13 @@ module.exports.index = async (req, res) => {
           districtId: key,
           districtName: DISTRICT_LABELS[key],
           city: latestReading.city,
-          temperature: latestReading.current?.weather?.tp || 'N/A',
-          humidity: latestReading.current?.weather?.hu || 'N/A',
-          pressure: latestReading.current?.weather?.pr || 'N/A',
-          windSpeed: latestReading.current?.weather?.ws || 'N/A',
-          windDirection: latestReading.current?.weather?.wd || 'N/A',
+          temperature: latestReading.current?.weather?.tp ? parseFloat(latestReading.current.weather.tp.toFixed(1)) : 'N/A',
+          humidity: latestReading.current?.weather?.hu ? parseFloat(latestReading.current.weather.hu.toFixed(1)) : 'N/A',
+          pressure: latestReading.current?.weather?.pr ? parseFloat(latestReading.current.weather.pr.toFixed(1)) : 'N/A',
+          windSpeed: latestReading.current?.weather?.ws ? parseFloat(latestReading.current.weather.ws.toFixed(2)) : 'N/A',
+          windDirection: latestReading.current?.weather?.wd ? Math.round(latestReading.current.weather.wd) : 'N/A',
           iconCode: latestReading.current?.weather?.ic || 'N/A',
-          heatIndex: latestReading.current?.weather?.heatIndex || 'N/A',
+          heatIndex: latestReading.current?.weather?.heatIndex ? parseFloat(latestReading.current.weather.heatIndex.toFixed(1)) : 'N/A',
           timestamp: latestReading.current?.weather?.ts || new Date(),
           formattedTime: latestReading.current?.weather?.ts 
             ? new Date(latestReading.current.weather.ts).toLocaleString('vi-VN')
@@ -135,7 +135,18 @@ module.exports.detail = async (req, res) => {
       .lean();
 
     const formattedReadings = readings.map(r => ({
-      ...r,
+      city: r.city,
+      current: {
+        weather: {
+          ts: r.current?.weather?.ts,
+          tp: r.current?.weather?.tp ? parseFloat(r.current.weather.tp.toFixed(1)) : null,
+          hu: r.current?.weather?.hu ? parseFloat(r.current.weather.hu.toFixed(1)) : null,
+          pr: r.current?.weather?.pr ? parseFloat(r.current.weather.pr.toFixed(1)) : null,
+          ws: r.current?.weather?.ws ? parseFloat(r.current.weather.ws.toFixed(2)) : null,
+          wd: r.current?.weather?.wd ? Math.round(r.current.weather.wd) : null,
+          heatIndex: r.current?.weather?.heatIndex ? parseFloat(r.current.weather.heatIndex.toFixed(1)) : null
+        }
+      },
       formattedTime: r.current?.weather?.ts 
         ? new Date(r.current.weather.ts).toLocaleString('vi-VN')
         : 'N/A'

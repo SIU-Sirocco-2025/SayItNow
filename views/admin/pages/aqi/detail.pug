@@ -54,20 +54,16 @@ block main
                             thead.table-light
                                 tr
                                     th.text-center #
-                                    th Thành phố
                                     th.text-center AQI US
                                     th Main US
-                                    th.text-center AQI CN
-                                    th Main CN
                                     th Thời gian
                             tbody
                                 each item, index in data
                                     tr
                                         td.text-center
                                             strong= index + 1
-                                        td= item.city || 'N/A'
                                         td.text-center
-                                            - let aqi_us = item.current?.pollution?.aqius;
+                                            - let aqi_us = item.current && item.current.pollution ? item.current.pollution.aqius : null;
                                             - let usClass = 'bg-secondary';
                                             - if (typeof aqi_us === 'number') {
                                             -   if (aqi_us <= 50) usClass = 'bg-success';
@@ -78,20 +74,7 @@ block main
                                             - }
                                             span.badge(class=usClass)
                                                 = typeof aqi_us === 'number' ? aqi_us : 'N/A'
-                                        td= item.current?.pollution?.mainus || 'N/A'
-                                        td.text-center
-                                            - let aqi_cn = item.current?.pollution?.aqicn;
-                                            - let cnClass = 'bg-secondary';
-                                            - if (typeof aqi_cn === 'number') {
-                                            -   if (aqi_cn <= 50) cnClass = 'bg-success';
-                                            -   else if (aqi_cn <= 100) cnClass = 'bg-info';
-                                            -   else if (aqi_cn <= 150) cnClass = 'bg-warning';
-                                            -   else if (aqi_cn <= 200) cnClass = 'bg-danger';
-                                            -   else cnClass = 'bg-dark';
-                                            - }
-                                            span.badge(class=cnClass)
-                                                = typeof aqi_cn === 'number' ? aqi_cn : 'N/A'
-                                        td= item.current?.pollution?.maincn || 'N/A'
+                                        td= item.current && item.current.pollution ? item.current.pollution.mainus : 'N/A'
                                         td.small= item.formattedTime
                 else
                     .alert.alert-warning
@@ -115,7 +98,7 @@ block main
                         h6.card-title.text-muted AQI Cao nhất (US)
                         h3.mb-0
                             if data && data.length > 0
-                                - const maxAQI = Math.max(...data.map(d => typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : 0))
+                                - const maxAQI = Math.max(...data.map(d => d.current && d.current.pollution && typeof d.current.pollution.aqius === 'number' ? d.current.pollution.aqius : 0))
                                 strong= maxAQI
                             else
                                 strong N/A
@@ -125,7 +108,7 @@ block main
                         h6.card-title.text-muted AQI Trung bình (US)
                         h3.mb-0
                             if data && data.length > 0
-                                - const avgAQI = (data.reduce((sum, d) => sum + (typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : 0), 0) / data.length).toFixed(0)
+                                - const avgAQI = (data.reduce((sum, d) => sum + (d.current && d.current.pollution && typeof d.current.pollution.aqius === 'number' ? d.current.pollution.aqius : 0), 0) / data.length).toFixed(0)
                                 strong= avgAQI
                             else
                                 strong N/A
@@ -135,7 +118,7 @@ block main
                         h6.card-title.text-muted AQI Thấp nhất (US)
                         h3.mb-0
                             if data && data.length > 0
-                                - const minAQI = Math.min(...data.map(d => typeof d.current?.pollution?.aqius === 'number' ? d.current.pollution.aqius : Infinity))
+                                - const minAQI = Math.min(...data.map(d => d.current && d.current.pollution && typeof d.current.pollution.aqius === 'number' ? d.current.pollution.aqius : Infinity))
                                 strong= minAQI === Infinity ? 'N/A' : minAQI
                             else
                                 strong N/A

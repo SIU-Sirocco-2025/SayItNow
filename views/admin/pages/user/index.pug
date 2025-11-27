@@ -3,7 +3,6 @@ extends ../../layouts/default.pug
 block main
     .user-header
         h2 Quản lý User
-        button.btn-add(onclick="openAddModal()") + Thêm User Mới
 
     .user-container
         table.user-table
@@ -16,27 +15,7 @@ block main
                     th Hành động
             tbody#userTable
                 tr
-                    td(colspan="6", style="text-align: center; padding: 2rem; color: #94a3b8;") Đang tải...
-
-    // Add/Edit Modal
-    .modal#userModal
-        .modal-content
-            .modal-header
-                h3#modalTitle Thêm User Mới
-                button.modal-close(onclick="closeUserModal()") ✕
-            .modal-body
-                .form-group
-                    label FullName
-                    input#inputFullName(type="text", placeholder="Nhập full name")
-                .form-group
-                    label Email
-                    input#inputEmail(type="email", placeholder="Nhập email")
-                .form-group
-                    label Password
-                    input#inputPassword(type="password", placeholder="Nhập mật khẩu (để trống nếu không đổi)")
-            .modal-footer
-                button.btn-cancel(onclick="closeUserModal()") Hủy
-                button.btn-submit(onclick="saveUser()") Lưu
+                    td(colspan="5", style="text-align: center; padding: 2rem; color: #94a3b8;") Đang tải...
 
     style.
         .user-header {
@@ -168,12 +147,12 @@ block main
         }
 
         .btn-edit {
-            background: #3b82f6;
+            background: #f59e0b;
             color: white;
         }
 
         .btn-edit:hover {
-            background: #1d4ed8;
+            background: #d97706;
         }
 
         .btn-delete {
@@ -185,128 +164,7 @@ block main
             background: #dc2626;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: #fff;
-            border-radius: 1rem;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--slate-200);
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--slate-900);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--slate-400);
-            transition: color 0.25s;
-        }
-
-        .modal-close:hover {
-            color: var(--slate-900);
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--slate-900);
-            font-size: 0.95rem;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--slate-200);
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-            transition: all 0.25s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--green-500);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            padding: 1.5rem;
-            border-top: 1px solid var(--slate-200);
-        }
-
-        .btn-cancel, .btn-submit {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-        }
-
-        .btn-cancel {
-            background: var(--slate-200);
-            color: var(--slate-900);
-        }
-
-        .btn-cancel:hover {
-            background: var(--slate-300);
-        }
-
-        .btn-submit {
-            background: var(--green-500);
-            color: white;
-        }
-
-        .btn-submit:hover {
-            background: var(--green-600);
-        }
-
     script.
-        let editingUserId = null;
-
         function loadUsers() {
             fetch('/admin/user/api/list')
                 .then(r => r.json())
@@ -324,7 +182,7 @@ block main
                             <td>${createdAt}</td>
                             <td>
                                 <div class="action-btns">
-                                    <button class="btn-edit" onclick="editUser('${user._id}', '${user.fullName}', '${user.email}')">Sửa</button>
+                                    <button class="btn-edit" onclick="resetUserPassword('${user._id}', '${user.fullName}')">Reset PW</button>
                                     <button class="btn-delete" onclick="deleteUser('${user._id}')">Xóa</button>
                                 </div>
                             </td>
@@ -334,74 +192,16 @@ block main
                 });
         }
 
-        function openAddModal() {
-            editingUserId = null;
-            document.getElementById('modalTitle').textContent = 'Thêm User Mới';
-            document.getElementById('inputFullName').value = '';
-            document.getElementById('inputEmail').value = '';
-            document.getElementById('inputPassword').value = '';
-            document.getElementById('userModal').classList.add('active');
-        }
-
-        function editUser(id, fullName, email) {
-            editingUserId = id;
-            document.getElementById('modalTitle').textContent = 'Chỉnh sửa User';
-            document.getElementById('inputFullName').value = fullName;
-            document.getElementById('inputEmail').value = email;
-            document.getElementById('inputPassword').value = '';
-            document.getElementById('userModal').classList.add('active');
-        }
-
-        function closeUserModal() {
-            document.getElementById('userModal').classList.remove('active');
-        }
-
-        function saveUser() {
-            const fullName = document.getElementById('inputFullName').value.trim();
-            const email = document.getElementById('inputEmail').value.trim();
-            const password = document.getElementById('inputPassword').value;
-
-            if (!fullName || !email) {
-                alert('Vui lòng nhập họ tên và email');
-                return;
-            }
-
-            if (editingUserId) {
-                // Update
-                const payload = { fullName, email };
-                if (password) payload.password = password;
-                
-                fetch(`/admin/user/api/update/${editingUserId}`, {
+        function resetUserPassword(id, fullName) {
+            if (confirm(`Bạn chắc chắn muốn reset password cho user ${fullName}?\nMật khẩu mới sẽ là: 123456`)) {
+                fetch(`/admin/user/api/reset-password/${id}`, {
                     method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' }
                 })
                 .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Cập nhật thành công');
-                        closeUserModal();
-                        loadUsers();
-                    } else {
-                        alert('Lỗi: ' + data.message);
-                    }
-                });
-            } else {
-                // Create
-                if (!password) {
-                    alert('Vui lòng nhập mật khẩu');
-                    return;
-                }
-                fetch('/admin/user/api/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fullName, email, password })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Tạo user thành công');
-                        closeUserModal();
+                        alert('Reset password thành công!\nMật khẩu mới: 123456');
                         loadUsers();
                     } else {
                         alert('Lỗi: ' + data.message);

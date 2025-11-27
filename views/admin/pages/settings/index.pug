@@ -1,0 +1,221 @@
+extends ../../layouts/default.pug
+
+block main
+    .settings-container
+        .settings-card
+            .settings-header
+                i.bi.bi-gear
+                h2 Cài đặt Hệ thống
+            
+            .settings-body
+                .settings-section
+                    h3 Đổi Mật khẩu
+                    
+                    if messages.error
+                        .alert.alert-danger(role="alert")
+                            i.bi.bi-exclamation-circle
+                            span!= messages.error
+
+                    if messages.success
+                        .alert.alert-success(role="alert")
+                            i.bi.bi-check-circle
+                            span!= messages.success
+
+                    form(method="POST", action=`${prefixAdmin}/settings/change-password`)
+                        .form-group
+                            label(for="oldPassword") Mật khẩu cũ
+                            input.form-control(type="password", id="oldPassword", name="oldPassword", required, placeholder="Nhập mật khẩu hiện tại")
+
+                        .form-group
+                            label(for="newPassword") Mật khẩu mới
+                            input.form-control(type="password", id="newPassword", name="newPassword", required, placeholder="Nhập mật khẩu mới", minlength="6")
+                            small.form-text.text-muted Mật khẩu phải có ít nhất 6 ký tự
+
+                        .form-group
+                            label(for="confirmPassword") Xác nhận mật khẩu mới
+                            input.form-control(type="password", id="confirmPassword", name="confirmPassword", required, placeholder="Xác nhận mật khẩu mới", minlength="6")
+
+                        button.btn.btn-primary(type="submit")
+                            i.bi.bi-check
+                            | Đổi Mật khẩu
+
+                .settings-info
+                    h4 Thông tin tài khoản
+                    .info-item
+                        span.label Tên đầy đủ:
+                        span.value= adminUser.fullName
+                    .info-item
+                        span.label Email:
+                        span.value= adminUser.email
+
+    style.
+        .settings-container {
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .settings-card {
+            background: #fff;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .settings-header i {
+            font-size: 1.5rem;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .settings-body {
+            padding: 2rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .settings-section h3 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .alert-danger i {
+            font-size: 1.1rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .alert-success i {
+            font-size: 1.1rem;
+        }
+
+        .settings-info {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .settings-info h4 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item .label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .info-item .value {
+            color: #1f2937;
+            font-weight: 500;
+        }

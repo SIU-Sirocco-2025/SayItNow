@@ -21,7 +21,11 @@ async function getAQIChartData(req, res) {
     const aqi = [];
 
     const keys = Object.keys(models);
+    const excludedModels = ['HCMCAirIndex', 'HCMCAirHour'];
+    
     for (const key of keys) {
+      if (excludedModels.includes(key)) continue;
+      
       const Model = models[key];
       const doc = await Model.findOne({}, { 'current.pollution.aqius': 1, 'current.pollution.ts': 1 }).sort({ 'current.pollution.ts': -1 }).lean().exec();
       districts.push(formatLabel(key));
@@ -41,7 +45,11 @@ async function getTempChartData(req, res) {
     const humidities = [];
 
     const keys = Object.keys(models);
+    const excludedModels = ['HCMCAirIndex', 'HCMCAirHour'];
+    
     for (const key of keys) {
+      if (excludedModels.includes(key)) continue;
+      
       const Model = models[key];
       const doc = await Model.findOne({}, { 'current.weather.tp': 1, 'current.weather.hu': 1, 'current.weather.ts': 1 }).sort({ 'current.weather.ts': -1 }).lean().exec();
       districts.push(formatLabel(key));
@@ -61,7 +69,11 @@ async function getAlertData(req, res) {
     const alerts = [];
 
     const keys = Object.keys(models);
+    const excludedModels = ['HCMCAirIndex', 'HCMCAirHour'];
+    
     for (const key of keys) {
+      if (excludedModels.includes(key)) continue;
+      
       const Model = models[key];
       const doc = await Model.findOne({}, { 'current.pollution.aqius': 1 }).sort({ 'current.pollution.ts': -1 }).lean().exec();
       const aqius = doc && doc.current && doc.current.pollution ? (doc.current.pollution.aqius || null) : null;
@@ -86,8 +98,11 @@ async function getRankingData(req, res) {
   try {
     const allDistricts = [];
     const keys = Object.keys(models);
+    const excludedModels = ['HCMCAirIndex', 'HCMCAirHour'];
 
     for (const key of keys) {
+      if (excludedModels.includes(key)) continue;
+      
       const Model = models[key];
       const doc = await Model.findOne({}, { 'current.pollution.aqius': 1 }).sort({ 'current.pollution.ts': -1 }).lean().exec();
       const aqius = doc && doc.current && doc.current.pollution ? (doc.current.pollution.aqius || null) : null;
@@ -123,10 +138,57 @@ async function getRankingData(req, res) {
   }
 }
 
+async function get72HAQIData(req, res) {
+  try {
+    const districtKey = req.query.district || 'District1Reading';
+    const Model = models[districtKey];
+    
+    if (!Model) {
+      return res.json({ success: false, message: 'District not found' });
+    }
+
+    // Lấy 72 bản ghi gần nhất, sắp xếp theo thời gian
+    const records = await Model.find({}, { 'current.pollution.aqius': 1, 'current.pollution.ts': 1 })
+      .sort({ 'current.pollution.ts': -1 })
+      .limit(72)
+      .lean()
+      .exec();
+
+    // Đảo ngược để có thứ tự thời gian tăng dần
+    records.reverse();
+
+    const timestamps = records.map(r => {
+      const date = new Date(r.current.pollution.ts);
+      return date.toLocaleString('vi-VN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    });
+
+    const aqiValues = records.map(r => r.current.pollution.aqius || null);
+
+    // Lấy danh sách tất cả quận (bỏ HCMCAirIndex, HCMCAirHour, HCMCReading)
+    const keys = Object.keys(models);
+    const excludedModels = ['HCMCAirIndex', 'HCMCAirHour', 'HCMCReading'];
+    const districts = keys.filter(k => !excludedModels.includes(k)).map(k => ({
+      key: k,
+      label: formatLabel(k)
+    }));
+
+    res.json({ 
+      success: true, 
+      district: formatLabel(districtKey),
+      timestamps, 
+      aqiValues,
+      districts
+    });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+}
+
 module.exports = {
   index,
   getAQIChartData,
   getTempChartData,
   getAlertData,
-  getRankingData
+  getRankingData,
+  get72HAQIData
 };

@@ -47,14 +47,14 @@ async function create(req, res) {
   }
 }
 
-async function update(req, res) {
+async function resetPassword(req, res) {
   try {
     const { id } = req.params;
-    const { username, email, role } = req.body;
+    const defaultPassword = '123456';
     
     const user = await User.findByIdAndUpdate(
       id,
-      { username, email, role },
+      { password: md5(defaultPassword) },
       { new: true }
     ).lean().exec();
 
@@ -62,7 +62,7 @@ async function update(req, res) {
       return res.json({ success: false, message: 'User không tồn tại' });
     }
 
-    res.json({ success: true, message: 'Cập nhật thành công', user });
+    res.json({ success: true, message: 'Reset password thành công. Mật khẩu mới: 123456', user });
   } catch (err) {
     res.json({ success: false, message: err.message });
   }
@@ -87,6 +87,6 @@ module.exports = {
   index,
   getList,
   create,
-  update,
+  resetPassword,
   remove
 };

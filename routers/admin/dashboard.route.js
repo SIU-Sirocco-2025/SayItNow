@@ -10,5 +10,6 @@ router.get('/api/aqi-chart', controller.getAQIChartData);
 router.get('/api/temp-chart', controller.getTempChartData);
 router.get('/api/alerts', controller.getAlertData);
 router.get('/api/ranking', controller.getRankingData);
+router.get('/api/72h-aqi', controller.get72HAQIData);
 
 module.exports = router;

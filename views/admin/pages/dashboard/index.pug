@@ -75,6 +75,15 @@ block main
                 h3 Temperature & Humidity
             #tempChart
 
+    // 72H AQI CHART SECTION
+    .chart-section
+        .chart-card
+            .chart-header
+                i.bi.bi-graph-up
+                h3 AQI 72 Hours - Chi tiết từng giờ
+                select#districtSelect.district-select(style="margin-left: auto; padding: 0.5rem 1rem; border: 1px solid #ccc; border-radius: 0.5rem; font-size: 14px;")
+            #aqi72Chart
+
     style.
         .alert-section {
             background: #fff;
@@ -255,11 +264,11 @@ block main
                     colors: ["#3b82f6", "#06b6d4"],
                     xaxis: { categories: dists, labels: { style: { fontSize: "12px" } } },
                     yaxis: [
-                        { title: { text: "°C", style: { color: "#3b82f6" } }, labels: { style: { colors: "#3b82f6" } } },
-                        { opposite: true, title: { text: "%", style: { color: "#06b6d4" } }, labels: { style: { colors: "#06b6d4" } }, min: 0, max: 100 }
+                        { title: { text: "°C", style: { color: "#3b82f6" } }, labels: { style: { colors: "#3b82f6" }, formatter: v => v.toFixed(1) } },
+                        { opposite: true, title: { text: "%", style: { color: "#06b6d4" } }, labels: { style: { colors: "#06b6d4" }, formatter: v => v.toFixed(1) }, min: 0, max: 100 }
                     ],
                     stroke: { curve: "smooth", width: 2 },
-                    tooltip: { shared: true, intersect: false }
+                    tooltip: { shared: true, intersect: false, y: { formatter: v => v ? v.toFixed(1) : "N/A" } }
                 }).render();
             });
 
@@ -318,6 +327,58 @@ block main
                         alertsList.appendChild(item);
                     });
                 }
+            });
+
+            // 72H AQI Chart (Selected District with Hour Detail)
+            let aqi72ChartInstance = null;
+            
+            function load72HAQIChart(districtKey = 'District1Reading') {
+                fetch(`/admin/dashboard/api/72h-aqi?district=${districtKey}`).then(r => r.json()).then(data => {
+                    if (!data.success) return;
+                    
+                    const timestamps = data.timestamps || [];
+                    const aqiValues = data.aqiValues || [];
+                    
+                    // Populate select nếu chưa làm
+                    const select = document.getElementById('districtSelect');
+                    if (select.options.length === 0 && data.districts) {
+                        data.districts.forEach(d => {
+                            const option = document.createElement('option');
+                            option.value = d.key;
+                            option.textContent = d.label;
+                            if (d.key === districtKey) option.selected = true;
+                            select.appendChild(option);
+                        });
+                    }
+                    
+                    // Destroy old chart nếu có
+                    if (aqi72ChartInstance) {
+                        aqi72ChartInstance.destroy();
+                    }
+                    
+                    const colors = aqiValues.map(v => !v ? "#e5e7eb" : v <= 50 ? "#22c55e" : v <= 100 ? "#3b82f6" : v <= 150 ? "#eab308" : v <= 200 ? "#f97316" : "#ef4444");
+                    
+                    aqi72ChartInstance = new ApexCharts(document.getElementById("aqi72Chart"), {
+                        series: [{ name: "AQI US", data: aqiValues }],
+                        chart: { type: "line", height: 400, toolbar: { show: true }, zoom: { enabled: true } },
+                        colors: ["#f97316"],
+                        xaxis: { categories: timestamps, labels: { style: { fontSize: "11px" }, rotate: -45 } },
+                        yaxis: { title: { text: "AQI Value" }, labels: { formatter: v => v.toFixed(0) } },
+                        stroke: { curve: "smooth", width: 2 },
+                        tooltip: { y: { formatter: v => v ? v.toFixed(1) : "N/A" } },
+                        plotOptions: { line: { dataLabels: { enabled: false } } }
+                    });
+                    
+                    aqi72ChartInstance.render();
+                });
+            }
+            
+            // Load mặc định
+            load72HAQIChart('District1Reading');
+            
+            // Thêm event listener cho dropdown
+            document.getElementById('districtSelect').addEventListener('change', function(e) {
+                load72HAQIChart(e.target.value);
             });
         }
 
