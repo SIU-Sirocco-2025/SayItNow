@@ -9,6 +9,29 @@
 const HCMCAirHour = require('../models/hcmcAirHour.model');
 const models = require('../models');
 
+// Helper function để map city name sang district key
+function getDistrictKey(cityName) {
+  const mapping = {
+    'Quận 1': 'district1',
+    'Quận 2': 'district2',
+    'Quận 3': 'district3',
+    'Quận 4': 'district4',
+    'Quận 5': 'district5',
+    'Quận 6': 'district6',
+    'Quận 7': 'district7',
+    'Quận 9': 'district9',
+    'Quận 10': 'district10',
+    'Quận 11': 'district11',
+    'Quận Bình Thạnh': 'binhThanh',
+    'Quận Phú Nhuận': 'phuNhuan',
+    'Quận Tân Phú': 'tanPhu',
+    'Quận Bình Tân': 'binhTan',
+    'Thủ Đức': 'thuDuc',
+    'Ho Chi Minh City': 'hcmc'
+  };
+  return mapping[cityName] || 'hcmc';
+}
+
 // Hàm tính AQI US từ PM2.5
 function calculatePM25AQI(pm25) {
   if (pm25 == null || pm25 < 0) return null;
@@ -341,6 +364,14 @@ async function initialSync() {
         } catch (err) {
           // Silent error during initial sync
         }
+            if (USE_ORION && latestData) {
+      try {
+        const districtKey = getDistrictKey(district.city);
+        await orionSync.syncAQIReading(latestData, districtKey);
+      } catch (err) {
+        console.error(`[Orion-LD] Failed to sync ${district.city}:`, err.message);
+      }
+    }
       }
     }
 

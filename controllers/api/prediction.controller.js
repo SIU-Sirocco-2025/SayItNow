@@ -7,6 +7,7 @@
 // See LICENSE in the project root for full license text.
 const models = require('../../models');
 const path = require('path');
+const { predictionToNGSILD } = require('../../helpers/ngsiLdConverter');
 const { runPythonScriptWithStdin } = require('../../helpers/pythonRunner');
 const { ensurePythonDependencies } = require('../../helpers/checkPythonDeps');
 
@@ -251,6 +252,64 @@ module.exports.forecast24h = async (req, res) => {
       success: false,
       message: 'Lỗi khi dự đoán',
       error: error.message
+    });
+  }
+};
+
+module.exports.forecast24hNGSILD = async (req, res) => {
+  try {
+    const { district } = req.params;
+    
+    // Gọi lại hàm forecast24h hiện tại để lấy predictions
+    const mockReq = { params: { district } };
+    const mockRes = {
+      status: (code) => ({
+        json: (data) => {
+          if (!data.success) {
+            return res.status(code).json({
+              "type": "https://uri.etsi.org/ngsi-ld/errors/InternalError",
+              "title": "Prediction failed",
+              "detail": data.message
+            });
+          }
+          
+          // Convert predictions sang NGSI-LD
+          const entities = data.predictions.map(p => 
+            predictionToNGSILD(p, district)
+          );
+          
+          res.setHeader('Content-Type', 'application/ld+json');
+          res.json({
+            "@context": "https://ecotrack.asia/context/v1",
+            "type": "Collection",
+            "totalItems": entities.length,
+            "member": entities
+          });
+        }
+      }),
+      json: (data) => {
+        const entities = data.predictions.map(p => 
+          predictionToNGSILD(p, district)
+        );
+        
+        res.setHeader('Content-Type', 'application/ld+json');
+        res.json({
+          "@context": "https://ecotrack.asia/context/v1",
+          "type": "Collection",
+          "totalItems": entities.length,
+          "member": entities
+        });
+      }
+    };
+    
+    // Gọi hàm gốc với mock res để intercept response
+    await module.exports.forecast24h(mockReq, mockRes);
+    
+  } catch (error) {
+    console.error('[NGSI-LD Prediction] Error:', error);
+    res.status(500).json({
+      "type": "https://uri.etsi.org/ngsi-ld/errors/InternalError",
+      "title": "Internal Server Error"
     });
   }
 };

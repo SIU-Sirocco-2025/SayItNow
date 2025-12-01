@@ -6,4 +6,8 @@
 // Eco-Track is distributed WITHOUT ANY WARRANTY; see LICENSE for details.
 // See LICENSE in the project root for full license text.
 const PATH_ADMIN = '/admin';
-module.exports = { prefixAdmin: PATH_ADMIN };
+const PATH_API = '/api'
+module.exports = {
+    prefixAdmin: PATH_ADMIN,
+    prefixAPI: PATH_API
+};

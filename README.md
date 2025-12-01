@@ -99,9 +99,39 @@ Script:
 
 ## 🌐 API
 
+## 🌐 API
+
+### Standard REST API
 - AQI Client Endpoints: xem [controllers/client/aqi.controller.js](controllers/client/aqi.controller.js)
 - Prediction Endpoints: xem [controllers/api/prediction.controller.js](controllers/api/prediction.controller.js)
 - API Docs giao diện: [views/client/pages/docs/index.pug](views/client/pages/docs/index.pug)
+
+### NGSI-LD API
+Eco-Track tuân thủ chuẩn NGSI-LD (ETSI GS CIM 009) cho tương thác Smart City:
+
+- **Context**: `GET /api/ngsi-ld/context`
+- **Query Entities**: `GET /api/ngsi-ld/entities/:district`
+- **Temporal Query**: `GET /api/ngsi-ld/entities/:district/temporal`
+- **All Entities**: `GET /api/ngsi-ld/entities`
+- **Predictions**: `POST /api/ngsi-ld/predictions/:district`
+
+Context definition: [public/context/v1.jsonld](public/context/v1.jsonld)
+
+#### Ví dụ sử dụng NGSI-LD:
+
+```bash
+# Lấy AQI entity mới nhất
+curl -H "Accept: application/ld+json" \
+  https://ecotrack.asia/api/ngsi-ld/entities/district1
+
+# Truy vấn temporal (24h gần nhất)
+curl "https://ecotrack.asia/api/ngsi-ld/entities/district1/temporal?limit=24"
+```
+
+Tích hợp với FIWARE Orion-LD Context Broker:
+- Cấu hình trong `.env`: `FIWARE_BROKER_URL`, `FIWARE_USE_ORIONLD=true`
+- Service: [services/orionLdSync.service.js](services/orionLdSync.service.js)
+
 
 ---
 

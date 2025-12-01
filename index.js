@@ -52,7 +52,7 @@ app.use(passport.session());
 // App local variables
 app.locals.moment = moment;
 app.locals.prefixAdmin = system.prefixAdmin;
-
+app.locals.prefixApi = system.prefixAPI;
 // TinyMCE
 app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce')));
 // End TinyMCE
@@ -68,6 +68,10 @@ app.use(injectAdminUser);
 clientRoutes(app);
 adminRoutes(app);
 apiRoutes(app); // Thêm dòng này
+
+
+// Serve static context
+app.use('/context', express.static('public/context'));
 
 app.use((req, res) => {
     res.status(404).render('client/pages/errors/404', {

@@ -27,6 +27,7 @@
   "homepage": "https://github.com/your-org/eco-track#readme",
   "description": "",
   "dependencies": {
+    "@digitalbazaar/http-client": "^4.2.0",
     "axios": "^1.13.2",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.8.0",
@@ -37,6 +38,7 @@
     "express-session": "^1.18.2",
     "fs-extra": "^11.3.2",
     "json2csv": "^6.0.0-alpha.2",
+    "jsonld": "^9.0.0",
     "md5": "^2.3.0",
     "method-override": "^3.0.0",
     "moment": "^2.30.1",

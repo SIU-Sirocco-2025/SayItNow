@@ -66,6 +66,20 @@ html(lang='vi')
                 a(href='#get-api-key') Lấy API Key
               li
                 a(href='#regenerate-api-key') Tạo lại API Key
+          
+          .sidebar-section
+            h3 NGSI-LD API
+            ul
+              li
+                a(href='#ngsi-ld-intro') Giới thiệu NGSI-LD
+              li
+                a(href='#ngsi-ld-context') Context
+              li
+                a(href='#ngsi-ld-entities') Query Entities
+              li
+                a(href='#ngsi-ld-temporal') Temporal Queries
+              li
+                a(href='#ngsi-ld-predictions') Predictions
 
       main.docs-main
         .docs-content
@@ -231,7 +245,143 @@ html(lang='vi')
                     },
                     "districts": [...]
                   }
-
+          section#ngsi-ld-intro.docs-section
+            h2 
+              i.fas.fa-code-branch
+              |  NGSI-LD API
+            
+            p Eco-Track cung cấp API tuân thủ chuẩn NGSI-LD (ETSI GS CIM 009) để tương thích với các hệ sinh thái Smart City.
+            
+            .info-box
+              i.fas.fa-info-circle
+              div
+                strong NGSI-LD là gì?
+                br
+                | NGSI-LD là chuẩn API dựa trên Linked Data cho IoT và Smart Cities, sử dụng JSON-LD để biểu diễn dữ liệu có ngữ cảnh.
+          
+          section#ngsi-ld-context.docs-section
+            h2 
+              i.fas.fa-link
+              |  Context Definition
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/context
+            
+            p Lấy @context định nghĩa cho tất cả entities của Eco-Track.
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "@context": {
+                      "ecotrack": "https://ecotrack.asia/entities/",
+                      "AQIReading": "ecotrack:AQIReading",
+                      "aqius": {
+                        "@id": "ecotrack:aqius",
+                        "@type": "ngsi-ld:Property"
+                      }
+                    }
+                  }
+          
+          section#ngsi-ld-entities.docs-section
+            h2 
+              i.fas.fa-database
+              |  Query Entities
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/entities/:district
+            
+            p Lấy entity AQI mới nhất theo chuẩn NGSI-LD.
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1" \
+                    -H "Accept: application/ld+json"
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "@context": "https://ecotrack.asia/context/v1",
+                    "id": "urn:ngsi-ld:AQIReading:district1:1735574400000",
+                    "type": "AQIReading",
+                    "aqius": {
+                      "type": "Property",
+                      "value": 75,
+                      "observedAt": "2024-12-30T12:00:00Z"
+                    },
+                    "location": {
+                      "type": "GeoProperty",
+                      "value": {
+                        "type": "Point",
+                        "coordinates": [106.7009, 10.7756]
+                      }
+                    }
+                  }
+          
+          section#ngsi-ld-temporal.docs-section
+            h2 
+              i.fas.fa-clock
+              |  Temporal Queries
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/entities/:district/temporal
+            
+            p Truy vấn dữ liệu AQI theo khoảng thời gian.
+            
+            h4 Parameters
+            table.param-table
+              thead
+                tr
+                  th Tham số
+                  th Loại
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code timeAt
+                  td Query
+                  td Thời gian bắt đầu (ISO 8601)
+                tr
+                  td
+                    code endTimeAt
+                  td Query
+                  td Thời gian kết thúc (ISO 8601)
+                tr
+                  td
+                    code limit
+                  td Query
+                  td Số lượng records (mặc định: 24)
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1/temporal?timeAt=2024-12-30T00:00:00Z&limit=24" \
+                    -H "Accept: application/ld+json"
           section#history.docs-section
             h2 
               i.fas.fa-history
