@@ -245,216 +245,7 @@ html(lang='vi')
                     },
                     "districts": [...]
                   }
-          section#ngsi-ld-intro.docs-section
-            h2 
-              i.fas.fa-code-branch
-              |  NGSI-LD API
-            
-            p Eco-Track cung cấp API tuân thủ chuẩn NGSI-LD (ETSI GS CIM 009) để tương thích với các hệ sinh thái Smart City.
-            
-            .info-box
-              i.fas.fa-info-circle
-              div
-                strong NGSI-LD là gì?
-                br
-                | NGSI-LD là chuẩn API dựa trên Linked Data cho IoT và Smart Cities, sử dụng JSON-LD để biểu diễn dữ liệu có ngữ cảnh.
-            
-            .info-box
-              i.fas.fa-database
-              div
-                strong AirQualityObserved
-                br
-                | Entity type mô tả một quan trắc chất lượng không khí. Các thuộc tính chính:
-                ul
-                  li
-                    code dateObserved
-                    |  - Thời điểm quan trắc (ISO 8601)
-                  li
-                    code airQualityIndex
-                    |  - Chỉ số AQI tổng hợp
-                  li
-                    code pm25
-                    |  - Nồng độ PM2.5 (µg/m³)
-                  li
-                    code pm10
-                    |  - Nồng độ PM10 (µg/m³)
-                  li
-                    code o3
-                    |  - Nồng độ O₃ (µg/m³)
-                  li
-                    code no2
-                    |  - Nồng độ NO₂ (µg/m³)
-                  li
-                    code so2
-                    |  - Nồng độ SO₂ (µg/m³)
-                  li
-                    code co
-                    |  - Nồng độ CO (µg/m³)
-          
-          section#ngsi-ld-context.docs-section
-            h2 
-              i.fas.fa-link
-              |  Context Definition
-             
-            .endpoint-info
-              span.http-method.get GET
-              code.endpoint-url /api/ngsi-ld/context
-             
-            p
-              | Lấy @context định nghĩa cho tất cả entities của Eco-Track. Ngoài endpoint động ở 
-              code /api/ngsi-ld/context
-              | , hệ thống cũng phục vụ context tĩnh tại 
-              code /context
-              |  (xem 
-              a(href='/public/context.jsonld') public/context.jsonld
-              | ). Cấu hình prefix API xem 
-              a(href='/config/system.js') 
-                | `
-                | config.system.prefixAPI
-                | `
-              | .
-          
-            h4 Response Example
-            .code-block
-              .code-header
-                span.language json
-                button.copy-btn(onclick='copyCode(this)')
-                  i.fas.fa-copy
-              pre
-                code.language-json.
-                  {
-                    "@context": {
-                      "ngsi-ld": "https://uri.etsi.org/ngsi-ld/",
-                      "schema": "https://schema.org/",
-                      "ecotrack": "https://ecotrack.asia/entities/",
-                      "id": "@id",
-                      "type": "@type",
-                      "AirQualityObserved": "ecotrack:AirQualityObserved",
-                      "dateObserved": {
-                        "@id": "schema:observationDate",
-                        "@type": "DateTime"
-                      },
-                      "airQualityIndex": {
-                        "@id": "ecotrack:airQualityIndex",
-                        "@type": "ngsi-ld:Property"
-                      },
-                      "pm25": { "@id": "ecotrack:pm25", "@type": "ngsi-ld:Property" },
-                      "pm10": { "@id": "ecotrack:pm10", "@type": "ngsi-ld:Property" },
-                      "o3": { "@id": "ecotrack:o3", "@type": "ngsi-ld:Property" },
-                      "no2": { "@id": "ecotrack:no2", "@type": "ngsi-ld:Property" },
-                      "so2": { "@id": "ecotrack:so2", "@type": "ngsi-ld:Property" },
-                      "co": { "@id": "ecotrack:co", "@type": "ngsi-ld:Property" },
-                      "location": { "@id": "schema:geo", "@type": "ngsi-ld:GeoProperty" }
-                    }
-                  }
-          
-          section#ngsi-ld-entities.docs-section
-            h2 
-              i.fas.fa-database
-              |  Query Entities
-             
-            .endpoint-info
-              span.http-method.get GET
-              code.endpoint-url /api/ngsi-ld/entities/:district
-             
-            p Lấy entity mới nhất theo chuẩn NGSI-LD cho một quận (type: 
-              code AirQualityObserved
-              | ).
-             
-            h4 Request Example
-            .code-block
-              .code-header
-                span.language bash
-                button.copy-btn(onclick='copyCode(this)')
-                  i.fas.fa-copy
-              pre
-                code.language-bash.
-                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1" \
-                    -H "Accept: application/ld+json"
-             
-            h4 Response Example
-            .code-block
-              .code-header
-                span.language json
-                button.copy-btn(onclick='copyCode(this)')
-                  i.fas.fa-copy
-              pre
-                code.language-json.
-                  {
-                    "@context": "https://ecotrack.asia/context",
-                    "id": "urn:ngsi-ld:AirQualityObserved:district1:1735574400000",
-                    "type": "AirQualityObserved",
-                    "dateObserved": {
-                      "type": "Property",
-                      "value": "2024-12-30T12:00:00Z"
-                    },
-                    "airQualityIndex": {
-                      "type": "Property",
-                      "value": 75
-                    },
-                    "pm25": { "type": "Property", "value": 23.4 },
-                    "pm10": { "type": "Property", "value": 41.2 },
-                    "o3": { "type": "Property", "value": 68.1 },
-                    "no2": { "type": "Property", "value": 21.9 },
-                    "so2": { "type": "Property", "value": 7.3 },
-                    "co": { "type": "Property", "value": 0.5 },
-                    "location": {
-                      "type": "GeoProperty",
-                      "value": {
-                        "type": "Point",
-                        "coordinates": [106.7009, 10.7756]
-                      }
-                    }
-                  }
-          
-          section#ngsi-ld-temporal.docs-section
-            h2 
-              i.fas.fa-clock
-              |  Temporal Queries
-            
-            .endpoint-info
-              span.http-method.get GET
-              code.endpoint-url /api/ngsi-ld/entities/:district/temporal
-            
-            p Truy vấn dữ liệu 
-              code AirQualityObserved
-              |  theo khoảng thời gian (dateObserved).
-            
-            h4 Parameters
-            table.param-table
-              thead
-                tr
-                  th Tham số
-                  th Loại
-                  th Mô tả
-              tbody
-                tr
-                  td
-                    code timeAt
-                  td Query
-                  td Thời gian bắt đầu (ISO 8601)
-                tr
-                  td
-                    code endTimeAt
-                  td Query
-                  td Thời gian kết thúc (ISO 8601)
-                tr
-                  td
-                    code limit
-                  td Query
-                  td Số lượng records (mặc định: 24)
-            
-            h4 Request Example
-            .code-block
-              .code-header
-                span.language bash
-                button.copy-btn(onclick='copyCode(this)')
-                  i.fas.fa-copy
-              pre
-                code.language-bash.
-                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1/temporal?timeAt=2024-12-30T00:00:00Z&endTimeAt=2024-12-30T23:59:59Z&limit=24" \
-                    -H "Accept: application/ld+json"
-          
+
           section#history.docs-section
             h2 
               i.fas.fa-history
@@ -767,6 +558,260 @@ html(lang='vi')
               span.auth-badge.session Cần đăng nhập
             
             p Tạo API key mới (key cũ sẽ không còn hoạt động).
+
+          section#ngsi-ld-intro.docs-section
+            h2 
+              i.fas.fa-code-branch
+              |  NGSI-LD API
+            
+            p Eco-Track cung cấp API tuân thủ chuẩn NGSI-LD (ETSI GS CIM 009) để tương thích với các hệ sinh thái Smart City.
+            
+            .info-box
+              i.fas.fa-info-circle
+              div
+                strong NGSI-LD là gì?
+                br
+                | NGSI-LD là chuẩn API dựa trên Linked Data cho IoT và Smart Cities, sử dụng JSON-LD để biểu diễn dữ liệu có ngữ cảnh.
+            
+            .info-box
+              i.fas.fa-database
+              div
+                strong AirQualityObserved
+                br
+                | Entity type mô tả một quan trắc chất lượng không khí. Các thuộc tính chính:
+                ul
+                  li
+                    code dateObserved
+                    |  - Thời điểm quan trắc (ISO 8601)
+                  li
+                    code airQualityIndex
+                    |  - Chỉ số AQI tổng hợp
+                  li
+                    code pm25
+                    |  - Nồng độ PM2.5 (µg/m³)
+                  li
+                    code pm10
+                    |  - Nồng độ PM10 (µg/m³)
+                  li
+                    code o3
+                    |  - Nồng độ O₃ (µg/m³)
+                  li
+                    code no2
+                    |  - Nồng độ NO₂ (µg/m³)
+                  li
+                    code so2
+                    |  - Nồng độ SO₂ (µg/m³)
+                  li
+                    code co
+                    |  - Nồng độ CO (µg/m³)
+          
+          section#ngsi-ld-context.docs-section
+            h2 
+              i.fas.fa-link
+              |  Context Definition
+             
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/context
+             
+            p
+              | Lấy @context định nghĩa cho tất cả entities của Eco-Track. Ngoài endpoint động ở 
+              code /api/ngsi-ld/context
+              | , hệ thống cũng phục vụ context tĩnh tại 
+              code /context
+              |  (xem 
+              a(href='/public/context.jsonld') public/context.jsonld
+              | ). Cấu hình prefix API xem 
+              a(href='/config/system.js') 
+                | `
+                | config.system.prefixAPI
+                | `
+              | .
+          
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "@context": {
+                      "ngsi-ld": "https://uri.etsi.org/ngsi-ld/",
+                      "schema": "https://schema.org/",
+                      "ecotrack": "https://ecotrack.asia/entities/",
+                      "id": "@id",
+                      "type": "@type",
+                      "AirQualityObserved": "ecotrack:AirQualityObserved",
+                      "dateObserved": {
+                        "@id": "schema:observationDate",
+                        "@type": "DateTime"
+                      },
+                      "airQualityIndex": {
+                        "@id": "ecotrack:airQualityIndex",
+                        "@type": "ngsi-ld:Property"
+                      },
+                      "pm25": { "@id": "ecotrack:pm25", "@type": "ngsi-ld:Property" },
+                      "pm10": { "@id": "ecotrack:pm10", "@type": "ngsi-ld:Property" },
+                      "o3": { "@id": "ecotrack:o3", "@type": "ngsi-ld:Property" },
+                      "no2": { "@id": "ecotrack:no2", "@type": "ngsi-ld:Property" },
+                      "so2": { "@id": "ecotrack:so2", "@type": "ngsi-ld:Property" },
+                      "co": { "@id": "ecotrack:co", "@type": "ngsi-ld:Property" },
+                      "location": { "@id": "schema:geo", "@type": "ngsi-ld:GeoProperty" }
+                    }
+                  }
+          
+          section#ngsi-ld-entities.docs-section
+            h2 
+              i.fas.fa-database
+              |  Query Entities
+             
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/entities/:district
+             
+            p Lấy entity mới nhất theo chuẩn NGSI-LD cho một quận (type: 
+              code AirQualityObserved
+              | ).
+             
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1" \
+                    -H "Accept: application/ld+json"
+             
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "@context": "https://ecotrack.asia/context",
+                    "id": "urn:ngsi-ld:AirQualityObserved:district1:1735574400000",
+                    "type": "AirQualityObserved",
+                    "dateObserved": {
+                      "type": "Property",
+                      "value": "2024-12-30T12:00:00Z"
+                    },
+                    "airQualityIndex": {
+                      "type": "Property",
+                      "value": 75
+                    },
+                    "pm25": { "type": "Property", "value": 23.4 },
+                    "pm10": { "type": "Property", "value": 41.2 },
+                    "o3": { "type": "Property", "value": 68.1 },
+                    "no2": { "type": "Property", "value": 21.9 },
+                    "so2": { "type": "Property", "value": 7.3 },
+                    "co": { "type": "Property", "value": 0.5 },
+                    "location": {
+                      "type": "GeoProperty",
+                      "value": {
+                        "type": "Point",
+                        "coordinates": [106.7009, 10.7756]
+                      }
+                    }
+                  }
+          
+          section#ngsi-ld-temporal.docs-section
+            h2 
+              i.fas.fa-clock
+              |  Temporal Queries
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/entities/:district/temporal
+            
+            p Truy vấn dữ liệu 
+              code AirQualityObserved
+              |  theo khoảng thời gian (dateObserved).
+            
+            h4 Parameters
+            table.param-table
+              thead
+                tr
+                  th Tham số
+                  th Loại
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code timeAt
+                  td Query
+                  td Thời gian bắt đầu (ISO 8601)
+                tr
+                  td
+                    code endTimeAt
+                  td Query
+                  td Thời gian kết thúc (ISO 8601)
+                tr
+                  td
+                    code limit
+                  td Query
+                  td Số lượng records (mặc định: 24)
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -X GET "https://ecotrack.asia/api/ngsi-ld/entities/district1/temporal?timeAt=2024-12-30T00:00:00Z&endTimeAt=2024-12-30T23:59:59Z&limit=24" \
+                    -H "Accept: application/ld+json"
+
+          section#ngsi-ld-predictions.docs-section
+            h2
+              i.fas.fa-brain
+              |  Predictions
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/ngsi-ld/predictions/:district
+            p Trả về dự báo AQI 24h ở định dạng NGSI-LD Collection, mỗi phần tử là một entity AQIPrediction.
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language bash
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl -X GET "http://localhost:3000/api/ngsi-ld/predictions/district1" \
+                    -H "Accept: application/ld+json"
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "@context": "https://ecotrack.asia/context/v1",
+                    "type": "Collection",
+                    "totalItems": 24,
+                    "member": [
+                      {
+                        "@context": "https://ecotrack.asia/context/v1",
+                        "id": "urn:ngsi-ld:AQIPrediction:district1:1",
+                        "type": "AQIPrediction",
+                        "predictedAQI": { "type": "Property", "value": 72, "observedAt": "2025-12-04T10:00:00Z" },
+                        "predictionHour": { "type": "Property", "value": 1 },
+                        "quality": { "type": "Property", "value": "moderate" },
+                        "timestamp": { "type": "Property", "value": "2025-12-04T11:00:00Z" },
+                        "district": { "type": "Relationship", "object": "urn:ngsi-ld:District:district1" }
+                      }
+                    ]
+                  }
 
           section#errors.docs-section
             h2 
