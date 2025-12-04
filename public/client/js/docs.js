@@ -1,3 +1,50 @@
+// Base URL switcher
+document.addEventListener('DOMContentLoaded', function() {
+  const baseUrlSelect = document.getElementById('baseUrlSelect');
+  const currentBaseUrlDisplay = document.getElementById('currentBaseUrl');
+  
+  if (!baseUrlSelect) return;
+
+  // Load saved preference from localStorage
+  const savedBaseUrl = localStorage.getItem('eco-track-base-url') || 'http://localhost:3000';
+  baseUrlSelect.value = savedBaseUrl;
+  updateBaseUrl(savedBaseUrl);
+
+  // Handle base URL change
+  baseUrlSelect.addEventListener('change', function() {
+    const newBaseUrl = this.value;
+    localStorage.setItem('eco-track-base-url', newBaseUrl);
+    updateBaseUrl(newBaseUrl);
+  });
+
+  function updateBaseUrl(baseUrl) {
+    // Update display
+    if (currentBaseUrlDisplay) {
+      currentBaseUrlDisplay.textContent = baseUrl;
+    }
+
+    // Update all code blocks
+    const codeBlocks = document.querySelectorAll('code');
+    codeBlocks.forEach(code => {
+      let content = code.textContent;
+      
+      // Replace localhost:3000 or ecotrack.asia
+      content = content.replace(
+        /https?:\/\/(localhost:3000|ecotrack\.asia)/g, 
+        baseUrl
+      );
+      
+      code.textContent = content;
+    });
+
+    // Re-apply syntax highlighting if using highlight.js
+    if (typeof hljs !== 'undefined') {
+      document.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+      });
+    }
+  }
+});
 // Initialize syntax highlighting
 document.addEventListener('DOMContentLoaded', function() {
   // Highlight all code blocks

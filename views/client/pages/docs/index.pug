@@ -8,7 +8,7 @@ html(lang='vi')
     link(rel='stylesheet', href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap')
     link(rel='stylesheet', href='/client/css/docs.css')
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css')
-    
+    link(rel="icon" type="image/png" href="/client/image/logo.png" sizes="32x32") 
   body
     header.docs-header
       .container
@@ -20,7 +20,10 @@ html(lang='vi')
             a(href='/') Trang chủ
             a(href='/aqi') Bản đồ AQI
             a(href='/auth/settings') Cài đặt
-            a.btn-primary(href='/auth/login') Đăng nhập
+            if currentUser
+              span Hello, #{currentUser.fullName}
+            else
+              a.btn-primary(href='/auth/login') Đăng nhập
     
     .docs-layout
       aside.docs-sidebar
@@ -96,7 +99,12 @@ html(lang='vi')
                 | v1.1
                 br
                 strong Base URL: 
-                code http://localhost:3000
+                .base-url-selector.mt-2
+                  label(for='baseUrlSelect') Chọn môi trường:
+                  select#baseUrlSelect.form-select.d-inline-block.ms-2(style='width: auto;')
+                    option(value='http://localhost:3000') Development (localhost:3000)
+                    option(value='https://ecotrack.asia') Production (ecotrack.asia)
+                  code#currentBaseUrl.ms-2 http://localhost:3000
           
           section#authentication.docs-section
             h2 

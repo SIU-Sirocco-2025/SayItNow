@@ -180,6 +180,94 @@ GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 
 ## 📥 Cài Đặt & Chạy
 
+### 🗄️ Hướng Dẫn Tạo MongoDB
+
+#### Lựa chọn 1: MongoDB Atlas (Cloud - Khuyến nghị)
+
+1. **Tạo tài khoản MongoDB Atlas**
+   - Truy cập: https://www.mongodb.com/cloud/atlas/register
+   - Đăng ký tài khoản miễn phí
+
+2. **Tạo Cluster mới**
+   - Sau khi đăng nhập, chọn "Build a Database"
+   - Chọn plan FREE (M0 Sandbox - 512MB)
+   - Chọn region gần nhất (Singapore hoặc Tokyo cho Việt Nam)
+   - Đặt tên cluster (ví dụ: `eco-track-cluster`)
+
+3. **Cấu hình Database Access**
+   - Vào mục "Database Access" → "Add New Database User"
+   - Tạo username và password (lưu lại để dùng sau)
+   - Chọn role: "Read and write to any database"
+
+4. **Cấu hình Network Access**
+   - Vào mục "Network Access" → "Add IP Address"
+   - Chọn "Allow Access from Anywhere" (0.0.0.0/0) cho dev
+   - Production: chỉ thêm IP cụ thể của server
+
+5. **Lấy Connection String**
+   - Vào "Database" → "Connect" → "Connect your application"
+   - Chọn Driver: Node.js, Version: 4.1 or later
+   - Copy connection string:
+   ```
+   mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/<dbname>?retryWrites=true&w=majority
+   ```
+   - Thay `<username>`, `<password>`, `<dbname>` (ví dụ: `ecotrack`)
+
+6. **Cập nhật file .env**
+   ```env
+   MONGODB_URL=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/ecotrack?retryWrites=true&w=majority
+   ```
+
+#### Lựa chọn 2: MongoDB Local (Development)
+
+1. **Cài đặt MongoDB Community Edition**
+   - Windows: https://www.mongodb.com/try/download/community
+   - Tải installer và chạy với cấu hình mặc định
+   - Chọn "Install MongoDB as a Service"
+
+2. **Khởi động MongoDB Service**
+   ```bash
+   # Kiểm tra service đang chạy
+   net start MongoDB
+   
+   # Nếu chưa chạy, khởi động:
+   "C:\Program Files\MongoDB\Server\<version>\bin\mongod.exe" --dbpath "C:\data\db"
+   ```
+
+3. **Tạo database (tuỳ chọn, sẽ tự động tạo khi insert)**
+   ```bash
+   # Mở MongoDB Shell
+   mongosh
+   
+   # Chọn/tạo database
+   use ecotrack
+   ```
+
+4. **Cập nhật file .env**
+   ```env
+   MONGODB_URL=mongodb://localhost:27017/ecotrack
+   ```
+
+### 📧 Hướng Dẫn Cấu Hình SMTP Email
+
+Eco-Track sử dụng SMTP để gửi email OTP, thông báo, v.v.
+
+#### Gmail SMTP (Khuyến nghị cho dev/test)
+
+1. **Tạo App Password cho Gmail**
+   - Đăng nhập Gmail
+   - Vào: https://myaccount.google.com/security
+   - Bật "2-Step Verification" (bắt buộc)
+   - Tìm "App passwords" → Tạo mật khẩu ứng dụng mới
+   - Chọn app: "Mail", device: "Other" (đặt tên: Eco-Track)
+   - Copy mật khẩu 16 ký tự (dạng: `xxxx xxxx xxxx xxxx`)
+
+2. **Cấu hình .env**
+   ```env
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=xxxx xxxx xxxx xxxx  # App password vừa tạo (bỏ khoảng trắng)
+   ```
+
 ### 1) Cài đặt dependencies
 ```bash
 git clone https://github.com/SIU-Sirocco-2025/Eco-Track.git
