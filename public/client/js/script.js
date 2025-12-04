@@ -1,12 +1,12 @@
-// Enhanced client-side AQI map + UI behaviours
+// Bản đồ AQI phía client + hành vi UI (nâng cao)
 (function initAQIMap() {
   function aqiClass(aqius) {
-    if (aqius <= 50) return { key: 'good', color: '#2ecc71', label: 'Tot' };
-    if (aqius <= 100) return { key: 'moderate', color: '#f1c40f', label: 'Trung binh' };
-    if (aqius <= 150) return { key: 'unhealthy', color: '#e67e22', label: 'Nhay cam' };
-    if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xau' };
-    if (aqius <= 300) return { key: 'very-unhealthy', color: '#8e44ad', label: 'Rat xau' };
-    return { key: 'hazardous', color: '#e74c3c', label: 'Nguy hai' };
+    if (aqius <= 50) return { key: 'good', color: '#2ecc71', label: 'Tốt' };
+    if (aqius <= 100) return { key: 'moderate', color: '#f1c40f', label: 'Trung bình' };
+    if (aqius <= 150) return { key: 'unhealthy', color: '#e67e22', label: 'Nhạy cảm' };
+    if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xấu' };
+    if (aqius <= 300) return { key: 'very-unhealthy', color: '#8e44ad', label: 'Rất xấu' };
+    return { key: 'hazardous', color: '#e74c3c', label: 'Nguy hại' };
   }
   function formatTime(value) {
     if (!value) return '--';
@@ -25,7 +25,7 @@
       'aqi-good', 'aqi-moderate', 'aqi-unhealthy', 'aqi-very-unhealthy', 'aqi-hazardous', 'aqi-unknown'
     );
     root.classList.add(`aqi-${info.key}`);
-    root.title = `Cap nhat: ${formatTime(ts)} • ${info.label}`;
+    root.title = `Cập nhật: ${formatTime(ts)} • ${info.label}`;
   }
 
   // Cập nhật header luôn, dù có hay không có map
@@ -74,10 +74,10 @@
   const markerById = new Map();
   const layerState = { heat: true, markers: true };
 
-  // Visual outline for the focus area
+  // Khung trực quan cho khu vực tập trung
   L.rectangle(HCMC_BOUNDS, { color: '#f39c12', weight: 1, fill: false, dashArray: '6 4' }).addTo(map);
 
-  // DOM references
+  // Tham chiếu DOM
   const layerButtons = document.querySelectorAll('[data-layer-toggle]');
   const styleButtons = document.querySelectorAll('[data-map-style]');
   const locateBtn = document.querySelector('[data-map-action="locate"]');
@@ -88,11 +88,11 @@
   let cityOverlay = null;
 
   const adviceTexts = {
-    good: 'Khong khi an toan, ban co the sinh hoat ngoai troi binh thuong.',
-    moderate: 'Nguoi nhay cam nen giam thoi gian ngoai troi, nguoi khac van on.',
-    unhealthy: 'Can than trong: giam hoat dong manh va nen deo khau trang phu hop.',
-    'very-unhealthy': 'Han che ra ngoai neu khong can thiet, uu tien o trong nha.',
-    hazardous: 'Muc nguy hiem: nen o trong nha va su dung thiet bi loc khong khi neu co.'
+    good: 'Không khí an toàn, bạn có thể sinh hoạt ngoài trời bình thường.',
+    moderate: 'Người nhạy cảm nên giảm thời gian ngoài trời, người khác vẫn ổn.',
+    unhealthy: 'Cần thận trọng: giảm hoạt động mạnh và nên đeo khẩu trang phù hợp.',
+    'very-unhealthy': 'Hạn chế ra ngoài nếu không cần thiết, ưu tiên ở trong nhà.',
+    hazardous: 'Mức nguy hiểm: nên ở trong nhà và sử dụng thiết bị lọc không khí nếu có.'
   };
 
   function isCityWideStation(feature) {
@@ -111,46 +111,6 @@
     return { cityStation, districts };
   }
 
-  // function aqiClass(aqius) {
-  //   if (aqius <= 50) return { key: 'good', color: '#2ecc71', label: 'Tot' };
-  //   if (aqius <= 100) return { key: 'moderate', color: '#f1c40f', label: 'Trung binh' };
-  //   if (aqius <= 150) return { key: 'unhealthy', color: '#e67e22', label: 'Nhay cam' };
-  //   if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xau' };
-  //   if (aqius <= 300) return { key: 'very-unhealthy', color: '#8e44ad', label: 'Rat xau' };
-  //   return { key: 'hazardous', color: '#e74c3c', label: 'Nguy hai' };
-  // }
-
-  // function formatTime(value) {
-  //   if (!value) return '--';
-  //   const time = typeof value === 'number' ? new Date(value) : new Date(String(value));
-  //   if (Number.isNaN(time.getTime())) return '--';
-  //   return time.toLocaleString('vi-VN', { hour12: false });
-  // }
-  // function updateHeaderBadges(aqi, temp, ts) {
-  //   const aqiEl = document.querySelector('.aqi-badge');
-  //   const tempEl = document.querySelector('[data-temp]');
-  //   if (!aqiEl || !tempEl) return;
-  //   const info = aqiClass(Number(aqi || 0));
-  //   aqiEl.dataset.aqi = aqi ?? '--';
-  //   aqiEl.innerHTML = `<i class="bi bi-wind me-1"></i>AQI ${aqi ?? '--'}`;
-  //   aqiEl.className = `aqi-badge btn btn-outline-light rounded-pill aqi-${info.key}`;
-  //   tempEl.innerHTML = `<i class="bi bi-thermometer me-1"></i>${typeof temp === 'number' ? temp + '°' : '--°'}`;
-  //   aqiEl.title = `Cap nhat: ${formatTime(ts)} • ${info.label}`;
-  // }
-
-  // // Luôn gọi để cập nhật header, kể cả khi không có map
-  // fetch('/aqi/latest-reading')
-  //   .then(r => r.json())
-  //   .then(d => { if (d?.success) updateHeaderBadges(d.aqius, d.tp, d.ts); })
-  //   .catch(() => { });
-
-  // const mapEl = document.getElementById('aqi-map');
-  // const hasMap = mapEl && typeof L !== 'undefined';
-  // if (!hasMap) {
-  //   // Không có map -> chỉ cần header, dừng tại đây
-  //   return;
-  // }
-
   function renderCityHero(station) {
     if (!cityHeroEl) return;
     if (!station) {
@@ -164,30 +124,30 @@
     const aqius = rawAqi ? Math.round(rawAqi) : '--';
     const info = aqiClass(rawAqi);
     const tsText = props.ts ? formatTime(props.ts) : '--';
-    const label = props.city || 'Ho Chi Minh City';
+    const label = props.city || 'Thành phố Hồ Chí Minh';
     const key = props.cityKey || 'city-wide';
     cityHeroEl.innerHTML = `
       <div class="aqi-city-hero-card card aqi-card-${info.key}" data-station-id="${key}">
         <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
           <div class="flex-grow-1">
             <p class="text-uppercase small fw-semibold text-muted mb-1">
-              <i class="bi bi-broadcast-pin me-1"></i>Tram tong
+              <i class="bi bi-broadcast-pin me-1"></i>Trạm tổng
             </p>
             <h3 class="h4 mb-1">${label}</h3>
             <p class="mb-2 text-muted d-flex align-items-center gap-2">
-              <i class="bi bi-geo me-1"></i>Phu song toan thanh pho
+              <i class="bi bi-geo me-1"></i>Phủ sóng toàn thành phố
             </p>
             <span class="aqi-city-chip me-2 badge rounded-pill px-3 py-2" style="background:${info.color}1f;color:${info.color};border:1px solid ${info.color}33">${info.label}</span>
             <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-city-hour-btn>
               <i class="bi bi-clock-history"></i>
-              <span>Thong so gio gan nhat</span>
+              <span>Thông số giờ gần nhất</span>
             </button>
           </div>
           <div class="text-center">
             <div class="display-4 fw-bold mb-0">${aqius}</div>
             <div class="text-muted">AQI</div>
             <div class="mt-2 small text-muted d-flex align-items-center justify-content-center gap-1">
-              <i class="bi bi-arrow-repeat"></i><span>Cap nhat: ${tsText}</span>
+              <i class="bi bi-arrow-repeat"></i><span>Cập nhật: ${tsText}</span>
             </div>
           </div>
         </div>
@@ -203,7 +163,7 @@
     const wrap = document.getElementById('city-hour-details');
     if (!wrap) return;
     if (!data?.success) {
-      wrap.innerHTML = '<div class="city-hour-card small text-muted">Khong co du lieu gio gan nhat.</div>';
+      wrap.innerHTML = '<div class="city-hour-card small text-muted">Không có dữ liệu giờ gần nhất.</div>';
       wrap.classList.remove('d-none');
       return;
     }
@@ -224,11 +184,11 @@
     function isCritical(key, value) {
       if (typeof value !== 'number') return false;
       switch (key) {
-        case 'pm25': return value >= 35;            // WHO 24h guideline ~35 µg/m³
-        case 'pm1': return value >= 35;            // dùng cùng ngưỡng cảnh báo gần đúng
-        case 'temperature': return value <= 15 || value >= 35; // quá lạnh/nóng
-        case 'relativehumidity': return value <= 20 || value >= 85; // quá khô/ẩm
-        case 'um003': return value >= 1000;         // ví dụ: hạt quá cao (tuỳ chỉnh)
+        case 'pm25': return value >= 35;            // Khuyến nghị WHO 24h ~35 µg/m³
+        case 'pm1': return value >= 35;
+        case 'temperature': return value <= 15 || value >= 35;
+        case 'relativehumidity': return value <= 20 || value >= 85;
+        case 'um003': return value >= 1000;
         default: return false;
       }
     }
@@ -249,7 +209,7 @@
           </td>
           <td>
             <span class="fw-semibold">${displayValue}</span>
-            ${warn ? '<span class="badge bg-danger-subtle text-danger ms-2">Canh bao</span>' : ''}
+            ${warn ? '<span class="badge bg-danger-subtle text-danger ms-2">Cảnh báo</span>' : ''}
           </td>
           <td class="text-muted">${meta.unit}</td>
         </tr>`;
@@ -259,16 +219,16 @@
     <div class="city-hour-card card border-0 shadow-sm">
       <div class="card-header bg-white border-0 pb-0 d-flex justify-content-between align-items-center">
         <h5 class="h6 mb-0 d-flex align-items-center gap-2">
-          <i class="bi bi-clock-history text-primary"></i><span>Thong so gio gan nhat</span>
+          <i class="bi bi-clock-history text-primary"></i><span>Thông số giờ gần nhất</span>
         </h5>
         <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-city-hour-close>
-          <i class="bi bi-x-lg"></i><span>Dong</span>
+          <i class="bi bi-x-lg"></i><span>Đóng</span>
         </button>
       </div>
       <div class="card-body pt-2">
         <p class="small text-muted mb-3">
           <i class="bi bi-calendar-range me-1"></i>
-          Khung gio: <strong>${fromText}</strong>
+          Khung giờ: <strong>${fromText}</strong>
           <span class="mx-1">→</span>
           <strong>${toText}</strong>
         </p>
@@ -290,7 +250,7 @@
         <div class="table-responsive mb-0 city-hour-table">
           <table class="table table-sm align-middle mb-0">
             <thead class="table-light">
-              <tr><th>Sensor</th><th>Value</th><th>Unit</th></tr>
+              <tr><th>Cảm biến</th><th>Giá trị</th><th>Đơn vị</th></tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
@@ -381,7 +341,7 @@
     avgEl.textContent = avg;
     maxEl.textContent = mx;
     minEl.textContent = mn;
-    status.textContent = `Muc do hien tai: ${cls.label}`;
+    status.textContent = `Mức độ hiện tại: ${cls.label}`;
     sub.textContent = adviceTexts[cls.key] || adviceTexts.unhealthy;
 
     wrap.classList.remove('aqi-theme-good', 'aqi-theme-moderate', 'aqi-theme-unhealthy', 'aqi-theme-very-unhealthy', 'aqi-theme-hazardous');
@@ -444,7 +404,7 @@
         iconSize,
         iconAnchor
       });
-      const label = props.city || 'Tram';
+      const label = props.city || 'Trạm';
       const displayAqi = typeof aqius === 'number' ? Math.round(aqius) : aqius;
       const marker = L.marker([lat, lng], { icon: divIcon })
         .bindTooltip(`<strong>${label}</strong><br/>AQI: ${displayAqi} (${info.label})`, { direction: 'top' });
@@ -460,7 +420,7 @@
     stationContainer.innerHTML = '';
     const sorted = [...(stations || [])].sort((a, b) => (b.properties?.aqius || 0) - (a.properties?.aqius || 0));
     if (!sorted.length) {
-      stationContainer.innerHTML = '<div class="col text-center text-muted py-4">Khong co du lieu AQI.</div>';
+      stationContainer.innerHTML = '<div class="col text-center text-muted py-4">Không có dữ liệu AQI.</div>';
       return;
     }
     sorted.forEach((f, idx) => {
@@ -477,8 +437,8 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <div>
-                <p class="text-muted small mb-0">${props.state || 'Ho Chi Minh'}</p>
-                <h3 class="h6 mb-0">${props.city || 'Tram AQI'}</h3>
+                <p class="text-muted small mb-0">${props.state || 'Hồ Chí Minh'}</p>
+                <h3 class="h6 mb-0">${props.city || 'Trạm AQI'}</h3>
               </div>
               <span class="aqi-card-badge" style="background:${info.color}1f;color:${info.color}">${info.label}</span>
             </div>
@@ -486,7 +446,7 @@
               <span class="display-6 fw-bold">${aqius}</span>
               <span class="text-muted">AQI</span>
             </div>
-            <div class="aqi-station-meta">Cap nhat: ${tsText}</div>
+            <div class="aqi-station-meta">Cập nhật: ${tsText}</div>
           </div>
         </div>`;
       col.querySelector('.aqi-station-card').addEventListener('click', () => focusStation(cardId));
@@ -535,11 +495,11 @@
       const div = L.DomUtil.create('div', 'card p-2 shadow-sm small');
       div.innerHTML = [
         '<div><strong>AQI</strong></div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#2ecc71;margin-right:6px"></span>0-50 Tot</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#f1c40f;margin-right:6px"></span>51-100 Trung binh</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#e67e22;margin-right:6px"></span>101-200 Xau/Nhay cam</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#8e44ad;margin-right:6px"></span>201-300 Rat xau</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#e74c3c;margin-right:6px"></span>300+ Nguy hai</div>'
+        '<div><span style="display:inline-block;width:10px;height:10px;background:#2ecc71;margin-right:6px"></span>0-50 Tốt</div>',
+        '<div><span style="display:inline-block;width:10px;height:10px;background:#f1c40f;margin-right:6px"></span>51-100 Trung bình</div>',
+        '<div><span style="display:inline-block;width:10px;height:10px;background:#e67e22;margin-right:6px"></span>101-200 Xấu/Nhạy cảm</div>',
+        '<div><span style="display:inline-block;width:10px;height:10px;background:#8e44ad;margin-right:6px"></span>201-300 Rất xấu</div>',
+        '<div><span style="display:inline-block;width:10px;height:10px;background:#e74c3c;margin-right:6px"></span>300+ Nguy hại</div>'
       ].join('');
       return div;
     };
@@ -548,7 +508,7 @@
 
   function handleLocate() {
     if (!navigator.geolocation) {
-      alert('Trinh duyet khong ho tro dinh vi.');
+      alert('Trình duyệt không hỗ trợ định vị.');
       return;
     }
     locateBtn?.classList.add('disabled');
@@ -562,7 +522,7 @@
             color: '#3498db',
             fillColor: '#3498db',
             fillOpacity: 0.9
-          }).bindTooltip('Vi tri cua ban', { direction: 'top' }).addTo(map);
+          }).bindTooltip('Vị trí của bạn', { direction: 'top' }).addTo(map);
         } else {
           userMarker.setLatLng(latlng);
         }
@@ -574,7 +534,7 @@
     );
   }
 
-  // UI events
+  // Sự kiện UI
   layerButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.layerToggle;
@@ -600,7 +560,7 @@
       return;
     }
     const latest = Math.max(...timestamps);
-    stationsUpdatedEl.textContent = `Cap nhat luc ${formatTime(latest)}`;
+    stationsUpdatedEl.textContent = `Cập nhật lúc ${formatTime(latest)}`;
   }
 
   fetch('/aqi/data')
@@ -621,7 +581,7 @@
 })();
 
 
-// Show Alert Message
+// Hiển thị thông báo (Alert)
 
 const showAlert = document.querySelector('[show-alert]');
 if (showAlert) {
@@ -637,7 +597,7 @@ if (showAlert) {
   }
 }
 
-// End Show Alert Message
+// Kết thúc hiển thị thông báo (Alert)
 
 
 (function () {
@@ -659,7 +619,7 @@ if (showAlert) {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.message || 'Gửi OTP thất bại');
-        // chuyển sang bước verify
+        // chuyển sang bước xác minh
         formVerify.classList.remove('d-none');
         formRequest.classList.add('d-none');
         formVerify.email.value = email;
@@ -713,7 +673,7 @@ if (togglePassword && passwordField) {
     const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordField.setAttribute('type', type);
 
-    // Toggle icon
+    // Đổi icon
     const icon = this.querySelector('i');
     if (type === 'password') {
       icon.classList.remove('bi-eye');

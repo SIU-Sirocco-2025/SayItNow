@@ -6,18 +6,18 @@ mixin aqiStatusbar()
       .d-flex.align-items-center.gap-3
         i.bi.bi-shield-exclamation.display-6.opacity-75
         .status-copy
-          h3.h5.mb-1#aqi-status-text Trang thai chat luong khong khi
-          p.small.mb-0.text-muted#aqi-status-sub Cap nhat tu cac tram moi nhat.
+          h3.h5.mb-1#aqi-status-text Trạng thái chất lượng không khí
+          p.small.mb-0.text-muted#aqi-status-sub Cập nhật từ các trạm mới nhất.
       .d-flex.align-items-center.gap-3.flex-wrap
         .d-flex.align-items-center.gap-2
-          span.badge.bg-light.text-body.secondary-label Trung binh
+          span.badge.bg-light.text-body.secondary-label Trung bình
           span.fw-bold.fs-5#aqi-avg --
         .vr.d-none.d-md-block
         .d-flex.align-items-center.gap-2
-          span.badge.bg-light.text-body.secondary-label Cao nhat
+          span.badge.bg-light.text-body.secondary-label Cao nhất
           span.fw-bold#aqi-max --
         .d-flex.align-items-center.gap-2
-          span.badge.bg-light.text-body.secondary-label Thap nhat
+          span.badge.bg-light.text-body.secondary-label Thấp nhất
           span.fw-bold#aqi-min --
 
 mixin aqiLegendInline()
@@ -43,32 +43,32 @@ mixin aqiMapControls()
       .btn-group(role='group', aria-label='Toggle map layers')
         button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='heat')
           i.bi.bi-fire.me-1
-          | Ban do nhiet
+          | Bản đồ nhiệt
         button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='markers')
           i.bi.bi-geo-alt.me-1
-          | Diem tram
+          | Điểm trạm
       .btn-group(role='group', aria-label='Base map styles')
-        button.btn.btn-sm.btn-outline-secondary.active(type='button', data-map-style='Carto Light') Sang
-        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='Dark Matter') Toi
-        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='OpenStreetMap') Co dien
+        button.btn.btn-sm.btn-outline-secondary.active(type='button', data-map-style='Carto Light') Sáng
+        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='Dark Matter') Tối
+        button.btn.btn-sm.btn-outline-secondary(type='button', data-map-style='OpenStreetMap') Cổ điển
       button.btn.btn-sm.btn-outline-success(type='button', data-map-action='locate')
         i.bi.bi-crosshair.me-1
-        | Vi tri cua toi
+        | Vị trí của tôi
 
 mixin aqiMapCard()
   .aqi-map-card.card.border-0.shadow-sm
     .card-body
       #aqi-map(style='width:100%;height:520px;border-radius:12px;overflow:hidden;')
       p.small.text-muted.mt-2
-        | Nen ban do tu OpenStreetMap/Carto. Vung mau the hien muc do AQI tu cac tram.
+        | Nền bản đồ từ OpenStreetMap/Carto. Vùng màu thể hiện mức độ AQI từ các trạm.
 
 mixin aqiStationGrid()
   .aqi-stations.mt-4
     .d-flex.justify-content-between.align-items-end.flex-wrap.gap-2.mb-3
-      h2.h5.mb-0 Chi tiet cac tram
+      h2.h5.mb-0 Chi tiết các trạm
       span.text-muted.small(data-stations-updated) --
     #aqi-city-hero.mb-3
     #city-hour-details.d-none.mb-3
     .row.row-cols-1.row-cols-md-2.g-3#aqi-stations
       .col.text-center.text-muted.py-4(data-empty-state)
-        | Dang tai du lieu AQI...
+        | Đang tải dữ liệu AQI...
