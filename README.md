@@ -324,6 +324,12 @@ node scripts/check-latest-openaq.js
 ```bash
 node scripts/check-python-deps.js
 ```
+### 9) NGSI‑LD API (tuỳ chọn)
+- Kiểm thử nhanh các endpoint NGSI‑LD
+```bash
+node scripts/test-ngsi-ld.js
+```
+
 - Script dùng [`helpers.checkPythonDeps.ensurePythonDependencies`](helpers/checkPythonDeps.js) để tự động kiểm tra torch/pandas/numpy/sklearn và cài bằng pip nếu thiếu.
 - API dự đoán gọi Python runner: [`helpers.pythonRunner.runPythonScriptWithStdin`](helpers/pythonRunner.js) chạy [`predict_from_json.py`](predict_from_json.py).
 - Tham số mô hình LSTM: thư mục [model_params/](model_params/), ánh xạ trong [`controllers/api/prediction.controller.js`](controllers/api/prediction.controller.js).
@@ -383,6 +389,17 @@ git push -u origin feat/<ten-tinh-nang>
 - Tạo issue: https://github.com/SIU-Sirocco-2025/Eco-Track/issues
 
 ---
+
+## 📊 Giấy Phép Dữ Liệu Mở
+Dữ liệu được xuất bản theo giấy phép **ODC-BY 1.0**.  
+Xem chi tiết tại [DATA_LICENSE.md](DATA_LICENSE.md).
+
+## 📜 Giấy Phép Thư Viện Phụ Thuộc
+
+Danh sách giấy phép của tất cả dependencies (npm, Python) được tổng hợp tại [DEPENDENCIES_LICENSES.md](DEPENDENCIES_LICENSES.md).
+
+- Tự động tạo từ package.json và yêu cầu Python bằng script kiểm kê.
+- Mục tiêu: minh bạch bản quyền, tuân thủ phân phối theo GPL-3.0.
 
 ## 📄 Giấy Phép
 Phân phối theo GNU GPL v3.0. Xem [LICENSE](LICENSE).
