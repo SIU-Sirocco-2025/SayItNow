@@ -11,12 +11,12 @@ function normalize(s = '') {
 }
 
 function aqiMeta(aqius) {
-  if (aqius <= 50)  return { level: 'good',           label: 'Tốt',        color: '#2ecc71' };
-  if (aqius <= 100) return { level: 'moderate',       label: 'Trung bình', color: '#f1c40f' };
-  if (aqius <= 150) return { level: 'unhealthy-sg',   label: 'Nhạy cảm',   color: '#e67e22' };
-  if (aqius <= 200) return { level: 'unhealthy',      label: 'Xấu',        color: '#e67e22' };
-  if (aqius <= 300) return { level: 'very-unhealthy', label: 'Rất xấu',    color: '#8e44ad' };
-  return             { level: 'hazardous',      label: 'Nguy hại',    color: '#e74c3c' };
+  if (aqius <= 50)  return { level: 'good',                     label: 'Tốt',       color: '#2ecc71' };
+  if (aqius <= 100) return { level: 'moderate',                 label: 'Trung bình',color: '#f1c40f' };
+  if (aqius <= 150) return { level: 'unhealthy-for-sensitive',  label: 'Nhạy cảm',  color: '#f1c40f' };
+  if (aqius <= 200) return { level: 'unhealthy',                label: 'Xấu',       color: '#e67e22' };
+  if (aqius <= 300) return { level: 'very-unhealthy',           label: 'Rất xấu',   color: '#8e44ad' };
+  return             { level: 'hazardous',                      label: 'Nguy hại',  color: '#e74c3c' };
 }
 
 function intensityFromAQI(aqius) {
@@ -88,7 +88,8 @@ module.exports.latestPoints = async (req, res) => {
   try {
     const entries = Object.entries(models).filter(([k]) => k.endsWith('Reading'));
     const features = [];
-    for (const [, Model] of entries) {
+    let idx = 0;
+    for (const [modelName, Model] of entries) {
       const doc = await Model.findOne()
         .sort({ 'current.pollution.ts': -1 })
         .select('city state country location current.pollution.aqius current.pollution.ts')
@@ -103,6 +104,7 @@ module.exports.latestPoints = async (req, res) => {
           type: 'Feature',
           geometry: { type: 'Point', coordinates: coords },
           properties: {
+            idx: String(idx),
             city: doc.city,
             cityKey: normalize(doc.city), // thêm key đã chuẩn hoá để join với ranh giới quận nếu cần
             state: doc.state,
@@ -115,6 +117,7 @@ module.exports.latestPoints = async (req, res) => {
             intensity: intensityFromAQI(aqius)
           }
         });
+        idx++;
       }
     }
     res.json({ type: 'FeatureCollection', features });

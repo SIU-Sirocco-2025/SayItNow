@@ -1,12 +1,12 @@
-// Enhanced client-side AQI map + UI behaviours
+// Bản đồ AQI phía client + hành vi UI (nâng cao)
 (function initAQIMap() {
   function aqiClass(aqius) {
-    if (aqius <= 50) return { key: 'good', color: '#2ecc71', label: 'Tot' };
-    if (aqius <= 100) return { key: 'moderate', color: '#f1c40f', label: 'Trung binh' };
-    if (aqius <= 150) return { key: 'unhealthy', color: '#e67e22', label: 'Nhay cam' };
-    if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xau' };
-    if (aqius <= 300) return { key: 'very-unhealthy', color: '#8e44ad', label: 'Rat xau' };
-    return { key: 'hazardous', color: '#e74c3c', label: 'Nguy hai' };
+    if (aqius <= 50) return { key: 'good', color: '#1a9e3e', label: 'Tốt' };
+    if (aqius <= 100) return { key: 'moderate', color: '#95d500', label: 'Trung bình' };
+    if (aqius <= 150) return { key: 'unhealthy-for-sensitive', color: '#f1c40f', label: 'Nhạy cảm' };
+    if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xấu' };
+    if (aqius <= 300) return { key: 'very-unhealthy', color: '#ff8c00', label: 'Rất xấu' };
+    return { key: 'hazardous', color: '#d41e3a', label: 'Nguy hại' };
   }
   function formatTime(value) {
     if (!value) return '--';
@@ -19,12 +19,13 @@
     const valueEl = document.querySelector('[data-aqi]');
     if (!root || !valueEl) return;
     const info = aqiClass(Number(aqi || 0));
-    valueEl.textContent = aqi ?? '--';
+    const displayAqi = typeof aqi === 'number' ? Math.round(aqi) : (aqi ?? '--');
+    valueEl.textContent = displayAqi;
     root.classList.remove(
       'aqi-good', 'aqi-moderate', 'aqi-unhealthy', 'aqi-very-unhealthy', 'aqi-hazardous', 'aqi-unknown'
     );
     root.classList.add(`aqi-${info.key}`);
-    root.title = `Cap nhat: ${formatTime(ts)} • ${info.label}`;
+    root.title = `Cập nhật: ${formatTime(ts)} • ${info.label}`;
   }
 
   // Cập nhật header luôn, dù có hay không có map
@@ -68,15 +69,15 @@
   map.on('baselayerchange', e => highlightBaseButtons(e.name));
 
   const markerLayer = L.layerGroup().addTo(map);
-  let heatLayer = null;
+  let voronoiLayer = null;
   let userMarker = null;
   const markerById = new Map();
-  const layerState = { heat: true, markers: true };
+  const layerState = { voronoi: true, markers: true };
 
-  // Visual outline for the focus area
+  // Khung trực quan cho khu vực tập trung
   L.rectangle(HCMC_BOUNDS, { color: '#f39c12', weight: 1, fill: false, dashArray: '6 4' }).addTo(map);
 
-  // DOM references
+  // Tham chiếu DOM
   const layerButtons = document.querySelectorAll('[data-layer-toggle]');
   const styleButtons = document.querySelectorAll('[data-map-style]');
   const locateBtn = document.querySelector('[data-map-action="locate"]');
@@ -87,12 +88,17 @@
   let cityOverlay = null;
 
   const adviceTexts = {
-    good: 'Khong khi an toan, ban co the sinh hoat ngoai troi binh thuong.',
-    moderate: 'Nguoi nhay cam nen giam thoi gian ngoai troi, nguoi khac van on.',
-    unhealthy: 'Can than trong: giam hoat dong manh va nen deo khau trang phu hop.',
-    'very-unhealthy': 'Han che ra ngoai neu khong can thiet, uu tien o trong nha.',
-    hazardous: 'Muc nguy hiem: nen o trong nha va su dung thiet bi loc khong khi neu co.'
+    good: 'Không khí an toàn, bạn có thể sinh hoạt ngoài trời bình thường.',
+    moderate: 'Người nhạy cảm nên giảm thời gian ngoài trời, người khác vẫn ổn.',
+    unhealthy: 'Cần thận trọng: giảm hoạt động mạnh và nên đeo khẩu trang phù hợp.',
+    'very-unhealthy': 'Hạn chế ra ngoài nếu không cần thiết, ưu tiên ở trong nhà.',
+    hazardous: 'Mức nguy hiểm: nên ở trong nhà và sử dụng thiết bị lọc không khí nếu có.'
   };
+
+  // Lưu trữ dữ liệu trạm
+  let allStations = [];
+  let nearestStation = null;
+  let cityWideStation = null;
 
   function isCityWideStation(feature) {
     const props = feature?.properties || {};
@@ -110,46 +116,6 @@
     return { cityStation, districts };
   }
 
-  // function aqiClass(aqius) {
-  //   if (aqius <= 50) return { key: 'good', color: '#2ecc71', label: 'Tot' };
-  //   if (aqius <= 100) return { key: 'moderate', color: '#f1c40f', label: 'Trung binh' };
-  //   if (aqius <= 150) return { key: 'unhealthy', color: '#e67e22', label: 'Nhay cam' };
-  //   if (aqius <= 200) return { key: 'unhealthy', color: '#e67e22', label: 'Xau' };
-  //   if (aqius <= 300) return { key: 'very-unhealthy', color: '#8e44ad', label: 'Rat xau' };
-  //   return { key: 'hazardous', color: '#e74c3c', label: 'Nguy hai' };
-  // }
-
-  // function formatTime(value) {
-  //   if (!value) return '--';
-  //   const time = typeof value === 'number' ? new Date(value) : new Date(String(value));
-  //   if (Number.isNaN(time.getTime())) return '--';
-  //   return time.toLocaleString('vi-VN', { hour12: false });
-  // }
-  // function updateHeaderBadges(aqi, temp, ts) {
-  //   const aqiEl = document.querySelector('.aqi-badge');
-  //   const tempEl = document.querySelector('[data-temp]');
-  //   if (!aqiEl || !tempEl) return;
-  //   const info = aqiClass(Number(aqi || 0));
-  //   aqiEl.dataset.aqi = aqi ?? '--';
-  //   aqiEl.innerHTML = `<i class="bi bi-wind me-1"></i>AQI ${aqi ?? '--'}`;
-  //   aqiEl.className = `aqi-badge btn btn-outline-light rounded-pill aqi-${info.key}`;
-  //   tempEl.innerHTML = `<i class="bi bi-thermometer me-1"></i>${typeof temp === 'number' ? temp + '°' : '--°'}`;
-  //   aqiEl.title = `Cap nhat: ${formatTime(ts)} • ${info.label}`;
-  // }
-
-  // // Luôn gọi để cập nhật header, kể cả khi không có map
-  // fetch('/aqi/latest-reading')
-  //   .then(r => r.json())
-  //   .then(d => { if (d?.success) updateHeaderBadges(d.aqius, d.tp, d.ts); })
-  //   .catch(() => { });
-
-  // const mapEl = document.getElementById('aqi-map');
-  // const hasMap = mapEl && typeof L !== 'undefined';
-  // if (!hasMap) {
-  //   // Không có map -> chỉ cần header, dừng tại đây
-  //   return;
-  // }
-
   function renderCityHero(station) {
     if (!cityHeroEl) return;
     if (!station) {
@@ -159,33 +125,34 @@
     }
     cityHeroEl.classList.remove('d-none');
     const props = station.properties || {};
-    const aqius = Number(props.aqius || 0) || '--';
-    const info = aqiClass(aqius);
+    const rawAqi = Number(props.aqius || 0);
+    const aqius = rawAqi ? Math.round(rawAqi) : '--';
+    const info = aqiClass(rawAqi);
     const tsText = props.ts ? formatTime(props.ts) : '--';
-    const label = props.city || 'Ho Chi Minh City';
+    const label = props.city || 'Thành phố Hồ Chí Minh';
     const key = props.cityKey || 'city-wide';
     cityHeroEl.innerHTML = `
       <div class="aqi-city-hero-card card aqi-card-${info.key}" data-station-id="${key}">
         <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
           <div class="flex-grow-1">
             <p class="text-uppercase small fw-semibold text-muted mb-1">
-              <i class="bi bi-broadcast-pin me-1"></i>Tram tong
+              <i class="bi bi-broadcast-pin me-1"></i>Trạm tổng
             </p>
             <h3 class="h4 mb-1">${label}</h3>
             <p class="mb-2 text-muted d-flex align-items-center gap-2">
-              <i class="bi bi-geo me-1"></i>Phu song toan thanh pho
+              <i class="bi bi-geo me-1"></i>Phủ sóng toàn thành phố
             </p>
             <span class="aqi-city-chip me-2 badge rounded-pill px-3 py-2" style="background:${info.color}1f;color:${info.color};border:1px solid ${info.color}33">${info.label}</span>
             <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-city-hour-btn>
               <i class="bi bi-clock-history"></i>
-              <span>Thong so gio gan nhat</span>
+              <span>Thông số giờ gần nhất</span>
             </button>
           </div>
           <div class="text-center">
             <div class="display-4 fw-bold mb-0">${aqius}</div>
             <div class="text-muted">AQI</div>
             <div class="mt-2 small text-muted d-flex align-items-center justify-content-center gap-1">
-              <i class="bi bi-arrow-repeat"></i><span>Cap nhat: ${tsText}</span>
+              <i class="bi bi-arrow-repeat"></i><span>Cập nhật: ${tsText}</span>
             </div>
           </div>
         </div>
@@ -201,7 +168,7 @@
     const wrap = document.getElementById('city-hour-details');
     if (!wrap) return;
     if (!data?.success) {
-      wrap.innerHTML = '<div class="city-hour-card small text-muted">Khong co du lieu gio gan nhat.</div>';
+      wrap.innerHTML = '<div class="city-hour-card small text-muted">Không có dữ liệu giờ gần nhất.</div>';
       wrap.classList.remove('d-none');
       return;
     }
@@ -211,12 +178,26 @@
 
     // Mapping chuẩn
     const SENSOR_META = {
-      pm1: { display: 'PM1.0', unit: 'µg/m³', icon: 'bi-bullseye', critical: true },
-      pm25: { display: 'PM2.5', unit: 'µg/m³', icon: 'bi-cloud-haze2', critical: true },
+      pm1: { display: 'PM1.0', unit: 'µg/m³', icon: 'bi-bullseye' },
+      pm25: { display: 'PM2.5', unit: 'µg/m³', icon: 'bi-cloud-haze2' },
       relativehumidity: { display: 'Độ ẩm', unit: '%', icon: 'bi-droplet-half' },
       temperature: { display: 'Nhiệt độ', unit: '°C', icon: 'bi-thermometer-half' },
       um003: { display: 'PM0.3', unit: 'particles/cm³', icon: 'bi-stars' }
     };
+
+    // Đánh giá cảnh báo theo ngưỡng
+    function isCritical(key, value) {
+      if (typeof value !== 'number') return false;
+      switch (key) {
+        case 'pm25': return value >= 35;            // Khuyến nghị WHO 24h ~35 µg/m³
+        case 'pm1': return value >= 35;
+        case 'temperature': return value <= 15 || value >= 35;
+        case 'relativehumidity': return value <= 20 || value >= 85;
+        case 'um003': return value >= 1000;
+        default: return false;
+      }
+    }
+
     const sensorMeta = k => SENSOR_META[k] || { display: k, unit: '', icon: 'bi-info-circle' };
     const orderWeight = k => ({ pm1: 1, pm25: 2, relativehumidity: 3, temperature: 4, um003: 5 }[k] || 99);
 
@@ -224,15 +205,16 @@
       .sort((a, b) => orderWeight(a.key) - orderWeight(b.key))
       .map(m => {
         const meta = sensorMeta(m.key);
-        const warn = meta.critical;
+        const warn = isCritical(m.key, m.value);
+        const displayValue = typeof m.value === 'number' ? m.value.toFixed(1) : (m.value ?? '--');
         return `
         <tr class="${warn ? 'table-warning' : ''}">
           <td class="text-muted">
             <i class="bi ${meta.icon} me-1"></i>${meta.display}
           </td>
           <td>
-            <span class="fw-semibold">${m.value ?? '--'}</span>
-            ${warn ? '<span class="badge bg-danger-subtle text-danger ms-2">Canh bao</span>' : ''}
+            <span class="fw-semibold">${displayValue}</span>
+            ${warn ? '<span class="badge bg-danger-subtle text-danger ms-2">Cảnh báo</span>' : ''}
           </td>
           <td class="text-muted">${meta.unit}</td>
         </tr>`;
@@ -242,23 +224,23 @@
     <div class="city-hour-card card border-0 shadow-sm">
       <div class="card-header bg-white border-0 pb-0 d-flex justify-content-between align-items-center">
         <h5 class="h6 mb-0 d-flex align-items-center gap-2">
-          <i class="bi bi-clock-history text-primary"></i><span>Thong so gio gan nhat</span>
+          <i class="bi bi-clock-history text-primary"></i><span>Thông số giờ gần nhất</span>
         </h5>
         <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-city-hour-close>
-          <i class="bi bi-x-lg"></i><span>Dong</span>
+          <i class="bi bi-x-lg"></i><span>Đóng</span>
         </button>
       </div>
       <div class="card-body pt-2">
         <p class="small text-muted mb-3">
           <i class="bi bi-calendar-range me-1"></i>
-          Khung gio: <strong>${fromText}</strong>
+          Khung giờ: <strong>${fromText}</strong>
           <span class="mx-1">→</span>
           <strong>${toText}</strong>
         </p>
         <div class="row g-3 mb-3 city-hour-metrics">
           ${(data.measurements || []).sort((a, b) => orderWeight(a.key) - orderWeight(b.key)).map(m => {
       const meta = sensorMeta(m.key);
-      const cls = meta.critical ? 'metric-item danger' : 'metric-item';
+      const cls = isCritical(m.key, m.value) ? 'metric-item danger' : 'metric-item';
       return `
               <div class="col-6 col-md-4 col-lg-3">
                 <div class="${cls}">
@@ -273,7 +255,7 @@
         <div class="table-responsive mb-0 city-hour-table">
           <table class="table table-sm align-middle mb-0">
             <thead class="table-light">
-              <tr><th>Sensor</th><th>Value</th><th>Unit</th></tr>
+              <tr><th>Cảm biến</th><th>Giá trị</th><th>Đơn vị</th></tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
@@ -348,6 +330,153 @@
     return points;
   }
 
+  function updateRecommendations(aqi) {
+    // Ẩn tất cả khuyến nghị
+    const groups = document.querySelectorAll('[data-advice-group]');
+    groups.forEach(g => g.style.display = 'none');
+    
+    // Hiển thị khuyến nghị phù hợp
+    const cls = aqiClass(aqi);
+    const activeGroup = document.querySelector(`[data-advice-group="${cls.key}"]`);
+    if (activeGroup) activeGroup.style.display = 'block';
+  }
+
+  function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Bán kính Trái Đất (km)
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function findNearestStation(userLat, userLng) {
+    if (!allStations.length) return null;
+    let nearest = null;
+    let minDistance = Infinity;
+    allStations.forEach(station => {
+      const props = station.properties || {};
+      const lat = Number(props.latitude || props.lat || 0);
+      const lng = Number(props.longitude || props.lng || 0);
+      if (!lat || !lng) return;
+      const distance = calculateDistance(userLat, userLng, lat, lng);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = station;
+      }
+    });
+    return nearest;
+  }
+
+  function renderStationAqiCard(station) {
+    const container = document.getElementById('station-aqi-card');
+    if (!container || !station) return;
+
+    const props = station.properties || {};
+    const aqius = Number(props.aqius || 0);
+    const info = aqiClass(aqius);
+    const city = props.city || 'Trạm';
+    const ts = props.ts ? formatTime(props.ts) : '--';
+
+    // Emoji tương ứng với level
+    let emoji = '😊';
+    if (aqius <= 50) emoji = '😊';
+    else if (aqius <= 100) emoji = '😐';
+    else if (aqius <= 150) emoji = '😟';
+    else if (aqius <= 200) emoji = '😕';
+    else if (aqius <= 300) emoji = '😢';
+    else emoji = '😱';
+
+    container.innerHTML = `
+      <div class="station-aqi-display p-3 rounded" style="background: linear-gradient(135deg, ${info.color}20 0%, ${info.color}05 100%); border-left: 4px solid ${info.color};">
+        <p class="text-muted small mb-2">${city}</p>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="d-flex align-items-baseline gap-2">
+            <span class="display-4 fw-bold" style="color: ${info.color};">${Math.round(aqius)}</span>
+            <span class="h6 text-muted">AQI</span>
+          </div>
+          <div style="font-size: 3rem; background: rgba(0,0,0,0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">${emoji}</div>
+        </div>
+        <p class="small mb-0" style="color: ${info.color}; font-weight: 600;">${info.label}</p>
+        <p class="small text-muted mb-0 mt-2">
+          <i class="bi bi-clock"></i> ${ts}
+        </p>
+      </div>
+    `;
+  }
+
+  function handleStationSelection() {
+    const selector = document.getElementById('station-selector');
+    if (!selector) return;
+
+    selector.addEventListener('change', (e) => {
+      const stationId = e.target.value;
+      const selectedStation = allStations.find(s => s.properties?.idx === stationId);
+      
+      if (selectedStation) {
+        const selectedAqi = Number(selectedStation.properties?.aqius || 0);
+        renderStationAqiCard(selectedStation);
+        updateRecommendations(selectedAqi);
+      }
+    });
+  }
+
+  function populateStationSelector() {
+    const selector = document.getElementById('station-selector');
+    if (!selector || !allStations.length) return;
+
+    // Lấy vị trí user
+    let userLat = 10.7769; // Mặc định HCM center
+    let userLng = 106.6955;
+
+    if (userMarker) {
+      const latLng = userMarker.getLatLng();
+      userLat = latLng.lat;
+      userLng = latLng.lng;
+    }
+
+    // Tính khoảng cách cho tất cả trạm
+    const stationsWithDistance = allStations.map(station => {
+      const props = station.properties || {};
+      const lat = Number(props.latitude || props.lat || 0);
+      const lng = Number(props.longitude || props.lng || 0);
+      const distance = lat && lng ? calculateDistance(userLat, userLng, lat, lng) : Infinity;
+      return {
+        station,
+        distance,
+        city: props.city || 'Trạm',
+        idx: props.idx
+      };
+    });
+
+    // Sắp xếp theo khoảng cách
+    stationsWithDistance.sort((a, b) => a.distance - b.distance);
+
+    // Xóa options cũ
+    selector.innerHTML = '';
+
+    // Thêm options mới
+    stationsWithDistance.forEach((item, index) => {
+      const option = document.createElement('option');
+      option.value = item.idx;
+      const distanceText = item.distance !== Infinity ? ` (${item.distance.toFixed(1)}km)` : '';
+      const icon = index === 0 ? '🎯' : '📍';
+      option.textContent = `${icon} ${item.city}${distanceText}`;
+      selector.appendChild(option);
+    });
+
+    // Chọn trạm đầu tiên (gần nhất)
+    if (stationsWithDistance.length > 0) {
+      selector.value = stationsWithDistance[0].idx;
+      // Render card AQI cho trạm đầu tiên
+      renderStationAqiCard(stationsWithDistance[0].station);
+      const selectedAqi = Number(stationsWithDistance[0].station.properties?.aqius || 0);
+      updateRecommendations(selectedAqi);
+    }
+  }
+
   function updateStatusbar(features) {
     const avgEl = document.getElementById('aqi-avg');
     const maxEl = document.getElementById('aqi-max');
@@ -364,8 +493,11 @@
     avgEl.textContent = avg;
     maxEl.textContent = mx;
     minEl.textContent = mn;
-    status.textContent = `Muc do hien tai: ${cls.label}`;
+    status.textContent = `Mức độ hiện tại: ${cls.label}`;
     sub.textContent = adviceTexts[cls.key] || adviceTexts.unhealthy;
+    
+    // Cập nhật khuyến nghị dựa trên AQI trung bình
+    updateRecommendations(avg);
 
     wrap.classList.remove('aqi-theme-good', 'aqi-theme-moderate', 'aqi-theme-unhealthy', 'aqi-theme-very-unhealthy', 'aqi-theme-hazardous');
     document.body.classList.remove('aqi-safe', 'aqi-danger');
@@ -383,29 +515,125 @@
     );
   }
 
-  function renderHeatLayer(stations, cityStation) {
-    if (!L.heatLayer) return;
-    const heatData = (stations || []).map(f => {
+  function renderVoronoiLayer(stations, cityStation) {
+    if (!window.turf) {
+      console.warn('Turf.js not loaded yet');
+      return;
+    }
+    
+    if (voronoiLayer) map.removeLayer(voronoiLayer);
+    voronoiLayer = L.layerGroup();
+
+    // Tạo GeoJSON point collection từ danh sách trạm
+    const points = (stations || []).map((f, idx) => {
       const [lng, lat] = f.geometry.coordinates || [];
-      const aqius = Number(f.properties?.aqius || 0);
-      const intensity = Math.max(0.08, Math.min(1, Math.pow(aqius / 350, 1.1)));
-      return [lat, lng, intensity];
-    }).filter(point => Number.isFinite(point[0]) && Number.isFinite(point[1]));
-    if (heatLayer) map.removeLayer(heatLayer);
-    heatLayer = L.heatLayer(heatData, {
-      radius: 60,
-      blur: 38,
-      minOpacity: 0.45,
-      maxZoom: 17,
-      gradient: {
-        0.0: '#2ecc71',
-        0.35: '#f1c40f',
-        0.6: '#e67e22',
-        0.8: '#8e44ad',
-        1.0: '#e74c3c'
-      }
-    });
-    if (layerState.heat) heatLayer.addTo(map);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      
+      const props = f.properties || {};
+      const aqius = Number(props.aqius || 0);
+      return {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [lng, lat] },
+        properties: {
+          aqius,
+          city: props.city || 'Trạm',
+          ts: props.ts,
+          idx
+        }
+      };
+    }).filter(p => p !== null);
+
+    if (points.length < 3) {
+      console.warn('Need at least 3 stations for Voronoi diagram');
+      if (layerState.voronoi) voronoiLayer.addTo(map);
+      return;
+    }
+
+    const pointCollection = { type: 'FeatureCollection', features: points };
+
+    // Lấy bounding box để giới hạn Voronoi
+    const bbox = [106.40, 10.40, 107.10, 10.97]; // [minLng, minLat, maxLng, maxLat]
+
+    try {
+      // Tạo Voronoi diagram
+      const voronoi = window.turf.voronoi(pointCollection, { bbox });
+
+      // Render mỗi polygon với màu AQI
+      (voronoi.features || []).forEach(feature => {
+        const props = feature.properties || {};
+        const originIdx = props['site-index'];
+        const originalFeature = points[originIdx];
+        
+        if (!originalFeature) return;
+
+        const aqius = Number(originalFeature.properties.aqius || 0);
+        const info = aqiClass(aqius);
+        const label = originalFeature.properties.city;
+
+        // Tạo GeoJSON layer cho polygon
+        const geoJsonFeature = {
+          type: 'Feature',
+          geometry: feature.geometry,
+          properties: {
+            aqius,
+            label,
+            info: info.label
+          }
+        };
+
+        const geoJsonLayer = L.geoJSON(geoJsonFeature, {
+          style: {
+            fillColor: info.color,
+            fillOpacity: 0.6,
+            color: info.color,
+            weight: 2,
+            dashArray: '3,3'
+          },
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            const displayAqi = Math.round(props.aqius);
+            const tsText = originalFeature.properties.ts ? formatTime(originalFeature.properties.ts) : '--';
+
+            // Tooltip khi hover
+            layer.bindTooltip(`<strong>${props.label}</strong><br/>AQI: ${displayAqi} (${props.info})`, {
+              direction: 'center',
+              sticky: true
+            });
+
+            // Popup khi click
+            layer.bindPopup(`
+              <div class="voronoi-popup aqi-popup-${info.key}">
+                <strong>${props.label}</strong><br/>
+                <div style="font-size:1.3em;font-weight:bold;color:${info.color};margin:4px 0;">${displayAqi} AQI</div>
+                <div class="small text-muted">${props.info}</div>
+                <div class="small text-muted" style="margin-top:6px;"><i class="bi bi-clock-history"></i> ${tsText}</div>
+              </div>
+            `, {
+              className: `popup-${info.key}`,
+              maxWidth: 250,
+              closeButton: true,
+              autoPan: true,
+              autoPanPadding: [50, 50]
+            });
+
+            // Hover effect
+            layer.on('mouseover', function() {
+              this.setStyle({ weight: 3, dashArray: '', fillOpacity: 0.8 });
+            });
+
+            layer.on('mouseout', function() {
+              this.setStyle({ weight: 2, dashArray: '3,3', fillOpacity: 0.6 });
+            });
+          }
+        });
+
+        voronoiLayer.addLayer(geoJsonLayer);
+      });
+
+      if (layerState.voronoi) voronoiLayer.addTo(map);
+    } catch (error) {
+      console.error('Error generating Voronoi diagram:', error);
+    }
   }
 
   function renderMarkers(stations, cityStation) {
@@ -421,15 +649,29 @@
       const classes = [`pm-dot`, info.key.replace(/\s/g, '-'), aqius >= 151 ? 'need-pulse' : ''].join(' ').trim();
       const iconSize = [16, 16];
       const iconAnchor = [8, 8];
+      const displayAqi = typeof aqius === 'number' ? Math.round(aqius) : aqius;
       const divIcon = L.divIcon({
         className: 'pm-icon',
-        html: `<span class="${classes}" style="color:${info.color}"></span>`,
-        iconSize,
-        iconAnchor
+        html: `<span class="${classes}" style="color:${info.color}"></span><span class="pm-aqi-label">${displayAqi}</span>`,
+        iconSize: [35, 25],
+        iconAnchor: [17, 12]
       });
-      const label = props.city || 'Tram';
+      const label = props.city || 'Trạm';
+      const tsText = props.ts ? formatTime(props.ts) : '--';
       const marker = L.marker([lat, lng], { icon: divIcon })
-        .bindTooltip(`<strong>${label}</strong><br/>AQI: ${aqius} (${info.label})`, { direction: 'top' });
+        .bindTooltip(`
+          <div class="station-popup aqi-popup-${info.key}">
+            <strong style="display:block;margin-bottom:4px;">${label}</strong>
+            <div style="font-size:1.3em;font-weight:bold;color:${info.color};margin:4px 0;">${displayAqi} AQI</div>
+            <div class="small text-muted" style="margin:4px 0;">${info.label}</div>
+            <div class="small text-muted" style="margin-top:6px;"><i class="bi bi-clock-history" style="margin-right:4px;"></i>${tsText}</div>
+          </div>
+        `, { 
+          className: `tooltip-${info.key}`,
+          direction: 'top',
+          sticky: true,
+          permanent: false
+        });
       markerLayer.addLayer(marker);
       const key = props.cityKey || props.city || `station-${idx}`;
       markerById.set(key, marker);
@@ -439,40 +681,9 @@
 
   function renderStationCards(stations) {
     if (!stationContainer) return;
+    // Hide the district cards container
     stationContainer.innerHTML = '';
-    const sorted = [...(stations || [])].sort((a, b) => (b.properties?.aqius || 0) - (a.properties?.aqius || 0));
-    if (!sorted.length) {
-      stationContainer.innerHTML = '<div class="col text-center text-muted py-4">Khong co du lieu AQI.</div>';
-      return;
-    }
-    sorted.forEach((f, idx) => {
-      const props = f.properties || {};
-      const aqius = Number(props.aqius || 0) || '--';
-      const info = aqiClass(aqius);
-      const tsText = props.ts ? formatTime(props.ts) : '--';
-      const col = document.createElement('div');
-      col.className = 'col';
-      const cardId = props.cityKey || props.city || `station-${idx}`;
-      col.innerHTML = `
-        <div class="aqi-station-card card aqi-card-${info.key}" data-station-id="${cardId}">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <div>
-                <p class="text-muted small mb-0">${props.state || 'Ho Chi Minh'}</p>
-                <h3 class="h6 mb-0">${props.city || 'Tram AQI'}</h3>
-              </div>
-              <span class="aqi-card-badge" style="background:${info.color}1f;color:${info.color}">${info.label}</span>
-            </div>
-            <div class="d-flex align-items-baseline gap-2 mb-2">
-              <span class="display-6 fw-bold">${aqius}</span>
-              <span class="text-muted">AQI</span>
-            </div>
-            <div class="aqi-station-meta">Cap nhat: ${tsText}</div>
-          </div>
-        </div>`;
-      col.querySelector('.aqi-station-card').addEventListener('click', () => focusStation(cardId));
-      stationContainer.appendChild(col);
-    });
+    stationContainer.classList.add('d-none');
   }
 
   function focusStation(id) {
@@ -489,9 +700,9 @@
     } else {
       map.removeLayer(markerLayer);
     }
-    if (heatLayer) {
-      if (layerState.heat) heatLayer.addTo(map);
-      else map.removeLayer(heatLayer);
+    if (voronoiLayer) {
+      if (layerState.voronoi) voronoiLayer.addTo(map);
+      else map.removeLayer(voronoiLayer);
     }
   }
 
@@ -513,23 +724,98 @@
   function addLegendControl() {
     const legend = L.control({ position: 'bottomright' });
     legend.onAdd = function () {
-      const div = L.DomUtil.create('div', 'card p-2 shadow-sm small');
-      div.innerHTML = [
-        '<div><strong>AQI</strong></div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#2ecc71;margin-right:6px"></span>0-50 Tot</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#f1c40f;margin-right:6px"></span>51-100 Trung binh</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#e67e22;margin-right:6px"></span>101-200 Xau/Nhay cam</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#8e44ad;margin-right:6px"></span>201-300 Rat xau</div>',
-        '<div><span style="display:inline-block;width:10px;height:10px;background:#e74c3c;margin-right:6px"></span>300+ Nguy hai</div>'
-      ].join('');
+      const div = L.DomUtil.create('div', 'card p-3 shadow-sm small aqi-legend-control');
+      const legendItems = [
+        { min: 0, max: 50, label: 'Tốt', color: '#1a9e3e', range: '0-50' },
+        { min: 51, max: 100, label: 'Trung bình', color: '#95d500', range: '51-100' },
+        { min: 101, max: 200, label: 'Xấu/Nhạy cảm', color: '#f1c40f', range: '101-200' },
+        { min: 201, max: 300, label: 'Rất xấu', color: '#ff8c00', range: '201-300' },
+        { min: 301, max: 999, label: 'Nguy hại', color: '#d41e3a', range: '300+' }
+      ];
+      
+      const header = L.DomUtil.create('div');
+      header.innerHTML = '<div style="font-weight:bold;margin-bottom:8px;">AQI</div>';
+      div.appendChild(header);
+      
+      const gradientBar = L.DomUtil.create('div', 'aqi-gradient-bar');
+      gradientBar.style.cssText = `
+        width:100%;
+        height:20px;
+        background: linear-gradient(to right, #1a9e3e 0%, #95d500 25%, #f1c40f 45%, #ff8c00 65%, #d41e3a 80%, #7a0519 100%);
+        border-radius:4px;
+        margin-bottom:8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      `;
+      div.appendChild(gradientBar);
+      
+      const rangeLabel = L.DomUtil.create('div', 'aqi-range-label');
+      rangeLabel.style.cssText = 'font-size:0.8em;color:#666;text-align:center;margin-bottom:8px;';
+      rangeLabel.textContent = '0 ← AQI → 300+';
+      div.appendChild(rangeLabel);
+      
+      legendItems.forEach(item => {
+        const itemDiv = L.DomUtil.create('div', 'aqi-legend-item');
+        itemDiv.style.cssText = `
+          display:flex;
+          align-items:center;
+          gap:6px;
+          padding:6px;
+          margin:2px -6px;
+          border-radius:4px;
+        `;
+        itemDiv.innerHTML = `
+          <span style="display:inline-block;width:12px;height:12px;background:${item.color};border-radius:2px;flex-shrink:0;"></span>
+          <span style="flex:1;">${item.range} ${item.label}</span>
+        `;
+        
+        div.appendChild(itemDiv);
+      });
+      
       return div;
     };
     legend.addTo(map);
   }
+  
+  function filterMarkersByRange(minAqi, maxAqi) {
+    markerLayer.eachLayer(marker => {
+      const markerEl = marker.getElement();
+      if (!markerEl) return;
+      markerEl.style.opacity = '0.3';
+      markerEl.style.transition = 'opacity 0.2s ease';
+    });
+    
+    let count = 0;
+    markerById.forEach((marker, key) => {
+      const markerEl = marker.getElement();
+      if (!markerEl) return;
+      const span = markerEl.querySelector('.pm-dot');
+      if (!span) {
+        markerEl.style.opacity = '0.3';
+        return;
+      }
+      
+      const aqiText = span.parentElement?.title || '';
+      const aqiMatch = aqiText.match(/AQI:\s*(\d+)/);
+      const aqius = aqiMatch ? Number(aqiMatch[1]) : 0;
+      
+      if (aqius >= minAqi && aqius <= maxAqi) {
+        markerEl.style.opacity = '1';
+        markerEl.style.zIndex = '1000';
+        count++;
+      } else {
+        markerEl.style.opacity = '0.3';
+        markerEl.style.zIndex = 'auto';
+      }
+    });
+    
+    if (count > 0) {
+      console.log(`Hiển thị ${count} trạm trong khoảng ${minAqi}-${maxAqi}`);
+    }
+  }
 
   function handleLocate() {
     if (!navigator.geolocation) {
-      alert('Trinh duyet khong ho tro dinh vi.');
+      alert('Trình duyệt không hỗ trợ định vị.');
       return;
     }
     locateBtn?.classList.add('disabled');
@@ -543,7 +829,7 @@
             color: '#3498db',
             fillColor: '#3498db',
             fillOpacity: 0.9
-          }).bindTooltip('Vi tri cua ban', { direction: 'top' }).addTo(map);
+          }).bindTooltip('Vị trí của bạn', { direction: 'top' }).addTo(map);
         } else {
           userMarker.setLatLng(latlng);
         }
@@ -555,7 +841,7 @@
     );
   }
 
-  // UI events
+  // Sự kiện UI
   layerButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.layerToggle;
@@ -581,7 +867,7 @@
       return;
     }
     const latest = Math.max(...timestamps);
-    stationsUpdatedEl.textContent = `Cap nhat luc ${formatTime(latest)}`;
+    stationsUpdatedEl.textContent = `Cập nhật lúc ${formatTime(latest)}`;
   }
 
   fetch('/aqi/data')
@@ -589,20 +875,39 @@
     .then(fc => {
       if (!fc || !Array.isArray(fc.features)) return;
       const { cityStation, districts } = splitStations(fc.features);
+      
+      // Lưu trữ dữ liệu
+      allStations = districts;
+      cityWideStation = cityStation;
+      
+      // Tìm trạm gần nhất (nếu có vị trí user)
+      if (userMarker) {
+        const userLat = userMarker.getLatLng().lat;
+        const userLng = userMarker.getLatLng().lng;
+        nearestStation = findNearestStation(userLat, userLng);
+      } else {
+        // Dùng trạm đầu tiên nếu không có vị trí user
+        nearestStation = districts.length > 0 ? districts[0] : null;
+      }
+      
       updateStatusbar(fc.features);
       renderMarkers(districts, cityStation);
-      renderHeatLayer(districts, cityStation);
+      renderVoronoiLayer(districts, cityStation);
       renderCityHero(cityStation);
       applyCityOverlay(cityStation);
       renderStationCards(districts);
       updateStationsTimestamp(fc.features);
       addLegendControl();
+      
+      // Khởi tạo selector với danh sách các trạm
+      handleStationSelection();
+      populateStationSelector();
     })
     .catch(() => { });
 })();
 
 
-// Show Alert Message
+// Hiển thị thông báo (Alert)
 
 const showAlert = document.querySelector('[show-alert]');
 if (showAlert) {
@@ -618,7 +923,7 @@ if (showAlert) {
   }
 }
 
-// End Show Alert Message
+// Kết thúc hiển thị thông báo (Alert)
 
 
 (function () {
@@ -640,7 +945,7 @@ if (showAlert) {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.message || 'Gửi OTP thất bại');
-        // chuyển sang bước verify
+        // chuyển sang bước xác minh
         formVerify.classList.remove('d-none');
         formRequest.classList.add('d-none');
         formVerify.email.value = email;
@@ -690,11 +995,11 @@ if (showAlert) {
 const togglePassword = document.getElementById('togglePassword');
 const passwordField = document.getElementById('password');
 if (togglePassword && passwordField) {
-    togglePassword.addEventListener('click', function () {
+  togglePassword.addEventListener('click', function () {
     const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
     passwordField.setAttribute('type', type);
 
-    // Toggle icon
+    // Đổi icon
     const icon = this.querySelector('i');
     if (type === 'password') {
       icon.classList.remove('bi-eye');

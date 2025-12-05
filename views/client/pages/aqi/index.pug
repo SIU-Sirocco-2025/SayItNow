@@ -7,9 +7,12 @@ block main
   +showAlertSuccess(5000)
   +showAlertError(5000)
   .container.py-4
-    h1.h4.mb-3 Ban do vung chat luong khong khi
-    +aqiStatusbar()
-    +aqiLegendInline()
-    +aqiMapControls()
-    +aqiMapCard()
-    +aqiStationGrid()
+    .row
+      .col-lg-9
+        +aqiStatusbar()
+        +aqiLegendInline()
+        +aqiMapControls()
+        +aqiMapCard()
+        +aqiStationGrid()
+      .col-lg-3.mt-4.mt-lg-0
+        +aqiRecommendations()
