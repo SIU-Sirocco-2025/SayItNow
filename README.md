@@ -36,10 +36,11 @@ Dữ liệu thời gian thực được lấy từ OpenAQ API v3 và lưu vào M
 - **Nguồn dữ liệu:** OpenAQ API v3 - nền tảng dữ liệu chất lượng không khí mở lớn nhất thế giới
 - **Tần suất thu thập:** Mỗi giờ, tự động thông qua node-cron scheduler
 - **Phạm vi:** 16 khu vực tại TP.HCM (thành phố + 15 quận/huyện)
-- **Thông số đo:** AQI US/CN, PM2.5, PM10, O3, NO2, SO2, CO, nhiệt độ, độ ẩm, áp suất, gió
+- **Thông số đo:** AQI US/CN, PM1, PM2.5, UM003 (particles/cm³), nhiệt độ, độ ẩm, áp suất, gió
 - **Dung lượng:** Hàng nghìn điểm dữ liệu mỗi ngày, lưu trữ dài hạn phục vụ phân tích xu hướng
 - **Format:** JSON (MongoDB documents) với schema chuẩn hoá
 - **Chất lượng:** Dữ liệu từ các trạm quan trắc chính thức, được validate và chuẩn hoá
+- **Lưu ý:** Database chỉ lưu trữ các thông số có sẵn từ OpenAQ (pm1, pm25, um003, temperature, relativehumidity, pressure, windSpeed, windDirection)
 
 Hệ thống cho phép:
 - Hiển thị dashboard trực quan (biểu đồ, bản đồ, heatmap)
@@ -59,18 +60,6 @@ Hệ thống cho phép:
 - Frontend libs: Bootstrap 5, Leaflet.js, Chart.js
 - Scheduler: node-cron (thu thập OpenAQ theo giờ)
 - ML: Python (NumPy, Pandas, scikit-learn, PyTorch) gọi qua Node
-
-Tham chiếu mã nguồn:
-- Cấu hình DB: [config/database.js](config/database.js)
-- Mô hình dữ liệu AQI: [models/index.js](models/index.js), các model quận như [models/district1.model.js](models/district1.model.js), [models/hcmc.model.js](models/hcmc.model.js)
-- Dữ liệu theo giờ OpenAQ: [models/hcmcAirHour.model.js](models/hcmcAirHour.model.js), [models/hcmcAirindex.model.js](models/hcmcAirindex.model.js)
-- Thu thập OpenAQ: [scripts/fetch-openaq-hours.js](scripts/fetch-openaq-hours.js)
-- Đồng bộ AQI sang các quận: [services/aqiSyncService.js](services/aqiSyncService.js), [scripts/sync-openaq-to-districts.js](scripts/sync-openaq-to-districts.js)
-- API AQI client: [controllers/client/aqi.controller.js](controllers/client/aqi.controller.js)
-- API Dự đoán: [controllers/api/prediction.controller.js](controllers/api/prediction.controller.js), Python runner [helpers/pythonRunner.js](helpers/pythonRunner.js), script ML [predict_from_json.py](predict_from_json.py)
-- Giao diện: Client [views/client/pages/home/index.pug](views/client/pages/home/index.pug), Docs [views/client/pages/docs/index.pug](views/client/pages/docs/index.pug), Admin AQI [views/admin/pages/aqi/index.pug](views/admin/pages/aqi/index.pug), Admin Weather [views/admin/pages/weather/index.pug](views/admin/pages/weather/index.pug)
-
-Lưu ý: Mọi tham chiếu AirVisual đã bị loại bỏ. Script cũ [scripts/fetch-and-save.js](scripts/fetch-and-save.js) không còn được khuyến nghị sử dụng.
 
 ---
 
@@ -217,6 +206,46 @@ Eco-Track sử dụng dataset chất lượng không khí được thu thập v�
 - RMSE (Root Mean Squared Error): 5-15 điểm
 - R² Score: 0.85-0.95 (tùy quận)
 - Xem chi tiết: [evaluation_results.csv](evaluation_results.csv)
+
+**Kết quả so sánh thực tế (Nov 2025):**
+
+| District | Actual Mean | Predicted Mean | Mean Diff | Accuracy |
+|----------|-------------|----------------|-----------|----------|
+| Bình Thạnh | 129.15 | 121.25 | 7.91 | 93.9% |
+| District 1 | 107.42 | 119.21 | 11.78 | 89.0% |
+| District 2 | 112.42 | 113.87 | 1.46 | 98.7% |
+| District 3 | 104.64 | 100.31 | 4.32 | 95.9% |
+| District 6 | 128.38 | 97.01 | 31.37 | 75.6% |
+| District 7 | 97.17 | 118.79 | 21.62 | 77.7% |
+| District 9 | 116.04 | 113.95 | 2.09 | 98.2% |
+| Tân Phú | 126.54 | 122.18 | 4.35 | 96.6% |
+| Thủ Đức | 118.41 | 128.35 | 9.94 | 91.6% |
+| District 10 | 117.66 | 107.94 | 9.72 | 91.7% |
+
+**Trung bình:** Độ chính xác 90.9% (MAE: 10.66 điểm AQI)
+
+**Ví dụ dự đoán chi tiết (District 1 - Nov 18, 2025):**
+
+| Timestamp | Actual AQI | Predicted AQI | Difference | Accuracy |
+|-----------|------------|---------------|------------|----------|
+| 2025-11-18 00:00 | 159 | 155 | -4 | 97.5% |
+| 2025-11-18 06:00 | 145 | 160 | +15 | 89.7% |
+| 2025-11-18 12:00 | 169 | 171 | +2 | 98.8% |
+
+**Ví dụ dataset thực tế:**
+
+```csv
+timestamp,district,aqius,pm1,pm25,um003,temperature,relativehumidity,pressure,windSpeed
+2025-11-20 19:00,Quan 7,96,18.7,27,3320,28.6,49.5,1012.8,4.0
+2025-11-20 20:00,Quan 7,92,17.2,25,3180,28.8,48.2,1012.5,3.8
+2025-11-20 14:00,Binh Thanh,145,42.1,68,8950,29.0,73.0,1010.0,3.5
+2025-11-20 15:00,Binh Thanh,153,45.8,72,9240,28.8,74.0,1010.2,3.3
+```
+
+**Phân tích độ lệch:**
+- **District 2, District 9:** Độ chính xác cao nhất (>98%), độ lệch <2 điểm AQI
+- **District 6, District 7:** Độ chính xác thấp hơn (75-78%), có thể do biến động đột ngột hoặc thiếu data huấn luyện
+- **Hầu hết các quận:** Độ lệch trung bình 4-12 điểm AQI, chấp nhận được cho dự báo thời tiết
 
 **Re-training:**
 ```bash

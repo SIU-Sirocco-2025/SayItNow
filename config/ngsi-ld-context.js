@@ -36,13 +36,17 @@ const NGSI_LD_CONTEXT = {
     "dateObserved": { "@id": "schema:Date", "@type": "ngsi-ld:Property" },
     "airQualityIndex": { "@id": "ecotrack:airQualityIndex", "@type": "ngsi-ld:Property" },
 
-    // Pollutants
-    "pm25": { "@id": "ecotrack:pm25", "@type": "ngsi-ld:Property" },
-    "pm10": { "@id": "ecotrack:pm10", "@type": "ngsi-ld:Property" },
-    "o3":   { "@id": "ecotrack:o3",   "@type": "ngsi-ld:Property" },
-    "no2":  { "@id": "ecotrack:no2",  "@type": "ngsi-ld:Property" },
-    "so2":  { "@id": "ecotrack:so2",  "@type": "ngsi-ld:Property" },
-    "co":   { "@id": "ecotrack:co",   "@type": "ngsi-ld:Property" },
+    // Pollutants & Measurements (chỉ có sẵn từ OpenAQ)
+    "pm1":   { "@id": "ecotrack:pm1",   "@type": "ngsi-ld:Property" },
+    "pm25":  { "@id": "ecotrack:pm25",  "@type": "ngsi-ld:Property" },
+    "um003": { "@id": "ecotrack:um003", "@type": "ngsi-ld:Property" },
+    
+    // Weather data
+    "temperature":       { "@id": "ecotrack:temperature",       "@type": "ngsi-ld:Property" },
+    "relativehumidity":  { "@id": "ecotrack:relativehumidity",  "@type": "ngsi-ld:Property" },
+    "pressure":          { "@id": "ecotrack:pressure",          "@type": "ngsi-ld:Property" },
+    "windSpeed":         { "@id": "ecotrack:windSpeed",         "@type": "ngsi-ld:Property" },
+    "windDirection":     { "@id": "ecotrack:windDirection",     "@type": "ngsi-ld:Property" },
 
     // Location
     "location": { "@id": "ngsi-ld:location", "@type": "ngsi-ld:GeoProperty" },

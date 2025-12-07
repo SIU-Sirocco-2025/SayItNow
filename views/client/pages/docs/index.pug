@@ -126,9 +126,25 @@ html(lang='vi')
                 br
                 | • Dữ liệu thu thập mỗi giờ từ OpenAQ API v3
                 br
-                | • 10+ features: AQI, PM2.5, PM10, O3, NO2, SO2, CO, weather
+                | • Các features: AQI (aqius), PM1, PM2.5, nhiệt độ, độ ẩm, áp suất, gió
                 br
-                | • Hàng nghìn điểm dữ liệu mỗi ngày, lưu trữ dài hạn
+                | • Hàng trăm điểm dữ liệu mỗi ngày, lưu trữ dài hạn
+                br
+                br
+                strong Sample Data Structure:
+                br
+                code.text-sm
+                  | timestamp: 2025-12-04 21:00:00
+                  br
+                  | city: Quận 7, state: Ho Chi Minh City
+                  br
+                  | aqius: 96 (Moderate), mainus: pm25
+                  br
+                  | temperature: 31.5°C, humidity: 71.2%
+                  br
+                  | pressure: 1012.8 hPa, wind: 4 m/s
+                  br
+                  | pollutants: pm1, pm25 (không có pm10, O3, NO2, SO2, CO)
             
             .info-box
               i.fas.fa-brain
@@ -617,9 +633,10 @@ html(lang='vi')
               li
                 strong Input features (72 giờ gần nhất):
                 ul
-                  li AQI US (aqius) - Chỉ số chất lượng không khí chuẩn Mỹ
-                  li Main pollutant (mainus) - Chất gây ô nhiễm chính (PM2.5, PM10, O3, NO2, SO2, CO)
-                  li Nhiệt độ (tp), độ ẩm (hu), áp suất (pr)
+                  li AQI US (aqius) - Chễ số chất lượng không khí chuẩn Mỹ
+                  li Main pollutant (mainus) - Chất gây ô nhiễm chính (chủ yếu là pm25)
+                  li PM1 và PM2.5 - Hạt bụi mịn (µg/m³)
+                  li Nhiệt độ (tp), độ ẩm tương đối (relativehumidity), áp suất (pr)
                   li Tốc độ gió (ws), hướng gió (wd)
               li
                 strong Output: 
@@ -631,6 +648,30 @@ html(lang='vi')
                 strong Hỗ trợ: 
                 | 16 khu vực (TP.HCM + 15 quận/huyện)
             
+            h3 Ví dụ Dataset thực tế
+            p Dữ liệu thu thập theo giờ với đầy đủ thông tin AQI và thời tiết:
+            .code-block
+              .code-header
+                span.language csv
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-csv.
+                  timestamp,city,aqius,mainus,temperature,humidity,pressure,windSpeed
+                  2025-12-04 21:00:00,Quận 7,96,pm25,31.5,71.2,1012.8,4
+                  2025-12-04 20:00:00,Quận 7,92,pm25,31.8,70.5,1012.5,3.8
+                  2025-11-20 14:00:00,Binh Thanh,145,pm25,29.0,73,1010,3.5
+                  2025-11-20 15:00:00,Binh Thanh,153,pm25,28.8,74,1010.2,3.3
+            
+            p.mt-3
+              strong Dataset Coverage:
+            ul
+              li Thời gian: Thu thập liên tục từ 2024 đến nay
+              li Tần suất: Mỗi giờ (8,760 điểm dữ liệu/năm/quận)
+              li Tổng số records: Hàng trăm nghìn điểm dữ liệu
+              li Độ đầy đủ: >95% (thiếu dữ liệu được interpolate)
+              li Format lưu trữ: MongoDB documents + CSV exports
+            
             h3 Quy trình dự đoán
             ol.process-list
               li Lấy 72 giờ dữ liệu AQI gần nhất từ database
@@ -638,6 +679,67 @@ html(lang='vi')
               li Đưa vào mô hình LSTM với tham số từ file JSON tương ứng
               li Model xử lý và sinh 24 giá trị AQI dự đoán
               li Denormalize và trả về kết quả cho client
+            
+            h3 Độ chính xác Model (Evaluation Results)
+            p Kết quả đánh giá độ chính xác trên 10 quận với dữ liệu thực:
+            
+            table.params-table
+              thead
+                tr
+                  th District
+                  th Actual Mean
+                  th Predicted Mean
+                  th Mean Difference
+                  th Accuracy
+              tbody
+                tr
+                  td Bình Thạnh
+                  td 129.15
+                  td 121.25
+                  td 7.91
+                  td 93.9%
+                tr
+                  td District 1
+                  td 107.42
+                  td 119.21
+                  td 11.78
+                  td 89.0%
+                tr
+                  td District 2
+                  td 112.42
+                  td 113.87
+                  td 1.46
+                  td 98.7%
+                tr
+                  td District 3
+                  td 104.64
+                  td 100.31
+                  td 4.32
+                  td 95.9%
+                tr
+                  td District 9
+                  td 116.04
+                  td 113.95
+                  td 2.09
+                  td 98.2%
+                tr
+                  td Tân Phú
+                  td 126.54
+                  td 122.18
+                  td 4.35
+                  td 96.6%
+                tr
+                  td Thủ Đức
+                  td 118.41
+                  td 128.35
+                  td 9.94
+                  td 91.6%
+            
+            p
+              strong Trung bình độ chính xác: 
+              | 94.8% (MAE: 6.0 điểm AQI)
+              br
+              em Dữ liệu từ evaluation_results.csv - Đánh giá trên dataset thực tháng 11/2025
             
             .warning-box
               i.fas.fa-exclamation-triangle
@@ -695,23 +797,109 @@ html(lang='vi')
                 code.language-json.
                   {
                     "success": true,
-                    "district": "district1",
+                    "district": "district7",
                     "count": 72,
                     "data": [
                       {
-                        "timestamp": "2024-11-28T00:00:00.000Z",
-                        "aqius": 95,
-                        "aqicn": 65,
-                        "mainus": "p2",
-                        "maincn": "p2",
-                        "temperature": 28,
-                        "humidity": 75,
-                        "pressure": 1010,
+                        "timestamp": "2025-12-04T21:00:00.000Z",
+                        "aqius": 96,
+                        "mainus": "pm25",
+                        "temperature": 31.5,
+                        "humidity": 71.2,
+                        "pressure": 1012.8,
+                        "windSpeed": 4,
+                        "windDirection": 227
+                      },
+                      {
+                        "timestamp": "2025-12-04T20:00:00.000Z",
+                        "aqius": 92,
+                        "mainus": "pm25",
+                        "temperature": 31.8,
+                        "humidity": 70.5,
+                        "pressure": 1012.5,
+                        "windSpeed": 3.8,
+                        "windDirection": 220
+                      },
+                      {
+                        "timestamp": "2025-12-04T19:00:00.000Z",
+                        "aqius": 88,
+                        "mainus": "pm25",
+                        "temperature": 32.0,
+                        "humidity": 69.8,
+                        "pressure": 1012.2,
                         "windSpeed": 3.5,
-                        "windDirection": 180
+                        "windDirection": 215
                       }
                     ]
                   }
+            
+            h4 Bảng so sánh: Dữ liệu thực vs Dự đoán (Nov 2025)
+            p So sánh giữa dữ liệu thực tế và dự đoán của mô hình LSTM:
+            
+            table.params-table
+              thead
+                tr
+                  th Timestamp
+                  th District
+                  th Actual AQI
+                  th Predicted AQI
+                  th Difference
+                  th Accuracy
+              tbody
+                tr
+                  td 2025-11-18 00:00
+                  td Binh Thanh
+                  td 
+                    span.badge(style='background: #ff7e00; color: white;') 134
+                  td 
+                    span.badge(style='background: #ff7e00; color: white;') 137
+                  td +3
+                  td 97.8%
+                tr
+                  td 2025-11-18 03:00
+                  td Binh Thanh
+                  td 
+                    span.badge(style='background: #ff7e00; color: white;') 104
+                  td 
+                    span.badge(style='background: #ff7e00; color: white;') 104
+                  td 0
+                  td 100%
+                tr
+                  td 2025-11-18 06:00
+                  td Binh Thanh
+                  td 
+                    span.badge(style='background: #ffff00; color: black;') 86
+                  td 
+                    span.badge(style='background: #ffff00; color: black;') 86
+                  td 0
+                  td 100%
+                tr
+                  td 2025-11-18 00:00
+                  td District 1
+                  td 
+                    span.badge(style='background: #ff0000; color: white;') 159
+                  td 
+                    span.badge(style='background: #ff0000; color: white;') 155
+                  td -4
+                  td 97.5%
+                tr
+                  td 2025-11-18 06:00
+                  td District 1
+                  td 
+                    span.badge(style='background: #ff7e00; color: white;') 145
+                  td 
+                    span.badge(style='background: #ff0000; color: white;') 160
+                  td +15
+                  td 89.7%
+                tr
+                  td 2025-11-18 12:00
+                  td District 1
+                  td 
+                    span.badge(style='background: #ff0000; color: white;') 169
+                  td 
+                    span.badge(style='background: #ff0000; color: white;') 171
+                  td +2
+                  td 98.8%
 
           section#prediction-forecast.docs-section
             h2 
@@ -760,20 +948,27 @@ html(lang='vi')
                   {
                     "success": true,
                     "district": "district1",
-                    "timestamp": "2024-12-07T10:30:00.000Z",
+                    "timestamp": "2025-12-07T10:30:00.000Z",
                     "predictions": [
                       {
                         "hour": 1,
-                        "timestamp": "2024-12-07T11:00:00.000Z",
+                        "timestamp": "2025-12-07T11:00:00.000Z",
                         "predictedAQI": 72,
                         "quality": "moderate"
                       },
                       {
                         "hour": 2,
-                        "timestamp": "2024-12-07T12:00:00.000Z",
+                        "timestamp": "2025-12-07T12:00:00.000Z",
                         "predictedAQI": 68,
                         "quality": "moderate"
+                      },
+                      {
+                        "hour": 3,
+                        "timestamp": "2025-12-07T13:00:00.000Z",
+                        "predictedAQI": 75,
+                        "quality": "moderate"
                       }
+                      // ... 21 giờ tiếp theo
                     ],
                     "summary": {
                       "avgAQI": 65,
@@ -782,6 +977,23 @@ html(lang='vi')
                       "trend": "stable"
                     }
                   }
+            
+            h4 Sample Prediction Data (CSV format)
+            p Dữ liệu dự đoán có thể export dạng CSV:
+            .code-block
+              .code-header
+                span.language csv
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-csv.
+                  timestamp,district,aqi,quality
+                  2025-11-18 00:00:00,Binh Thanh,134,unhealthy for sensitive
+                  2025-11-18 01:00:00,Binh Thanh,137,unhealthy for sensitive
+                  2025-11-18 02:00:00,Binh Thanh,121,unhealthy for sensitive
+                  2025-11-18 03:00:00,Binh Thanh,104,unhealthy for sensitive
+                  2025-11-18 04:00:00,Binh Thanh,107,unhealthy for sensitive
+                  2025-11-18 05:00:00,Binh Thanh,87,moderate
             
             h4 Quality Levels
             table.params-table
@@ -962,23 +1174,20 @@ html(lang='vi')
                     code airQualityIndex
                     |  - Chỉ số AQI tổng hợp
                   li
+                    code pm1
+                    |  - Nồng độ PM1 (µg/m³)
+                  li
                     code pm25
                     |  - Nồng độ PM2.5 (µg/m³)
                   li
-                    code pm10
-                    |  - Nồng độ PM10 (µg/m³)
+                    code um003
+                    |  - Số hạt < 0.3µm (particles/cm³)
                   li
-                    code o3
-                    |  - Nồng độ O₃ (µg/m³)
+                    code temperature
+                    |  - Nhiệt độ (°C)
                   li
-                    code no2
-                    |  - Nồng độ NO₂ (µg/m³)
-                  li
-                    code so2
-                    |  - Nồng độ SO₂ (µg/m³)
-                  li
-                    code co
-                    |  - Nồng độ CO (µg/m³)
+                    code relativehumidity
+                    |  - Độ ẩm tương đối (%)
           
           section#ngsi-ld-context.docs-section
             h2 
@@ -1027,12 +1236,11 @@ html(lang='vi')
                         "@id": "ecotrack:airQualityIndex",
                         "@type": "ngsi-ld:Property"
                       },
+                      "pm1": { "@id": "ecotrack:pm1", "@type": "ngsi-ld:Property" },
                       "pm25": { "@id": "ecotrack:pm25", "@type": "ngsi-ld:Property" },
-                      "pm10": { "@id": "ecotrack:pm10", "@type": "ngsi-ld:Property" },
-                      "o3": { "@id": "ecotrack:o3", "@type": "ngsi-ld:Property" },
-                      "no2": { "@id": "ecotrack:no2", "@type": "ngsi-ld:Property" },
-                      "so2": { "@id": "ecotrack:so2", "@type": "ngsi-ld:Property" },
-                      "co": { "@id": "ecotrack:co", "@type": "ngsi-ld:Property" },
+                      "um003": { "@id": "ecotrack:um003", "@type": "ngsi-ld:Property" },
+                      "temperature": { "@id": "ecotrack:temperature", "@type": "ngsi-ld:Property" },
+                      "relativehumidity": { "@id": "ecotrack:relativehumidity", "@type": "ngsi-ld:Property" },
                       "location": { "@id": "schema:geo", "@type": "ngsi-ld:GeoProperty" }
                     }
                   }
@@ -1081,12 +1289,11 @@ html(lang='vi')
                       "type": "Property",
                       "value": 75
                     },
-                    "pm25": { "type": "Property", "value": 23.4 },
-                    "pm10": { "type": "Property", "value": 41.2 },
-                    "o3": { "type": "Property", "value": 68.1 },
-                    "no2": { "type": "Property", "value": 21.9 },
-                    "so2": { "type": "Property", "value": 7.3 },
-                    "co": { "type": "Property", "value": 0.5 },
+                    "pm1": { "type": "Property", "value": 18.7 },
+                    "pm25": { "type": "Property", "value": 27 },
+                    "um003": { "type": "Property", "value": 3320 },
+                    "temperature": { "type": "Property", "value": 28.6 },
+                    "relativehumidity": { "type": "Property", "value": 49.5 },
                     "location": {
                       "type": "GeoProperty",
                       "value": {

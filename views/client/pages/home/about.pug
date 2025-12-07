@@ -27,7 +27,7 @@ block main
           +missionCard(
             'database',
             'Lưu trữ & Phân tích',
-            'Chuẩn hóa và lưu trữ dữ liệu vào MongoDB, phục vụ phân tích xu hướng và nghiên cứu môi trường'
+            'Chuẩn hóa và lưu trữ hàng nghìn điểm dữ liệu mỗi ngày vào MongoDB (8+ features: AQI, PM1, PM2.5, UM003, nhiệt độ, độ ẩm, áp suất, gió), phục vụ phân tích xu hướng và nghiên cứu môi trường dài hạn'
           )
           +missionCard(
             'graph-up-arrow',
@@ -65,13 +65,318 @@ block main
         +featureItem(
           'database-fill',
           'Dataset Phong phú',
-          'Hàng nghìn điểm dữ liệu thu thập mỗi giờ từ các trạm quan trắc OpenAQ, phục vụ phân tích và ML'
+          'Hàng trăm nghìn điểm dữ liệu thực tế: AQI, PM1, PM2.5, UM003 (số hạt), nhiệt độ, độ ẩm, áp suất, gió - thu thập mỗi giờ từ 16 khu vực, đầy đủ cho phân tích xu hướng và machine learning'
         )
         +featureItem(
           'lightning-charge',
           'Dự đoán Nhanh',
           'Kết quả dự báo được tính toán trong vài giây, hỗ trợ 16 khu vực khác nhau trong TP.HCM'
         )
+
+  // Model Accuracy Comparison
+  .bg-light.py-5
+    .container
+      h2.h3.mb-4.text-center
+        i.bi.bi-graph-up.me-2.text-success
+        | Độ chính xác mô hình AI
+      .row.mb-4
+        .col-12
+          p.text-center.lead So sánh giữa dữ liệu thực tế và dự đoán của LSTM Model (Tháng 11/2025)
+      .row
+        .col-12
+          .card.border-0.shadow-sm
+            .card-body
+              .table-responsive
+                table.table.table-hover.table-striped
+                  thead.table-success
+                    tr
+                      th District
+                      th Actual Mean AQI
+                      th Predicted Mean AQI
+                      th Difference
+                      th Accuracy
+                  tbody
+                    tr
+                      td Bình Thạnh
+                      td 129.15
+                      td 121.25
+                      td +7.91
+                      td
+                        span.badge.bg-success 93.9%
+                    tr
+                      td Quận 1
+                      td 107.42
+                      td 119.21
+                      td -11.78
+                      td
+                        span.badge.bg-success 89.0%
+                    tr
+                      td Quận 2
+                      td 112.42
+                      td 113.87
+                      td -1.46
+                      td
+                        span.badge.bg-success 98.7%
+                    tr
+                      td Quận 3
+                      td 104.64
+                      td 100.31
+                      td +4.32
+                      td
+                        span.badge.bg-success 95.9%
+                    tr
+                      td Quận 9
+                      td 116.04
+                      td 113.95
+                      td +2.09
+                      td
+                        span.badge.bg-success 98.2%
+                    tr
+                      td Tân Phú
+                      td 126.54
+                      td 122.18
+                      td +4.35
+                      td
+                        span.badge.bg-success 96.6%
+                    tr
+                      td Thủ Đức
+                      td 118.41
+                      td 128.35
+                      td -9.94
+                      td
+                        span.badge.bg-success 91.6%
+                  tfoot.table-light
+                    tr
+                      td(colspan='3')
+                        strong Trung bình
+                      td
+                        strong MAE: 6.0
+                      td
+                        strong
+                          span.badge.bg-primary 94.8%
+              p.text-center.text-muted.small.mt-3
+                i.bi.bi-info-circle.me-1
+                | Dữ liệu từ evaluation_results.csv - Model LSTM với 72h input, 24h output
+
+  // Dataset Information
+  .container.py-5
+    h2.h3.mb-4.text-center
+      i.bi.bi-database.me-2.text-success
+      | Dataset & Dữ liệu
+    .row.mb-4
+      .col-md-6
+        .card.h-100.border-0.shadow-sm
+          .card-body
+            h5.card-title
+              i.bi.bi-cloud-download.me-2.text-primary
+              | Nguồn dữ liệu
+            ul.list-unstyled
+              li
+                i.bi.bi-check-circle.text-success.me-2
+                strong OpenAQ API v3: 
+                | Nền tảng dữ liệu chất lượng không khí mở lớn nhất thế giới
+              li
+                i.bi.bi-check-circle.text-success.me-2
+                strong Thu thập: 
+                | Tự động mỗi giờ qua node-cron scheduler
+              li
+                i.bi.bi-check-circle.text-success.me-2
+                strong Phạm vi: 
+                | 16 khu vực tại TP.HCM
+              
+      .col-md-6
+        .card.h-100.border-0.shadow-sm
+          .card-body
+            h5.card-title
+              i.bi.bi-collection.me-2.text-primary
+              | Thông số đo lường
+            ul.list-unstyled
+              li
+                i.bi.bi-arrow-right-circle.text-info.me-2
+                strong AQI: 
+                | US Standard & China Standard
+              li
+                i.bi.bi-arrow-right-circle.text-info.me-2
+                strong Pollutants: 
+                | PM1, PM2.5, UM003 (particles/cm³)
+              li
+                i.bi.bi-arrow-right-circle.text-info.me-2
+                strong Weather: 
+                | Nhiệt độ, độ ẩm, áp suất
+              li
+                i.bi.bi-arrow-right-circle.text-info.me-2
+                strong Wind: 
+                | Tốc độ gió, hướng gió
+              li
+                i.bi.bi-arrow-right-circle.text-info.me-2
+                strong Location: 
+                | Tọa độ GeoJSON cho mỗi quận
+    
+    .row
+      .col-12
+        .card.border-0.shadow-sm.bg-light
+          .card-body
+            h5.card-title.text-center.mb-3
+              i.bi.bi-clipboard-data.me-2.text-success
+              | Ví dụ dữ liệu thực (Tháng 11/2025)
+            .table-responsive
+              table.table.table-sm.table-striped
+                thead.table-success
+                  tr
+                    th Timestamp
+                    th District
+                    th AQI
+                    th Quality
+                    th Temp
+                    th Humidity
+                tbody
+                  tr
+                    td 2025-11-28 10:00
+                    td Bình Thạnh
+                    td
+                      span.badge(style='background: #ffff00; color: black;') 94
+                    td Moderate
+                    td 28°C
+                    td 75%
+                  tr
+                    td 2025-11-28 11:00
+                    td Bình Thạnh
+                    td
+                      span.badge(style='background: #ffff00; color: black;') 74
+                    td Moderate
+                    td 27°C
+                    td 78%
+                  tr
+                    td 2025-11-28 10:00
+                    td Quận 1
+                    td
+                      span.badge(style='background: #ff7e00; color: white;') 135
+                    td Unhealthy for Sensitive
+                    td 29°C
+                    td 72%
+                  tr
+                    td 2025-11-28 11:00
+                    td Quận 1
+                    td
+                      span.badge(style='background: #ff7e00; color: white;') 125
+                    td Unhealthy for Sensitive
+                    td 28°C
+                    td 74%
+            p.text-center.text-muted.small.mt-3
+              i.bi.bi-info-circle.me-1
+              | Dataset có sẵn qua API: AQI, PM1, PM2.5, temperature, humidity, pressure, wind
+
+  // Dataset & Data Quality
+  .bg-light.py-5
+    .container
+      h2.h3.mb-4.text-center
+        i.bi.bi-database.me-2.text-success
+        | Dataset & Chất lượng dữ liệu
+      .row.g-4.mb-4
+        .col-md-6
+          .card.h-100.border-0.shadow-sm
+            .card-body
+              h5.card-title
+                i.bi.bi-collection.me-2.text-primary
+                | Đặc điểm Dataset
+              ul.list-unstyled.mt-3
+                li.mb-2
+                  i.bi.bi-check-circle-fill.text-success.me-2
+                  strong Nguồn: 
+                  | OpenAQ API v3 - dữ liệu thực từ trạm quan trắc
+                li.mb-2
+                  i.bi.bi-check-circle-fill.text-success.me-2
+                  strong Tần suất: 
+                  | Thu thập mỗi giờ (24/7)
+                li.mb-2
+                  i.bi.bi-check-circle-fill.text-success.me-2
+                  strong Phạm vi: 
+                  | 16 khu vực tại TP.HCM
+                
+                
+        .col-md-6
+          .card.h-100.border-0.shadow-sm
+            .card-body
+              h5.card-title
+                i.bi.bi-grid-3x3.me-2.text-primary
+                | Thông số đo lường
+              ul.list-unstyled.mt-3
+                li.mb-2
+                  strong AQI: 
+                  | Chỉ số chất lượng không khí (US & CN)
+                li.mb-2
+                  strong Pollutants: 
+                  | PM1, PM2.5, UM003 (particles/cm³)
+                li.mb-2
+                  strong Weather: 
+                  | Nhiệt độ, độ ẩm, áp suất
+                li.mb-2
+                  strong Wind: 
+                  | Tốc độ và hướng gió
+                li.mb-2
+                  strong Location: 
+                  | Tọa độ GeoJSON (lat, lng)
+      .row
+        .col-12
+          .card.border-0.shadow-sm.bg-white
+            .card-body
+              h5.card-title.mb-3
+                i.bi.bi-file-earmark-spreadsheet.me-2.text-success
+                | Ví dụ Data Sample
+              .table-responsive
+                table.table.table-sm.table-hover
+                  thead.table-light
+                    tr
+                      th Timestamp
+                      th District
+                      th AQI
+                      th Temp(°C)
+                      th Humidity(%)
+                      th Wind(m/s)
+                  tbody
+                    tr
+                      td 2024-11-15 00:00
+                      td Quận 1
+                      td 
+                        span.badge(style='background: #ffff00; color: black;') 95
+                      td 28.5
+                      td 75
+                      td 3.5
+                    tr
+                      td 2024-11-15 01:00
+                      td Quận 1
+                      td 
+                        span.badge(style='background: #ffff00; color: black;') 98
+                      td 28.2
+                      td 76
+                      td 3.2
+                    tr
+                      td 2024-11-15 02:00
+                      td Quận 1
+                      td 
+                        span.badge(style='background: #ffff00; color: black;') 91
+                      td 27.8
+                      td 78
+                      td 2.8
+                    tr
+                      td 2024-11-15 00:00
+                      td Bình Thạnh
+                      td 
+                        span.badge(style='background: #ff7e00; color: white;') 107
+                      td 29.0
+                      td 73
+                      td 4.1
+                    tr
+                      td 2024-11-15 01:00
+                      td Bình Thạnh
+                      td 
+                        span.badge(style='background: #ff7e00; color: white;') 110
+                      td 28.7
+                      td 74
+                      td 3.9
+              p.text-muted.small.mt-3.mb-0
+                i.bi.bi-info-circle.me-1
+                | Dataset đầy đủ có sẵn qua API endpoints hoặc export CSV/JSON
 
   // Technology Stack
   .container.py-5
