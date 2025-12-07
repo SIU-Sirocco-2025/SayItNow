@@ -29,6 +29,8 @@
 
 ## 📋 Tổng Quan
 
+<img width="1887" height="941" alt="image" src="https://github.com/user-attachments/assets/74d031ab-2291-4bd2-ba55-81fe11f67e57" />
+
 Eco-Track thu thập, chuẩn hoá và lưu trữ dữ liệu chỉ số ô nhiễm không khí (AQI) và thông tin thời tiết theo quận/huyện tại TP. Hồ Chí Minh.  
 Dữ liệu thời gian thực được lấy từ OpenAQ API v3 và lưu vào MongoDB để phân tích, trực quan hoá và dự đoán.
 
