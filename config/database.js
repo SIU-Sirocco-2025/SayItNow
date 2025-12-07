@@ -10,9 +10,13 @@ require('dotenv').config();
 
 module.exports.connect = async () => {
   try {
+    if (!process.env.MONGODB_URL) {
+      console.warn('⚠️  Database URL missing (MONGODB_URL). Skipping DB connection. Features depending on DB may not work.');
+      return;
+    }
     await mongoose.connect(process.env.MONGODB_URL);
     console.log('Database connected successfully');
   } catch (error){
-    console.error('Database connection failed:', error);
+    console.error('⚠️  Database connection failed:', error.message);
   }
 }

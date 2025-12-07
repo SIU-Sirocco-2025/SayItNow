@@ -7,6 +7,9 @@ const session = require('express-session');
 const flash = require('express-flash');
 const moment = require('moment')
 require('dotenv').config();
+
+const { validateEnv } = require('./config/env');
+validateEnv();
 const passport = require('./config/passport'); 
 // database connection
 const database = require('./config/database')
