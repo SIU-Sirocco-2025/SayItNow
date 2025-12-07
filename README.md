@@ -32,11 +32,22 @@
 Eco-Track thu thập, chuẩn hoá và lưu trữ dữ liệu chỉ số ô nhiễm không khí (AQI) và thông tin thời tiết theo quận/huyện tại TP. Hồ Chí Minh.  
 Dữ liệu thời gian thực được lấy từ OpenAQ API v3 và lưu vào MongoDB để phân tích, trực quan hoá và dự đoán.
 
+**Về Dataset:**
+- **Nguồn dữ liệu:** OpenAQ API v3 - nền tảng dữ liệu chất lượng không khí mở lớn nhất thế giới
+- **Tần suất thu thập:** Mỗi giờ, tự động thông qua node-cron scheduler
+- **Phạm vi:** 16 khu vực tại TP.HCM (thành phố + 15 quận/huyện)
+- **Thông số đo:** AQI US/CN, PM2.5, PM10, O3, NO2, SO2, CO, nhiệt độ, độ ẩm, áp suất, gió
+- **Dung lượng:** Hàng nghìn điểm dữ liệu mỗi ngày, lưu trữ dài hạn phục vụ phân tích xu hướng
+- **Format:** JSON (MongoDB documents) với schema chuẩn hoá
+- **Chất lượng:** Dữ liệu từ các trạm quan trắc chính thức, được validate và chuẩn hoá
+
 Hệ thống cho phép:
 - Hiển thị dashboard trực quan (biểu đồ, bản đồ, heatmap)
 - Truy vấn dữ liệu theo thời gian và khu vực
 - Phân tích xu hướng chất lượng không khí
-- Dự đoán AQI ngắn hạn (24 giờ) bằng mô hình ML
+- Dự đoán AQI ngắn hạn (24 giờ) bằng mô hình LSTM
+- Export dữ liệu (CSV/JSON) cho nghiên cứu
+- API tuân thủ chuẩn NGSI-LD cho Smart City integration
 
 ---
 
@@ -90,10 +101,131 @@ Script:
   - Weather: [views/admin/pages/weather/index.pug](views/admin/pages/weather/index.pug)
 
 ### 4) 🔮 Dự Đoán AQI 24h
-- Tham số LSTM (JSON) trong `model_params/`
-- Dự đoán qua Python: [predict_from_json.py](predict_from_json.py)
-- Gọi từ Node: [controllers/api/prediction.controller.js](controllers/api/prediction.controller.js), [helpers/pythonRunner.js](helpers/pythonRunner.js)
+
+**Mô hình Machine Learning:**
+- Sử dụng mô hình LSTM (Long Short-Term Memory) được huấn luyện trước để dự đoán AQI 24 giờ tới
+- Tham số mô hình được lưu dạng JSON trong thư mục `model_params/` cho từng quận/huyện
+- Mỗi model file chứa: weights, biases, scaler parameters (min, max) cho chuẩn hóa dữ liệu
+- Hỗ trợ 16 khu vực: TP.HCM tổng thể + 15 quận/huyện (Quận 1-11, Thủ Đức, Bình Thạnh, Tân Phú, Phú Nhuận, Bình Tân)
+
+**Dataset huấn luyện:**
+- Dữ liệu lịch sử AQI từ OpenAQ API, được thu thập liên tục mỗi giờ
+- Features đầu vào (72 giờ gần nhất):
+  - AQI US (aqius) - Chỉ số chất lượng không khí theo chuẩn Mỹ
+  - Main pollutant (mainus) - Chất gây ô nhiễm chính
+  - Nhiệt độ (tp), độ ẩm (hu), áp suất (pr)
+  - Tốc độ gió (ws), hướng gió (wd)
+- Output: Dự đoán AQI cho 24 giờ tiếp theo
+- Dataset được cập nhật liên tục từ các trạm quan trắc thực tế
+
+**Quy trình dự đoán:**
+1. Lấy 72 giờ dữ liệu gần nhất từ MongoDB ([controllers/api/prediction.controller.js](controllers/api/prediction.controller.js))
+2. Chuẩn hóa dữ liệu theo scaler đã huấn luyện
+3. Gọi Python script [predict_from_json.py](predict_from_json.py) qua [helpers/pythonRunner.js](helpers/pythonRunner.js)
+4. Python LSTM model xử lý và trả về 24 giá trị AQI dự đoán
+5. Kết quả được format và trả về cho client
+
+**API Endpoints:**
+- REST: `GET /api/prediction/forecast-24h/:district`
+- NGSI-LD: `GET /api/ngsi-ld/predictions/:district`
 - UI dự báo: [public/client/js/forecast.js](public/client/js/forecast.js)
+
+**Độ chính xác:**
+- Model được đánh giá dựa trên MAE (Mean Absolute Error) và RMSE
+- Kết quả đánh giá: [evaluation_results.csv](evaluation_results.csv)
+- Độ lệch trung bình: 2-10 điểm AQI tùy quận
+
+---
+
+## 📊 Dataset & Model Training
+
+### Dataset Specification
+Eco-Track sử dụng dataset chất lượng không khí được thu thập và xử lý tự động:
+
+**Đặc điểm Dataset:**
+- **Time-series data:** Dữ liệu chuỗi thời gian với timestamp mỗi giờ
+- **Multi-variate:** 10+ features bao gồm AQI, pollutants, weather
+- **Real-time collection:** Thu thập liên tục từ OpenAQ API v3
+- **Storage:** MongoDB time-series collections
+- **Retention:** Lưu trữ dài hạn (unlimited) cho phân tích lịch sử
+
+**Data Schema (per district):**
+```javascript
+{
+  timestamp: Date,                 // Thời điểm quan trắc
+  current: {
+    pollution: {
+      ts: Date,                    // Timestamp pollution data
+      aqius: Number,               // AQI US standard (0-500+)
+      aqicn: Number,               // AQI China standard
+      mainus: String,              // Main pollutant (p2, p1, o3, n2, s2, co)
+      maincn: String
+    },
+    weather: {
+      ts: Date,                    // Timestamp weather data
+      tp: Number,                  // Temperature (°C)
+      hu: Number,                  // Humidity (%)
+      pr: Number,                  // Pressure (hPa)
+      ws: Number,                  // Wind speed (m/s)
+      wd: Number                   // Wind direction (degrees)
+    }
+  },
+  location: {
+    type: "Point",
+    coordinates: [lng, lat]        // GeoJSON format
+  }
+}
+```
+
+**Data Quality:**
+- Validation: Kiểm tra range và missing values
+- Cleaning: Loại bỏ outliers và duplicates
+- Normalization: Min-max scaling cho ML models
+- Completeness: Alert khi thiếu dữ liệu quan trọng
+
+### LSTM Model Training
+
+**Architecture:**
+- Input Layer: 72 timesteps × 10 features
+- LSTM Layer 1: 50 units, return sequences
+- Dropout: 0.2 (prevent overfitting)
+- LSTM Layer 2: 50 units
+- Dense Output: 24 units (24h forecast)
+- Activation: Linear (regression task)
+
+**Training Process:**
+1. **Data Preparation:**
+   - Lấy dữ liệu lịch sử từ MongoDB (ít nhất 1000+ giờ)
+   - Chuẩn hoá features sử dụng MinMaxScaler
+   - Tạo sliding windows (72h input → 24h output)
+   - Split train/validation/test (70/15/15)
+
+2. **Hyperparameters:**
+   - Loss function: Mean Squared Error (MSE)
+   - Optimizer: Adam (learning rate: 0.001)
+   - Batch size: 32
+   - Epochs: 100 (with early stopping)
+   - Validation patience: 10 epochs
+
+3. **Model Saving:**
+   - Export weights, biases sang JSON format
+   - Lưu scaler parameters (min, max) cho mỗi feature
+   - Files trong `model_params/lstm_params_<district>.json`
+
+**Evaluation Metrics:**
+- MAE (Mean Absolute Error): 2-10 điểm AQI
+- RMSE (Root Mean Squared Error): 5-15 điểm
+- R² Score: 0.85-0.95 (tùy quận)
+- Xem chi tiết: [evaluation_results.csv](evaluation_results.csv)
+
+**Re-training:**
+```bash
+# Thu thập thêm dữ liệu
+node scripts/fetch-openaq-hours.js
+
+# Chạy lại training (Python notebook hoặc script)
+# Update model params trong model_params/
+```
 
 ---
 

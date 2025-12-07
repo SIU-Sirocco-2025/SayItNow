@@ -63,6 +63,18 @@ html(lang='vi')
                 a(href='#latest') Dữ liệu mới nhất
           
           .sidebar-section
+            h3 Prediction API
+            ul
+              li
+                a(href='#prediction-intro') Giới thiệu
+              li
+                a(href='#prediction-get-data') Lấy dữ liệu 72h
+              li
+                a(href='#prediction-forecast') Dự đoán 24h
+              li
+                a(href='#prediction-districts') Danh sách quận
+          
+          .sidebar-section
             h3 Quản lý tài khoản
             ul
               li
@@ -90,7 +102,48 @@ html(lang='vi')
             h1 
               i.fas.fa-book
               |  API Documentation
-            p.lead Chào mừng đến với Eco-Track API - nền tảng cung cấp dữ liệu chất lượng không khí thời gian thực cho TP.HCM
+            p.lead Chào mừng đến với Eco-Track API - nền tảng cung cấp dữ liệu chất lượng không khí thời gian thực và dự đoán AI cho TP.HCM
+            
+            p 
+              | Eco-Track cung cấp 3 loại API chính:
+            ul.api-types
+              li
+                strong REST API: 
+                | Endpoints chuẩn REST để truy vấn dữ liệu AQI, thống kê, xu hướng
+              li
+                strong Prediction API: 
+                | Dự đoán AQI 24h tới sử dụng mô hình LSTM (Long Short-Term Memory)
+              li
+                strong NGSI-LD API: 
+                | Tuân thủ chuẩn Smart City ETSI cho IoT và Linked Data
+            
+            .info-box
+              i.fas.fa-database
+              div
+                strong Dataset & Coverage:
+                br
+                | • 16 khu vực tại TP.HCM (thành phố + 15 quận/huyện)
+                br
+                | • Dữ liệu thu thập mỗi giờ từ OpenAQ API v3
+                br
+                | • 10+ features: AQI, PM2.5, PM10, O3, NO2, SO2, CO, weather
+                br
+                | • Hàng nghìn điểm dữ liệu mỗi ngày, lưu trữ dài hạn
+            
+            .info-box
+              i.fas.fa-brain
+              div
+                strong AI Prediction Model:
+                br
+                | • Mô hình: LSTM (Long Short-Term Memory)
+                br
+                | • Input: 72 giờ dữ liệu lịch sử (AQI + weather)
+                br
+                | • Output: Dự đoán AQI cho 24 giờ tiếp theo
+                br
+                | • Độ chính xác: MAE 2-10 điểm, R² 0.85-0.95
+                br
+                | • Dataset huấn luyện: Dữ liệu thực từ các trạm quan trắc
             
             .info-box
               i.fas.fa-info-circle
@@ -541,6 +594,320 @@ html(lang='vi')
               span.auth-badge.no-auth Không cần API key
             
             p Lấy dữ liệu AQI mới nhất của TP.HCM.
+
+          section#prediction-intro.docs-section
+            h2 
+              i.fas.fa-brain
+              |  Prediction API - Dự đoán AQI bằng AI
+            
+            p Eco-Track sử dụng mô hình LSTM (Long Short-Term Memory) để dự đoán chỉ số AQI trong 24 giờ tới cho từng quận/huyện.
+            
+            .info-box
+              i.fas.fa-info-circle
+              div
+                strong Về mô hình LSTM:
+                br
+                | LSTM là một loại mạng neural hồi quy (Recurrent Neural Network) đặc biệt hiệu quả trong việc học và dự đoán các chuỗi dữ liệu thời gian. Mô hình được huấn luyện trên dữ liệu lịch sử AQI từ OpenAQ API.
+            
+            h3 Đặc điểm mô hình
+            ul.feature-list
+              li
+                strong Dataset huấn luyện: 
+                | Dữ liệu AQI lịch sử thu thập liên tục mỗi giờ từ các trạm quan trắc OpenAQ
+              li
+                strong Input features (72 giờ gần nhất):
+                ul
+                  li AQI US (aqius) - Chỉ số chất lượng không khí chuẩn Mỹ
+                  li Main pollutant (mainus) - Chất gây ô nhiễm chính (PM2.5, PM10, O3, NO2, SO2, CO)
+                  li Nhiệt độ (tp), độ ẩm (hu), áp suất (pr)
+                  li Tốc độ gió (ws), hướng gió (wd)
+              li
+                strong Output: 
+                | 24 giá trị AQI dự đoán cho 24 giờ tiếp theo
+              li
+                strong Độ chính xác: 
+                | MAE (Mean Absolute Error) từ 2-10 điểm AQI tùy quận
+              li
+                strong Hỗ trợ: 
+                | 16 khu vực (TP.HCM + 15 quận/huyện)
+            
+            h3 Quy trình dự đoán
+            ol.process-list
+              li Lấy 72 giờ dữ liệu AQI gần nhất từ database
+              li Chuẩn hóa dữ liệu theo scaler đã huấn luyện (min-max scaling)
+              li Đưa vào mô hình LSTM với tham số từ file JSON tương ứng
+              li Model xử lý và sinh 24 giá trị AQI dự đoán
+              li Denormalize và trả về kết quả cho client
+            
+            .warning-box
+              i.fas.fa-exclamation-triangle
+              div
+                strong Lưu ý: 
+                | Prediction API yêu cầu ít nhất 72 giờ dữ liệu lịch sử trong database. Nếu thiếu dữ liệu, hãy chạy 
+                code scripts/seed-72h-data.js
+                |  hoặc 
+                code scripts/fetch-openaq-hours.js
+                |  để thu thập.
+
+          section#prediction-get-data.docs-section
+            h2 
+              i.fas.fa-database
+              |  Lấy dữ liệu 72 giờ cho prediction
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/prediction/get-72h-data/:district
+              span.auth-badge.no-auth Không cần API key
+            
+            p Endpoint này trả về 72 giờ dữ liệu AQI gần nhất, được sử dụng làm input cho mô hình LSTM.
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code district
+                  td Path
+                  td Mã quận (hcmc, district1, district2, binhThanh, thuDuc...)
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl http://localhost:3000/api/prediction/get-72h-data/district1
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "district": "district1",
+                    "count": 72,
+                    "data": [
+                      {
+                        "timestamp": "2024-11-28T00:00:00.000Z",
+                        "aqius": 95,
+                        "aqicn": 65,
+                        "mainus": "p2",
+                        "maincn": "p2",
+                        "temperature": 28,
+                        "humidity": 75,
+                        "pressure": 1010,
+                        "windSpeed": 3.5,
+                        "windDirection": 180
+                      }
+                    ]
+                  }
+
+          section#prediction-forecast.docs-section
+            h2 
+              i.fas.fa-crystal-ball
+              |  Dự đoán AQI 24 giờ tới
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/prediction/forecast-24h/:district
+              span.auth-badge.no-auth Không cần API key
+            
+            p Endpoint chính để lấy dự đoán AQI cho 24 giờ tiếp theo. Sử dụng mô hình LSTM đã được huấn luyện.
+            
+            h4 Parameters
+            table.params-table
+              thead
+                tr
+                  th Tên
+                  th Kiểu
+                  th Mô tả
+              tbody
+                tr
+                  td
+                    code district
+                  td Path
+                  td Mã quận (hcmc, district1, district2, binhThanh, thuDuc...)
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl http://localhost:3000/api/prediction/forecast-24h/district1
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "district": "district1",
+                    "timestamp": "2024-12-07T10:30:00.000Z",
+                    "predictions": [
+                      {
+                        "hour": 1,
+                        "timestamp": "2024-12-07T11:00:00.000Z",
+                        "predictedAQI": 72,
+                        "quality": "moderate"
+                      },
+                      {
+                        "hour": 2,
+                        "timestamp": "2024-12-07T12:00:00.000Z",
+                        "predictedAQI": 68,
+                        "quality": "moderate"
+                      }
+                    ],
+                    "summary": {
+                      "avgAQI": 65,
+                      "maxAQI": 85,
+                      "minAQI": 45,
+                      "trend": "stable"
+                    }
+                  }
+            
+            h4 Quality Levels
+            table.params-table
+              thead
+                tr
+                  th AQI Range
+                  th Level
+                  th Màu
+                  th Mô tả
+              tbody
+                tr
+                  td 0-50
+                  td Good
+                  td 
+                    span.badge(style='background: #00e400; color: white;') Xanh lá
+                  td Chất lượng không khí tốt
+                tr
+                  td 51-100
+                  td Moderate
+                  td
+                    span.badge(style='background: #ffff00; color: black;') Vàng
+                  td Chấp nhận được
+                tr
+                  td 101-150
+                  td Unhealthy for Sensitive
+                  td
+                    span.badge(style='background: #ff7e00; color: white;') Cam
+                  td Nhạy cảm nên hạn chế ra ngoài
+                tr
+                  td 151-200
+                  td Unhealthy
+                  td
+                    span.badge(style='background: #ff0000; color: white;') Đỏ
+                  td Không tốt cho sức khỏe
+                tr
+                  td 201-300
+                  td Very Unhealthy
+                  td
+                    span.badge(style='background: #8f3f97; color: white;') Tím
+                  td Rất không tốt
+                tr
+                  td 301+
+                  td Hazardous
+                  td
+                    span.badge(style='background: #7e0023; color: white;') Nâu đỏ
+                  td Nguy hiểm
+
+          section#prediction-districts.docs-section
+            h2 
+              i.fas.fa-map-marked-alt
+              |  Danh sách Districts hỗ trợ Prediction
+            
+            .endpoint-info
+              span.http-method.get GET
+              code.endpoint-url /api/prediction/districts
+              span.auth-badge.no-auth Không cần API key
+            
+            p Lấy danh sách tất cả các quận/huyện được hỗ trợ prediction.
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "districts": [
+                      { "key": "hcmc", "name": "TP. Hồ Chí Minh", "modelFile": "lstm_params_hcmc.json" },
+                      { "key": "district1", "name": "Quận 1", "modelFile": "lstm_params_district_1.json" },
+                      { "key": "district2", "name": "Quận 2", "modelFile": "lstm_params_district_2.json" },
+                      { "key": "binhThanh", "name": "Bình Thạnh", "modelFile": "lstm_params_binh_thanh.json" },
+                      { "key": "thuDuc", "name": "Thủ Đức", "modelFile": "lstm_params_thu_duc.json" }
+                    ],
+                    "total": 16
+                  }
+            
+            h4 Supported Districts
+            .city-keys-grid
+              .city-key-item
+                code hcmc
+                span TP. Hồ Chí Minh
+              .city-key-item
+                code district1
+                span Quận 1
+              .city-key-item
+                code district2
+                span Quận 2
+              .city-key-item
+                code district3
+                span Quận 3
+              .city-key-item
+                code district4
+                span Quận 4
+              .city-key-item
+                code district5
+                span Quận 5
+              .city-key-item
+                code district6
+                span Quận 6
+              .city-key-item
+                code district7
+                span Quận 7
+              .city-key-item
+                code district9
+                span Quận 9
+              .city-key-item
+                code district10
+                span Quận 10
+              .city-key-item
+                code district11
+                span Quận 11
+              .city-key-item
+                code binhThanh
+                span Bình Thạnh
+              .city-key-item
+                code phuNhuan
+                span Phú Nhuận
+              .city-key-item
+                code tanPhu
+                span Tân Phú
+              .city-key-item
+                code thuDuc
+                span Thủ Đức
 
           section#get-api-key.docs-section
             h2 

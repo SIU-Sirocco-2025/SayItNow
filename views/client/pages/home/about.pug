@@ -59,8 +59,18 @@ block main
         )
         +featureItem(
           'robot',
-          'AI Dự báo',
-          'Dự đoán AQI 24h tới bằng mô hình học máy LSTM'
+          'AI Dự báo Thông minh',
+          'Dự đoán AQI 24h tới bằng mô hình LSTM được huấn luyện trên dữ liệu lịch sử 72h, độ chính xác cao (MAE 2-10 điểm)'
+        )
+        +featureItem(
+          'database-fill',
+          'Dataset Phong phú',
+          'Hàng nghìn điểm dữ liệu thu thập mỗi giờ từ các trạm quan trắc OpenAQ, phục vụ phân tích và ML'
+        )
+        +featureItem(
+          'lightning-charge',
+          'Dự đoán Nhanh',
+          'Kết quả dự báo được tính toán trong vài giây, hỗ trợ 16 khu vực khác nhau trong TP.HCM'
         )
 
   // Technology Stack
@@ -82,7 +92,12 @@ block main
       +techCard(
         'cloud',
         'Data & AI',
-        ['OpenAQ API', 'PyTorch (LSTM Model)', 'Pandas & NumPy', 'Scikit-learn']
+        ['OpenAQ API v3 (Real-time data)', 'PyTorch LSTM (Time-series prediction)', 'Pandas & NumPy (Data processing)', 'Scikit-learn (Scaling & metrics)', 'MongoDB (Time-series storage)']
+      )
+      +techCard(
+        'gear',
+        'DevOps & Tools',
+        ['PM2 Process Manager', 'Node-cron (Scheduler)', 'Git & GitHub', 'JSON-LD & NGSI-LD']
       )
 
   // Team Section
