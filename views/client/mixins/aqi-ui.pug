@@ -26,11 +26,12 @@ mixin aqiLegendInline()
       .me-1.fw-semibold AQI
       -
         const aqiLegendItems = [
-          { c:'#2ecc71', t:'0-50 Tốt' },
-          { c:'#f1c40f', t:'51-100 Trung bình' },
-          { c:'#e67e22', t:'101-200 Xấu/Nhạy cảm' },
-          { c:'#8e44ad', t:'201-300 Rất xấu' },
-          { c:'#e74c3c', t:'300+ Nguy hại' }
+          { c:'#1a9e3e', t:'0-50 Tốt' },
+          { c:'#95d500', t:'51-100 Trung bình' },
+          { c:'#f1c40f', t:'101-150 Nhạy cảm' },
+          { c:'#e67e22', t:'151-200 Xấu' },
+          { c:'#ff8c00', t:'201-300 Rất xấu' },
+          { c:'#d41e3a', t:'300+ Nguy hại' }
         ];
       each item in aqiLegendItems
         .d-inline-flex.align-items-center.gap-2
@@ -41,9 +42,9 @@ mixin aqiMapControls()
   .aqi-map-controls.card.border-0.shadow-sm.mb-3
     .card-body.d-flex.align-items-center.flex-wrap.gap-3
       .btn-group(role='group', aria-label='Toggle map layers')
-        button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='heat')
-          i.bi.bi-fire.me-1
-          | Bản đồ nhiệt
+        button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='voronoi')
+          i.bi.bi-map.me-1
+          | Bản đồ vùng AQI
         button.btn.btn-sm.btn-outline-primary.active(type='button', data-layer-toggle='markers')
           i.bi.bi-geo-alt.me-1
           | Điểm trạm
@@ -72,3 +73,70 @@ mixin aqiStationGrid()
     .row.row-cols-1.row-cols-md-2.g-3#aqi-stations
       .col.text-center.text-muted.py-4(data-empty-state)
         | Đang tải dữ liệu AQI...
+
+mixin aqiRecommendations()
+  .aqi-recommendations.card.border-0.shadow-sm
+    .card-body
+      h5.card-title.d-flex.align-items-center.gap-2.mb-3
+        i.bi.bi-info-circle.text-info
+        | Khuyến nghị
+      
+      select#station-selector.form-select.form-select-sm
+        option(value='nearest' selected) 🎯 Đang tải danh sách trạm...
+      
+      //- Card hiển thị AQI cụ thể
+      #station-aqi-card.mt-3.mb-3
+      
+      //- Nhóm khuyến nghị
+      .aqi-advice-group.mb-3.p-3.rounded.bg-success-subtle(id='advice-good' data-advice-group='good' style='display:none;')
+        h6.fw-bold.text-success.mb-2.mt-2
+          | AQI 0-50: Tốt
+        ul.small.mb-0
+          li Bạn có thể sinh hoạt ngoài trời bình thường
+          li Thích hợp cho các hoạt động thể dục ngoài trời
+          li Không cần bảo vệ đặc biệt
+
+      .aqi-advice-group.mb-3.p-3.rounded(id='advice-moderate' data-advice-group='moderate' style='display:none;border-left:4px solid #95d500;background-color:rgba(149,213,0,0.1);')
+        h6.fw-bold.mb-2.mt-2(style='color:#95d500;')
+          | AQI 51-100: Trung bình
+        ul.small.mb-0
+          li Người nhạy cảm nên giảm thời gian hoạt động ngoài trời
+          li Những người khỏe mạnh vẫn có thể sinh hoạt bình thường
+          li Xem xét sử dụng khẩu trang nếu có dấu hiệu khó chịu
+
+      .aqi-advice-group.mb-3.p-3.rounded(id='advice-unhealthy-for-sensitive' data-advice-group='unhealthy-for-sensitive' style='display:none;border-left:4px solid #f1c40f;background-color:rgba(241,196,15,0.1);')
+        h6.fw-bold.mb-2.mt-2(style='color:#f1c40f;')
+          | AQI 101-150: Nhạy cảm
+        ul.small.mb-0
+          li Người nhạy cảm nên hạn chế vận động mạnh ngoài trời
+          li Nhóm nhạy cảm nên giảm thời gian hoạt động ngoài trời
+          li Xem xét sử dụng khẩu trang nếu cần ra ngoài
+
+      .aqi-advice-group.mb-3.p-3.rounded(id='advice-unhealthy' data-advice-group='unhealthy' style='display:none;border-left:4px solid #e67e22;background-color:rgba(230,126,34,0.1);')
+        h6.fw-bold.mb-2.mt-2(style='color:#e67e22;')
+          | AQI 151-200: Xấu
+        ul.small.mb-0
+          li Cần thận trọng: giảm hoạt động mạnh ngoài trời
+          li Nên đeo khẩu trang phù hợp (N95/KN95) nếu ra ngoài
+          li Người nhạy cảm (trẻ em, người già, bệnh nhân) nên ở trong nhà
+          li Tăng cường sử dụng máy lọc không khí
+
+      .aqi-advice-group.mb-3.p-3.rounded(id='advice-very-unhealthy' data-advice-group='very-unhealthy' style='display:none;border-left:4px solid #ff8c00;background-color:rgba(255,140,0,0.1);')
+        h6.fw-bold.mb-2.mt-2(style='color:#ff8c00;')
+          | AQI 201-300: Rất xấu
+        ul.small.mb-0
+          li Hạn chế ra ngoài nếu không cần thiết
+          li Những người ngoài nhóm nhạy cảm cũng nên giảm hoạt động
+          li Bắt buộc đeo khẩu trang phù hợp nếu ra ngoài
+          li Sử dụng máy lọc không khí trong nhà
+          li Đóng cửa sổ để giảm không khí ngoài vào
+
+      .aqi-advice-group.mb-3.p-3.rounded(id='advice-hazardous' data-advice-group='hazardous' style='display:none;border-left:4px solid #d41e3a;background-color:rgba(212,30,58,0.1);')
+        h6.fw-bold.mb-2.mt-2(style='color:#d41e3a;')
+          | AQI 300+: Nguy hại
+        ul.small.mb-0
+          li Nên ở trong nhà và giảm các hoạt động ngoài trời
+          li Sử dụng thiết bị lọc không khí, máy tạo oxy nếu có
+          li Bắt buộc đeo khẩu trang chất lượng cao khi ra ngoài
+          li Những người bệnh tim, phổi cần tránh hoạt động ngoài
+          li Theo dõi tình trạng sức khỏe, gọi tư vấn bác sĩ nếu cần

@@ -63,38 +63,41 @@ block main
     if reading
       // AQI Recommendation Card
       - const aqi = Number(reading.aqius) || 0
-      - let recIcon, recMsg, recLevel
+      - let recEmoji, recMsg, recLevel
       
       if aqi <= 50
-        - recIcon = 'bi-emoji-smile'
+        - recEmoji = '😊'
         - recMsg = 'Không khí tốt. Bạn có thể hoạt động bình thường ngoài trời.'
         - recLevel = 'good'
       else if aqi <= 100
-        - recIcon = 'bi-emoji-neutral'
+        - recEmoji = '😐'
         - recMsg = 'Chất lượng trung bình. Nhóm nhạy cảm nên hạn chế tiếp xúc lâu ngoài trời.'
         - recLevel = 'moderate'
       else if aqi <= 150
-        - recIcon = 'bi-emoji-frown'
+        - recEmoji = '😟'
         - recMsg = 'Người nhạy cảm hạn chế vận động mạnh ngoài trời.'
         - recLevel = 'unhealthy-for-sensitive'
       else if aqi <= 200
-        - recIcon = 'bi-exclamation-triangle'
+        - recEmoji = '😕'
         - recMsg = 'Mọi người nên hạn chế vận động mạnh. Người nhạy cảm tránh hoạt động ngoài trời.'
         - recLevel = 'unhealthy'
       else if aqi <= 300
-        - recIcon = 'bi-exclamation-triangle-fill'
+        - recEmoji = '😢'
         - recMsg = 'Cảnh báo: Tất cả mọi người nên tránh hoạt động ngoài trời. Sử dụng khẩu trang N95.'
         - recLevel = 'very-unhealthy'
       else
-        - recIcon = 'bi-exclamation-octagon'
+        - recEmoji = '😱'
         - recMsg = 'NGUY HIỂM: Mọi người nên ở trong nhà. Chỉ ra ngoài khi cần thiết với khẩu trang N95.'
         - recLevel = 'hazardous'
       
       .recommendation-card(class='recommendation-' + recLevel)
         .recommendation-icon
-          i(class='bi ' + recIcon)
+          span= recEmoji
         .recommendation-content
           .recommendation-text= recMsg
+        .recommendation-aqi-display
+          .recommendation-aqi-value= aqi
+          .recommendation-aqi-label AQI
         .recommendation-bg
       
       // Stats Grid

@@ -30,7 +30,7 @@
   function getAQIClass(aqi) {
     if (aqi <= 50) return { key: 'good', label: 'Tốt', color: '#2ecc71' };
     if (aqi <= 100) return { key: 'moderate', label: 'Trung bình', color: '#f1c40f' };
-    if (aqi <= 150) return { key: 'unhealthy', label: 'Xấu', color: '#e67e22' };
+    if (aqi <= 150) return { key: 'unhealthy-for-sensitive', label: 'Nhạy cảm', color: '#e67e22' };
     if (aqi <= 200) return { key: 'unhealthy', label: 'Xấu', color: '#e67e22' };
     if (aqi <= 300) return { key: 'very-unhealthy', label: 'Rất xấu', color: '#8e44ad' };
     return { key: 'hazardous', label: 'Nguy hại', color: '#e74c3c' };
@@ -180,6 +180,13 @@
 
   // Event listeners
   btnForecast.addEventListener('click', handleForecast);
+  
+  // Auto-load dữ liệu khi chọn quận
+  districtSelect.addEventListener('change', function() {
+    if (this.value) {
+      handleForecast();
+    }
+  });
   
   // Load danh sách quận khi trang load
   loadDistricts();
