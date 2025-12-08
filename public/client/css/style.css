@@ -123,6 +123,15 @@ body{ background-color: var(--brand-50); }
 
 #aqi-map { min-height: 520px; border-radius: 12px; border:1px solid rgba(0,0,0,.05); }
 
+/* Mobile responsive - AQI Map */
+@media (max-width: 768px) {
+  #aqi-map { min-height: 300px; height: 300px !important; }
+  .aqi-statusbar.card { font-size: 0.9rem; }
+  .aqi-statusbar .display-6 { font-size: 2rem; }
+  .aqi-map-controls .btn-group { flex-wrap: wrap; }
+  .aqi-map-controls .btn { font-size: 0.75rem; padding: 0.4rem 0.6rem; }
+}
+
 .aqi-info.card{
   min-width: 260px;
   border: 0;
@@ -998,7 +1007,7 @@ body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(26, 158, 62, 0.15); }
 }
 
 .hero-title {
-  font-size: clamp(3rem, 12vw, 5.5rem);
+  font-size: clamp(2.5rem, 12vw, 5.5rem);
   font-weight: 900;
   line-height: 1.1;
   margin: 0 0 1rem;
@@ -1009,7 +1018,7 @@ body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(26, 158, 62, 0.15); }
 }
 
 .eco-track-label {
-  font-size: clamp(2rem, 8vw, 4rem);
+  font-size: clamp(1.8rem, 8vw, 4rem);
   font-weight: 900;
   background: linear-gradient(90deg, #00ff88 0%, #00ffcc 25%, #00ffff 50%, #00ccff 75%, #00ff88 100%);
   background-size: 400% 100%;
@@ -1082,6 +1091,34 @@ body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(26, 158, 62, 0.15); }
 
 .btn-hero:active {
   transform: translateY(-1px);
+}
+
+/* Mobile responsive - Hero buttons */
+@media (max-width: 576px) {
+  .btn-hero {
+    font-size: 1.1rem;
+    padding: 1rem 2.2rem;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .d-flex.gap-3.flex-wrap.mt-4 {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn-hero {
+    font-size: 1rem;
+    padding: 0.95rem 2.2rem;
+    min-height: 48px;
+  }
 }
 
 /* Scroll indicator */
@@ -1666,6 +1703,13 @@ body.aqi-safe .aqi-map-ring{ box-shadow: 0 0 0 4px rgba(26, 158, 62, 0.15); }
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Hide legend on mobile - takes too much space */
+@media (max-width: 768px) {
+  .aqi-legend-control {
+    display: none !important;
+  }
+}
+
 /* Marker Animation on Hover */
 .pm-icon:hover span {
   filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
@@ -1941,6 +1985,47 @@ body.aqi-safe .aqi-map-ring {
   margin-bottom: 0;
 }
 
+/* Mobile responsive - AQI Legend */
+@media (max-width: 576px) {
+  .aqi-legend.card { 
+    margin-bottom: 1rem; 
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .aqi-legend .card-body { 
+    flex-wrap: wrap; 
+    gap: 0.5rem;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  .aqi-legend .d-inline-flex { 
+    flex-basis: calc(50% - 0.25rem);
+    font-size: 0.85rem;
+  }
+  .aqi-legend .card-body > .d-inline-flex {
+    margin-right: 0.25rem;
+  }
+}
+
+/* Mobile responsive - AQI Statusbar */
+@media (max-width: 768px) {
+  .aqi-statusbar.card { margin-bottom: 1rem; }
+  .aqi-statusbar .card-body { flex-direction: column; gap: 1rem; }
+  .aqi-statusbar .status-copy { order: 1; }
+  .aqi-statusbar > .d-flex:last-child { order: 2; flex-direction: column; width: 100%; }
+  .aqi-statusbar .vr { display: none !important; }
+}
+
+/* Mobile responsive - AQI Recommendations */
+@media (max-width: 768px) {
+  .aqi-recommendations .card-body { padding: 1rem; }
+  .aqi-recommendations h5 { font-size: 1rem; margin-bottom: 0.75rem; }
+  #station-selector { margin-bottom: 1rem; }
+  .aqi-advice-group { padding: 0.75rem !important; margin-bottom: 0.75rem !important; }
+  .aqi-advice-group h6 { font-size: 0.9rem; }
+  .aqi-advice-group ul { font-size: 0.85rem; }
+}
+
 /* Responsive icon grid */
 @media (max-width: 576px) {
   #aqi-icons-grid {
@@ -1963,5 +2048,108 @@ body.aqi-safe .aqi-map-ring {
 @media (min-width: 1025px) {
   #aqi-icons-grid {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Mobile responsive - Form elements & Forecast */
+@media (max-width: 576px) {
+  .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.8rem;
+  }
+  
+  .form-select,
+  select {
+    font-size: 1rem;
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+  
+  .form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-select-lg {
+    font-size: 1.1rem;
+    padding: 0.8rem 1rem;
+    min-height: 48px;
+  }
+  
+  .btn.btn-lg {
+    font-size: 1.1rem;
+    padding: 0.85rem 1.5rem;
+    width: 100%;
+    margin-top: 0.75rem;
+    min-height: 50px;
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
+  
+  .stat-card {
+    padding: 1.25rem;
+    text-align: center;
+  }
+  
+  .stat-card__icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stat-card__value {
+    font-size: 1.5rem;
+  }
+  
+  .stat-card__label {
+    font-size: 0.95rem;
+  }
+  
+  .recommendation-card {
+    padding: 1.25rem;
+  }
+  
+  .scroll-indicator {
+    bottom: 20px;
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .form-select-lg {
+    font-size: 1.05rem;
+    padding: 0.75rem 1rem;
+    min-height: 46px;
+  }
+  
+  .btn.btn-lg {
+    font-size: 1rem;
+    padding: 0.7rem 1.5rem;
+  }
+  
+  .row.g-3.mb-4 {
+    gap: 0.75rem !important;
+  }
+  
+  .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .col-md-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 992px) {
+  .hero-globe {
+    margin-bottom: 2rem;
   }
 }

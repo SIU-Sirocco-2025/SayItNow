@@ -728,6 +728,7 @@
     const legend = L.control({ position: 'bottomright' });
     legend.onAdd = function () {
       const div = L.DomUtil.create('div', 'card p-3 shadow-sm small aqi-legend-control');
+      div.setAttribute('data-legend', 'aqi-map'); // Thêm attribute để CSS target
       const legendItems = [
         { min: 0, max: 50, label: 'Tốt', color: '#1a9e3e', range: '0-50' },
         { min: 51, max: 100, label: 'Trung bình', color: '#95d500', range: '51-100' },
