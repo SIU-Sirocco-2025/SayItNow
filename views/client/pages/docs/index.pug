@@ -192,7 +192,7 @@ html(lang='vi')
                   pre
                     code.language-bash.
                       curl -H "x-api-key: YOUR_API_KEY" \
-                        http://localhost:3000/aqi/history/quan1
+                        http://localhost:3000/aqi/history/district1
               
               .auth-method
                 h4 2. Authorization Bearer
@@ -204,7 +204,7 @@ html(lang='vi')
                   pre
                     code.language-bash.
                       curl -H "Authorization: Bearer YOUR_API_KEY" \
-                        http://localhost:3000/aqi/history/quan1
+                        http://localhost:3000/aqi/history/district1
               
               .auth-method
                 h4 3. Query Parameter
@@ -215,7 +215,7 @@ html(lang='vi')
                       i.fas.fa-copy
                   pre
                     code.language-bash.
-                      curl http://localhost:3000/aqi/history/quan1?apiKey=YOUR_API_KEY
+                      curl http://localhost:3000/aqi/history/district1?apiKey=YOUR_API_KEY
             
             .warning-box
               i.fas.fa-exclamation-triangle
@@ -297,6 +297,16 @@ html(lang='vi')
             
             p So sánh chất lượng không khí giữa tất cả các quận, tìm quận tốt nhất/xấu nhất.
             
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl http://localhost:3000/aqi/compare
+            
             h4 Response Example
             .code-block
               .code-header
@@ -307,15 +317,16 @@ html(lang='vi')
                 code.language-json.
                   {
                     "success": true,
-                    "total": 15,
+                    "total": 16,
                     "statistics": {
                       "best": {
                         "city": "Quận 1",
-                        "cityKey": "quan1",
+                        "cityKey": "district1",
                         "aqius": 45
                       },
                       "worst": {
                         "city": "Quận 10",
+                        "cityKey": "district10",
                         "aqius": 120
                       },
                       "average": 78.5
@@ -347,7 +358,7 @@ html(lang='vi')
                   td
                     code cityKey
                   td Path
-                  td Mã quận (quan1, quan2, hochiminhcity, thuduc...)
+                  td Mã quận (hcmc, district1, district2, binhThanh, thuDuc...)
                 tr
                   td
                     code limit
@@ -363,7 +374,7 @@ html(lang='vi')
               pre
                 code.language-bash.
                   curl -H "x-api-key: YOUR_API_KEY" \
-                    "http://localhost:3000/aqi/history/quan1?limit=72"
+                    "http://localhost:3000/aqi/history/district1?limit=72"
             
             h4 Response Example
             .code-block
@@ -375,7 +386,7 @@ html(lang='vi')
                 code.language-json.
                   {
                     "city": "Quận 1",
-                    "cityKey": "quan1",
+                    "cityKey": "district1",
                     "points": [
                       { "ts": "2025-11-23T10:00:00Z", "aqius": 65 },
                       { "ts": "2025-11-23T09:00:00Z", "aqius": 70 }
@@ -427,7 +438,7 @@ html(lang='vi')
               pre
                 code.language-bash.
                   curl -H "x-api-key: YOUR_API_KEY" \
-                    "http://localhost:3000/aqi/by-datetime/quan1?startDate=2025-11-20&endDate=2025-11-22"
+                    "http://localhost:3000/aqi/by-datetime/district1?startDate=2025-11-20&endDate=2025-11-22"
 
           section#statistics.docs-section
             h2 
@@ -581,11 +592,11 @@ html(lang='vi')
                 code.language-bash.
                   # Export CSV
                   curl -H "x-api-key: YOUR_API_KEY" \
-                    "http://localhost:3000/aqi/export/quan1?format=csv" -o data.csv
+                    "http://localhost:3000/aqi/export/district1?format=csv" -o data.csv
                   
                   # Export JSON
                   curl -H "x-api-key: YOUR_API_KEY" \
-                    "http://localhost:3000/aqi/export/quan1?format=json" -o data.json
+                    "http://localhost:3000/aqi/export/district1?format=json" -o data.json
 
           section#hourly-average.docs-section
             h2 
@@ -609,7 +620,48 @@ html(lang='vi')
               code.endpoint-url /aqi/latest-reading
               span.auth-badge.no-auth Không cần API key
             
-            p Lấy dữ liệu AQI mới nhất của TP.HCM.
+            p Lấy dữ liệu AQI mới nhất của TP.HCM (toàn thành phố).
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl http://localhost:3000/aqi/latest-reading
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "city": "Ho Chi Minh City",
+                    "timestamp": "2025-12-07T10:00:00.000Z",
+                    "current": {
+                      "pollution": {
+                        "ts": "2025-12-07T10:00:00.000Z",
+                        "aqius": 85,
+                        "mainus": "pm25",
+                        "aqicn": 48,
+                        "maincn": "pm25"
+                      },
+                      "weather": {
+                        "ts": "2025-12-07T10:00:00.000Z",
+                        "tp": 31,
+                        "pr": 1010,
+                        "hu": 70,
+                        "ws": 3.5,
+                        "wd": 220
+                      }
+                    }
+                  }
 
           section#prediction-intro.docs-section
             h2 
@@ -797,39 +849,26 @@ html(lang='vi')
                 code.language-json.
                   {
                     "success": true,
-                    "district": "district7",
-                    "count": 72,
+                    "district": "district1",
+                    "totalRecords": 72,
+                    "timeRange": {
+                      "from": "2025-12-04T19:00:00.000Z",
+                      "to": "2025-12-07T18:00:00.000Z"
+                    },
                     "data": [
-                      {
-                        "timestamp": "2025-12-04T21:00:00.000Z",
-                        "aqius": 96,
-                        "mainus": "pm25",
-                        "temperature": 31.5,
-                        "humidity": 71.2,
-                        "pressure": 1012.8,
-                        "windSpeed": 4,
-                        "windDirection": 227
-                      },
-                      {
-                        "timestamp": "2025-12-04T20:00:00.000Z",
-                        "aqius": 92,
-                        "mainus": "pm25",
-                        "temperature": 31.8,
-                        "humidity": 70.5,
-                        "pressure": 1012.5,
-                        "windSpeed": 3.8,
-                        "windDirection": 220
-                      },
                       {
                         "timestamp": "2025-12-04T19:00:00.000Z",
                         "aqius": 88,
+                        "aqicn": 50,
                         "mainus": "pm25",
+                        "maincn": "pm25",
                         "temperature": 32.0,
                         "humidity": 69.8,
                         "pressure": 1012.2,
                         "windSpeed": 3.5,
                         "windDirection": 215
                       }
+                      // ... 71 records tiếp theo
                     ]
                   }
             
@@ -1008,37 +1047,37 @@ html(lang='vi')
                   td 0-50
                   td Good
                   td 
-                    span.badge(style='background: #00e400; color: white;') Xanh lá
+                    span.badge(style='background: #1a9e3e; color: white;') Xanh lá
                   td Chất lượng không khí tốt
                 tr
                   td 51-100
                   td Moderate
                   td
-                    span.badge(style='background: #ffff00; color: black;') Vàng
+                    span.badge(style='background: #95d500; color: #243b02;') Vàng‑xanh
                   td Chấp nhận được
                 tr
                   td 101-150
                   td Unhealthy for Sensitive
                   td
-                    span.badge(style='background: #ff7e00; color: white;') Cam
+                    span.badge(style='background: #f1c40f; color: #243b02;') Vàng
                   td Nhạy cảm nên hạn chế ra ngoài
                 tr
                   td 151-200
                   td Unhealthy
                   td
-                    span.badge(style='background: #ff0000; color: white;') Đỏ
+                    span.badge(style='background: #e67e22; color: white;') Cam
                   td Không tốt cho sức khỏe
                 tr
                   td 201-300
                   td Very Unhealthy
                   td
-                    span.badge(style='background: #8f3f97; color: white;') Tím
+                    span.badge(style='background: #ff8c00; color: white;') Cam đậm
                   td Rất không tốt
                 tr
                   td 301+
                   td Hazardous
                   td
-                    span.badge(style='background: #7e0023; color: white;') Nâu đỏ
+                    span.badge(style='background: #d41e3a; color: white;') Đỏ đậm
                   td Nguy hiểm
 
           section#prediction-districts.docs-section
@@ -1073,7 +1112,7 @@ html(lang='vi')
                     "total": 16
                   }
             
-            h4 Supported Districts
+            h4 Supported Districts (16 khu vực)
             .city-keys-grid
               .city-key-item
                 code hcmc
@@ -1112,14 +1151,14 @@ html(lang='vi')
                 code binhThanh
                 span Bình Thạnh
               .city-key-item
+                code binhTan
+                span Bình Tân
+              .city-key-item
                 code phuNhuan
                 span Phú Nhuận
               .city-key-item
                 code tanPhu
                 span Tân Phú
-              .city-key-item
-                code binhTan
-                span Bình Tân
               .city-key-item
                 code thuDuc
                 span Thủ Đức
@@ -1135,7 +1174,33 @@ html(lang='vi')
               code.endpoint-url /auth/api-key
               span.auth-badge.session Cần đăng nhập
             
-            p Lấy thông tin API key của tài khoản đã đăng nhập.
+            p Lấy thông tin API key của tài khoản đã đăng nhập. Endpoint này yêu cầu session authentication (đăng nhập qua trình duyệt), không phải API key.
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  # Cần đăng nhập qua trình duyệt trước
+                  curl http://localhost:3000/auth/api-key \
+                    -H "Cookie: connect.sid=YOUR_SESSION_COOKIE"
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "apiKey": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+                    "createdAt": "2025-12-01T00:00:00.000Z"
+                  }
 
           section#regenerate-api-key.docs-section
             h3 
@@ -1147,7 +1212,46 @@ html(lang='vi')
               code.endpoint-url /auth/api-key/regenerate
               span.auth-badge.session Cần đăng nhập
             
-            p Tạo API key mới (key cũ sẽ không còn hoạt động).
+            p Tạo API key mới (key cũ sẽ không còn hoạt động). Endpoint này yêu cầu session authentication.
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  # Cần đăng nhập qua trình duyệt trước
+                  curl -X POST http://localhost:3000/auth/api-key/regenerate \
+                    -H "Cookie: connect.sid=YOUR_SESSION_COOKIE"
+            
+            h4 Response Example
+            .code-block
+              .code-header
+                span.language json
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-json.
+                  {
+                    "success": true,
+                    "message": "API key đã được tạo lại thành công",
+                    "newApiKey": "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+                  }
+            
+            .warning-box
+              i.fas.fa-exclamation-triangle
+              div
+                strong Lưu ý quan trọng:
+                br
+                | • Để lấy hoặc tạo lại API key, bạn cần đăng nhập vào hệ thống qua trang 
+                a(href='/auth/login') /auth/login
+                br
+                | • Hoặc truy cập trang Cài đặt: 
+                a(href='/auth/settings') /auth/settings
+                br
+                | • API key cũ sẽ ngay lập tức không còn hoạt động sau khi regenerate
 
           section#ngsi-ld-intro.docs-section
             h2 
@@ -1199,26 +1303,33 @@ html(lang='vi')
             .info-box.mt-2
               i.fas.fa-file-contract
               div
-              strong License: 
-              | Dữ liệu NGSI‑LD do Eco‑Track xuất bản theo ODC‑BY 1.0 – xem 
-              a(href='/DATA_LICENSE.md', target='_blank') DATA_LICENSE.md
+                strong License: 
+                | Dữ liệu NGSI‑LD do Eco‑Track xuất bản theo ODC‑BY 1.0 – xem 
+                a(href='/DATA_LICENSE.md', target='_blank') DATA_LICENSE.md
+            
             .endpoint-info
               span.http-method.get GET
               code.endpoint-url /api/ngsi-ld/context
+              span.auth-badge.no-auth Không cần API key
              
             p
               | Lấy @context định nghĩa cho tất cả entities của Eco-Track. Ngoài endpoint động ở 
               code /api/ngsi-ld/context
               | , hệ thống cũng phục vụ context tĩnh tại 
-              code /context
+              code /context.jsonld
               |  (xem 
-              a(href='/public/context.jsonld') public/context.jsonld
-              | ). Cấu hình prefix API xem 
-              a(href='/config/system.js') 
-                | `
-                | config.system.prefixAPI
-                | `
-              | .
+              a(href='/context.jsonld', target='_blank') public/context.jsonld
+              | ).
+            
+            h4 Request Example
+            .code-block
+              .code-header
+                span.language curl
+                button.copy-btn(onclick='copyCode(this)')
+                  i.fas.fa-copy
+              pre
+                code.language-bash.
+                  curl http://localhost:3000/api/ngsi-ld/context
           
             h4 Response Example
             .code-block
@@ -1261,6 +1372,7 @@ html(lang='vi')
             .endpoint-info
               span.http-method.get GET
               code.endpoint-url /api/ngsi-ld/entities/:district
+              span.auth-badge.no-auth Không cần API key
              
             p Lấy entity mới nhất theo chuẩn NGSI-LD cho một quận (type: 
               code AirQualityObserved
@@ -1286,7 +1398,7 @@ html(lang='vi')
               pre
                 code.language-json.
                   {
-                    "@context": "https://ecotrack.asia/context",
+                    "@context": "https://ecotrack.asia/context.jsonld",
                     "id": "urn:ngsi-ld:AirQualityObserved:district1:1735574400000",
                     "type": "AirQualityObserved",
                     "dateObserved": {
@@ -1319,6 +1431,7 @@ html(lang='vi')
             .endpoint-info
               span.http-method.get GET
               code.endpoint-url /api/ngsi-ld/entities/:district/temporal
+              span.auth-badge.no-auth Không cần API key
             
             p Truy vấn dữ liệu 
               code AirQualityObserved
@@ -1366,6 +1479,7 @@ html(lang='vi')
             .endpoint-info
               span.http-method.get GET
               code.endpoint-url /api/ngsi-ld/predictions/:district
+              span.auth-badge.no-auth Không cần API key
             p Trả về dự báo AQI 24h ở định dạng NGSI-LD Collection, mỗi phần tử là một entity AQIPrediction.
             h4 Request Example
             .code-block
@@ -1386,12 +1500,12 @@ html(lang='vi')
               pre
                 code.language-json.
                   {
-                    "@context": "https://ecotrack.asia/context/v1",
+                    "@context": "https://ecotrack.asia/context.jsonld",
                     "type": "Collection",
                     "totalItems": 24,
                     "member": [
                       {
-                        "@context": "https://ecotrack.asia/context/v1",
+                        "@context": "https://ecotrack.asia/context.jsonld",
                         "id": "urn:ngsi-ld:AQIPrediction:district1:1",
                         "type": "AQIPrediction",
                         "predictedAQI": { "type": "Property", "value": 72, "observedAt": "2025-12-04T10:00:00Z" },

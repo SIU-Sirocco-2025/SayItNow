@@ -35,20 +35,21 @@ function intensityFromAQI(aqius) {
 }
 
 const CITY_MODEL_MAP = {
-  'hochiminhcity': models.HCMCReading,
-  'quan1': models.District1Reading,
-  'quan2': models.District2Reading,
-  'quan3': models.District3Reading,
-  'quan4': models.District4Reading,
-  'quan5': models.District5Reading,
-  'quan6': models.District6Reading,
-  'quan7': models.District7Reading,
-  'quan9': models.District9Reading,
-  'quan10': models.District10Reading,
-  'quan11': models.District11Reading,
-  'quanbinhtan': models.BinhTanReading,
-  'quanphunhuan': models.PhuNhuanReading,
-  'quanbinhthanh': models.BinhThanhReading,
+  'hcmc': models.HCMCReading,
+  'district1': models.District1Reading,
+  'district2': models.District2Reading,
+  'district3': models.District3Reading,
+  'district4': models.District4Reading,
+  'district5': models.District5Reading,
+  'district6': models.District6Reading,
+  'district7': models.District7Reading,
+  'district9': models.District9Reading,
+  'district10': models.District10Reading,
+  'district11': models.District11Reading,
+  'binhtan': models.BinhTanReading,
+  'binhthanh': models.BinhThanhReading,
+  'phunhuan': models.PhuNhuanReading,
+  'tanphu': models.TanPhuReading,
   'thuduc': models.ThuDucReading
 };
 

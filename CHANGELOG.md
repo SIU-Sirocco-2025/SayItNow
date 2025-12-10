@@ -1,4 +1,54 @@
 # CHANGELOG
+
+## [v1.1.3](https://github.com/SIU-Sirocco-2025/Eco-Track/releases/tag/v1.1.3) - 2025-12-09
+
+> Phiên bản này tập trung nâng cấp lớp **model dự đoán AQI** (độ phủ quận, tham số LSTM và pipeline dự đoán), trong khi các bản trước (v1.1.0–v1.1.2) chủ yếu bổ sung NGSI‑LD, UI bản đồ và đồng bộ key quận/district trong API & docs.
+
+### Added
+- Bổ sung/bổ hoàn bộ tham số LSTM cho các quận/khu vực mới trong thư mục model:
+  - Thêm/bổ sung file tham số model cho từng quận trong [model_params](model_params) (ví dụ [`model_params/lstm_params_district_1.json`](model_params/lstm_params_district_1.json), các file tương ứng cho district khác và city‑wide)
+  - Chuẩn hoá cấu trúc JSON tham số (layer, weight, bias) để có thể tái sử dụng chung trong pipeline dự đoán Python
+- Mở rộng logic đọc model trong script Python:
+  - Cho phép lựa chọn model theo `districtKey`/file mapping trong [`predict_from_json.py`](predict_from_json.py)
+  - Hỗ trợ load nhiều model khác nhau (theo quận) trong cùng một tiến trình phục vụ API
+
+### Changed
+- Cập nhật controller prediction để sử dụng/bọc các model mới:
+  - Điều chỉnh mapping quận ↔ file tham số model trong [`controllers/api/prediction.controller.js`](controllers/api/prediction.controller.js) cho đồng bộ với 16 khu vực đã chuẩn hoá ở v1.1.2
+  - Chuẩn hoá validate `district` trong request và thông báo lỗi khi quận chưa có model tương ứng
+- Điều chỉnh lại pipeline runner:
+  - Cập nhật helper chạy Python để truyền đúng đường dẫn model và thông số đầu vào tương ứng [`helpers/pythonRunner.js`](helpers/pythonRunner.js)
+  - Giảm trùng lặp code khi gọi script dự đoán cho nhiều quận
+- Cập nhật tài liệu và ví dụ để phản ánh model dự đoán mới:
+  - Điều chỉnh phần mô tả model/dataset dự đoán và ví dụ response trong docs API ([views/client/pages/docs/index.pug](views/client/pages/docs/index.pug))
+  - Cập nhật bảng evaluation/sample dataset cho phù hợp với độ phủ model mới ([evaluation_results.csv](evaluation_results.csv), [predict.csv](predict.csv))
+
+### Fixed
+- Xử lý tốt hơn các lỗi liên quan tới model:
+  - Bổ sung kiểm tra tồn tại file tham số model, log cảnh báo rõ ràng khi thiếu hoặc sai tên file ([controllers/api/prediction.controller.js](controllers/api/prediction.controller.js), [predict_from_json.py](predict_from_json.py))
+  - Sửa một số lỗi nhỏ trong quá trình parse JSON tham số LSTM cho từng quận (đảm bảo đúng kiểu và shape trước khi đưa vào model)
+- Làm rõ hơn thông báo lỗi prediction trả về cho client khi model không khả dụng hoặc dữ liệu đầu vào không đủ 72h
+
+// ...existing code...
+
+## [v1.1.2](https://github.com/SIU-Sirocco-2025/Eco-Track/releases/tag/v1.1.2) - 2025-12-08
+
+### Changed
+- Đồng bộ lại danh sách quận/huyện giữa code và tài liệu:
+  - Chuẩn hoá key quận dùng trong API (`hcmc`, `district1`, `district2`, `binhThanh`, `thuDuc`, `tanPhu`, `phuNhuan`, `binhTan`...) theo mapping trong service đồng bộ AQI ([services/aqiSyncService.js](services/aqiSyncService.js), [models/index.js](models/index.js))
+  - Cập nhật bảng “Supported Districts (16 khu vực)” và ví dụ request trong docs để không còn thiếu/dư quận ([views/client/pages/docs/index.pug](views/client/pages/docs/index.pug))
+  - Cập nhật ví dụ seed/prediction để dùng đúng key quận đã hỗ trợ ([scripts/seed-72h-data.js](scripts/seed-72h-data.js), [controllers/api/prediction.controller.js](controllers/api/prediction.controller.js))
+
+### Fixed
+- Sửa lỗi liên kết và nội dung trong API Docs:
+  - Sửa các ví dụ curl dùng sai `cityKey`/`district` (ví dụ `quan1` → `district1`), đồng bộ với routing thật của API ([views/client/pages/docs/index.pug](views/client/pages/docs/index.pug), [public/client/js/docs.js](public/client/js/docs.js))
+  - Sửa lỗi định dạng markdown/link sai trong changelog và docs (ví dụ tham chiếu `HCMCAirHour` bị đóng ngoặc sai) ([CHANGELOG.md](CHANGELOG.md), [README.md](README.md))
+  - Cập nhật lại sample dataset, bảng evaluation và bảng dataset forecast cho khớp với legend AQI, tên quận, và cấu trúc response hiện tại ([views/client/pages/docs/index.pug](views/client/pages/docs/index.pug))
+
+- Sửa lỗi/thiếu sót nội dung trang giới thiệu:
+  - Đồng bộ ví dụ dataset, bảng độ chính xác mô hình theo quận và phần mô tả Dataset với docs API (16 khu vực, tần suất, thông số đo lường) ([views/client/pages/home/about.pug](views/client/pages/home/about.pug), [views/client/mixins/about.pug](views/client/mixins/about.pug))
+  - Cập nhật lại tên quận trong các bảng ví dụ (việt hoá đầy đủ “Bình Thạnh”, “Phú Nhuận”, “Tân Phú”, “Bình Tân”, “Thủ Đức” và tránh trộn lẫn English/Vietnamese) cho thống nhất với hệ thống API và bản đồ
+
 ## [v1.1.1](https://github.com/SIU-Sirocco-2025/Eco-Track/releases/tag/v1.1.1) - 2025-12-7
 
 ### Added
