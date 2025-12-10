@@ -67,17 +67,17 @@ module.exports.updateStatus = async (req, res) => {
         
         if (!['pending', 'in-progress', 'resolved', 'closed'].includes(status)) {
             req.flash('error', 'Trạng thái không hợp lệ');
-            return res.redirect('back');
+            return res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
         }
 
         await Ticket.findByIdAndUpdate(req.params.id, { status });
         
         req.flash('success', 'Cập nhật trạng thái thành công');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     } catch (err) {
         console.error('Update status error:', err);
         req.flash('error', 'Không thể cập nhật trạng thái');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     }
 };
 
@@ -88,17 +88,17 @@ module.exports.updatePriority = async (req, res) => {
         
         if (!['low', 'medium', 'high', 'urgent'].includes(priority)) {
             req.flash('error', 'Độ ưu tiên không hợp lệ');
-            return res.redirect('back');
+            return res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
         }
 
         await Ticket.findByIdAndUpdate(req.params.id, { priority });
         
         req.flash('success', 'Cập nhật độ ưu tiên thành công');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     } catch (err) {
         console.error('Update priority error:', err);
         req.flash('error', 'Không thể cập nhật độ ưu tiên');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     }
 };
 
@@ -110,11 +110,11 @@ module.exports.updateNote = async (req, res) => {
         await Ticket.findByIdAndUpdate(req.params.id, { adminNote });
         
         req.flash('success', 'Cập nhật ghi chú thành công');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     } catch (err) {
         console.error('Update note error:', err);
         req.flash('error', 'Không thể cập nhật ghi chú');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     }
 };
 
@@ -131,7 +131,7 @@ module.exports.delete = async (req, res) => {
     } catch (err) {
         console.error('Delete ticket error:', err);
         req.flash('error', 'Không thể xóa phản hồi');
-        res.redirect('back');
+        res.redirect(req.get('Referrer') || `${req.app.locals.prefixAdmin}/dashboard`);
     }
 };
 

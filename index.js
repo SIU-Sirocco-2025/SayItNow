@@ -27,12 +27,13 @@ const system = require('./config/system');
 
 // Main
 const app = express();
-app.use(methodOverride('_method'))
+
 const port = process.env.PORT || 3000;
 
 // app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')));
 // set view engine PUG
 app.set('views', path.join(__dirname, 'views'));
