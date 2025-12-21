@@ -8,18 +8,21 @@ block main
     +showAlertError(5000)
 
     .container-fluid.py-4
-        .row.mb-4
-            .col-md-8
-                h1.mb-0 
+        .row.mb-4.align-items-center
+            .col-12.col-md-8
+                h1.mb-0.page-title
                     i.bi.bi-cloud.me-2
                     | Quản lý AQI (Chất lượng không khí)
-            .col-md-4.text-end
-                a.btn.btn-success.me-2(href="/admin/aqi/export?format=csv")
-                    i.bi.bi-download.me-1
-                    | Export CSV
-                a.btn.btn-primary(href="/admin/aqi/export?format=json")
-                    i.bi.bi-download.me-1
-                    | Export JSON
+            .col-12.col-md-4.text-md-end.mt-3.mt-md-0
+                .d-flex.gap-2.justify-content-start.justify-content-md-end
+                    a.btn.btn-success(href="/admin/aqi/export?format=csv")
+                        i.bi.bi-download.me-1
+                        span.d-none.d-sm-inline Export 
+                        | CSV
+                    a.btn.btn-primary(href="/admin/aqi/export?format=json")
+                        i.bi.bi-download.me-1
+                        span.d-none.d-sm-inline Export 
+                        | JSON
 
         // Bảng dữ liệu AQI
         .card
@@ -74,8 +77,8 @@ block main
                         | Chưa có dữ liệu AQI để hiển thị
 
         // Thống kê nhanh
-        .row.mt-4
-            .col-md-3
+        .row.mt-4.g-3
+            .col-6.col-md-3
                 .card.text-center
                     .card-body
                         h6.card-title.text-muted Số quận có dữ liệu
@@ -84,7 +87,7 @@ block main
                                 strong= data.length
                             else
                                 strong 0
-            .col-md-3
+            .col-6.col-md-3
                 .card.text-center
                     .card-body
                         h6.card-title.text-muted AQI Cao nhất
@@ -93,7 +96,7 @@ block main
                                 strong= typeof data[0].aqius === 'number' ? data[0].aqius : 'N/A'
                             else
                                 strong N/A
-            .col-md-3
+            .col-6.col-md-3
                 .card.text-center
                     .card-body
                         h6.card-title.text-muted AQI Trung bình
@@ -103,7 +106,7 @@ block main
                                 strong= avg
                             else
                                 strong N/A
-            .col-md-3
+            .col-6.col-md-3
                 .card.text-center
                     .card-body
                         h6.card-title.text-muted Cập nhật lần cuối

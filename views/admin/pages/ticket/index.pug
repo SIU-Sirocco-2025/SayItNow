@@ -6,12 +6,12 @@ block main
     +showAlertError(5000)
 
     .container-fluid.py-4
-        .row.mb-4
-            .col-md-8
-                h1.mb-0
-                    i.bi.bi-chat-dots.me-2
+        .row.mb-4.align-items-center
+            .col-12.col-md-8
+                h1.mb-0.page-title
+                    i.bi.bi-chat-dots.me-2.d-none.d-sm-inline
                     | Quản lý phản hồi
-            .col-md-4.text-end
+            .col-12.col-md-4.text-md-end.mt-2.mt-md-0
                 button.btn.btn-primary#btnStats(type="button")
                     i.bi.bi-bar-chart.me-1
                     | Thống kê
@@ -20,36 +20,36 @@ block main
         .card.mb-4
             .card-body
                 form(method="GET" action="/admin/tickets")
-                    .row.g-3
-                        .col-md-3
-                            label.form-label Trạng thái:
-                            select.form-select(name="status")
+                    .row.g-2.g-md-3
+                        .col-6.col-md-3
+                            label.form-label.small Trạng thái:
+                            select.form-select.form-select-sm(name="status")
                                 option(value="" selected=currentStatus === 'all') Tất cả
                                 option(value="pending" selected=currentStatus === 'pending') Chờ xử lý
                                 option(value="in-progress" selected=currentStatus === 'in-progress') Đang xử lý
                                 option(value="resolved" selected=currentStatus === 'resolved') Đã giải quyết
                                 option(value="closed" selected=currentStatus === 'closed') Đã đóng
                         
-                        .col-md-3
-                            label.form-label Danh mục:
-                            select.form-select(name="category")
+                        .col-6.col-md-3
+                            label.form-label.small Danh mục:
+                            select.form-select.form-select-sm(name="category")
                                 option(value="" selected=currentCategory === 'all') Tất cả
                                 option(value="bug" selected=currentCategory === 'bug') Bug
                                 option(value="feature" selected=currentCategory === 'feature') Feature
                                 option(value="question" selected=currentCategory === 'question') Question
                                 option(value="other" selected=currentCategory === 'other') Other
                         
-                        .col-md-3
-                            label.form-label Độ ưu tiên:
-                            select.form-select(name="priority")
+                        .col-6.col-md-3
+                            label.form-label.small Độ ưu tiên:
+                            select.form-select.form-select-sm(name="priority")
                                 option(value="" selected=currentPriority === 'all') Tất cả
                                 option(value="low" selected=currentPriority === 'low') Thấp
                                 option(value="medium" selected=currentPriority === 'medium') Trung bình
                                 option(value="high" selected=currentPriority === 'high') Cao
                                 option(value="urgent" selected=currentPriority === 'urgent') Khẩn cấp
                         
-                        .col-md-3.d-flex.align-items-end
-                            button.btn.btn-success.w-100(type="submit")
+                        .col-6.col-md-3.d-flex.align-items-end
+                            button.btn.btn-success.btn-sm.w-100(type="submit")
                                 i.bi.bi-funnel.me-1
                                 | Lọc
 
@@ -58,28 +58,30 @@ block main
                 i.bi.bi-info-circle.me-2
                 | Không tìm thấy phản hồi nào
         else
-            .card
+            //- Desktop table view
+            .card.d-none.d-md-block
                 .card-body
                     .table-responsive
-                        table.table.table-hover
+                        table.table.table-hover.table-sm
                             thead.table-light
                                 tr
-                                    th #
+                                    th.d-none.d-lg-table-cell #
                                     th Người gửi
-                                    th Email
+                                    th.d-none.d-xl-table-cell Email
                                     th Chủ đề
                                     th Danh mục
                                     th Trạng thái
-                                    th Độ ưu tiên
-                                    th Ngày gửi
+                                    th.d-none.d-lg-table-cell Ưu tiên
+                                    th.d-none.d-xl-table-cell Ngày gửi
                                     th Hành động
                             tbody
                                 each ticket, index in tickets
                                     tr
-                                        td= index + 1
+                                        td.d-none.d-lg-table-cell= index + 1
                                         td= ticket.fullName
-                                        td= ticket.email
-                                        td= ticket.subject
+                                        td.d-none.d-xl-table-cell= ticket.email
+                                        td
+                                            span.text-truncate(style="max-width: 150px; display: inline-block;")= ticket.subject
                                         td
                                             case ticket.category
                                                 when 'bug'
@@ -100,7 +102,7 @@ block main
                                                     span.badge.bg-success Đã giải quyết
                                                 when 'closed'
                                                     span.badge.bg-secondary Đã đóng
-                                        td
+                                        td.d-none.d-lg-table-cell
                                             case ticket.priority
                                                 when 'low'
                                                     span.badge.bg-secondary Thấp
@@ -110,13 +112,112 @@ block main
                                                     span.badge.bg-warning Cao
                                                 when 'urgent'
                                                     span.badge.bg-danger Khẩn cấp
-                                        td.small= new Date(ticket.createdAt).toLocaleString('vi-VN')
+                                        td.small.d-none.d-xl-table-cell= new Date(ticket.createdAt).toLocaleString('vi-VN')
                                         td
                                             a.btn.btn-sm.btn-info.me-1(href=`/admin/tickets/${ticket._id}`)
                                                 i.bi.bi-eye
                                             form.d-inline(method='POST' action=`/admin/tickets/${ticket._id}?_method=DELETE`)
                                                 button.btn.btn-sm.btn-danger(type='submit' onclick="return confirm('Xác nhận xóa?')")
                                                     i.bi.bi-trash
+            
+            //- Mobile card view
+            .ticket-cards.d-md-none
+                each ticket, index in tickets
+                    .ticket-card
+                        .ticket-card-header
+                            .ticket-card-subject= ticket.subject
+                            .ticket-card-badges
+                                case ticket.status
+                                    when 'pending'
+                                        span.badge.bg-warning Chờ xử lý
+                                    when 'in-progress'
+                                        span.badge.bg-info Đang xử lý
+                                    when 'resolved'
+                                        span.badge.bg-success Đã giải quyết
+                                    when 'closed'
+                                        span.badge.bg-secondary Đã đóng
+                                case ticket.priority
+                                    when 'high'
+                                        span.badge.bg-warning.ms-1 Cao
+                                    when 'urgent'
+                                        span.badge.bg-danger.ms-1 Khẩn cấp
+                        .ticket-card-info
+                            .ticket-card-row
+                                i.bi.bi-person.me-1
+                                span= ticket.fullName
+                            .ticket-card-row
+                                i.bi.bi-envelope.me-1
+                                span= ticket.email
+                            .ticket-card-row
+                                i.bi.bi-clock.me-1
+                                span= new Date(ticket.createdAt).toLocaleString('vi-VN')
+                        .ticket-card-actions
+                            a.btn.btn-sm.btn-info.flex-fill(href=`/admin/tickets/${ticket._id}`)
+                                i.bi.bi-eye.me-1
+                                | Xem
+                            form.d-inline.flex-fill(method='POST' action=`/admin/tickets/${ticket._id}?_method=DELETE`)
+                                button.btn.btn-sm.btn-danger.w-100(type='submit' onclick="return confirm('Xác nhận xóa?')")
+                                    i.bi.bi-trash.me-1
+                                    | Xóa
+            
+            style.
+                .ticket-cards {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
+                .ticket-card {
+                    background: #fff;
+                    border: 1px solid var(--slate-200, #e2e8f0);
+                    border-radius: 0.75rem;
+                    padding: 1rem;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                }
+                .ticket-card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                    margin-bottom: 0.75rem;
+                }
+                .ticket-card-subject {
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    color: var(--slate-900, #0f172a);
+                    flex: 1;
+                    word-break: break-word;
+                }
+                .ticket-card-badges {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.25rem;
+                }
+                .ticket-card-badges .badge {
+                    font-size: 0.7rem;
+                }
+                .ticket-card-info {
+                    font-size: 0.85rem;
+                    color: var(--slate-600, #475569);
+                }
+                .ticket-card-row {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 0.25rem;
+                }
+                .ticket-card-row i {
+                    width: 1rem;
+                    color: var(--slate-400, #94a3b8);
+                }
+                .ticket-card-row span {
+                    word-break: break-all;
+                }
+                .ticket-card-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-top: 0.75rem;
+                    padding-top: 0.75rem;
+                    border-top: 1px solid var(--slate-100, #f1f5f9);
+                }
 
     // Modal thống kê
     .modal.fade#statsModal(tabindex="-1" aria-hidden="true")

@@ -9,9 +9,11 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../../controllers/admin/ticket.controller');
 
+// API routes (must be before :id routes)
+router.get('/api/stats', controller.stats);
+
 // Views
 router.get('/', controller.index);
-router.get('/api/stats', controller.stats);
 router.get('/:id', controller.detail);
 
 // Actions

@@ -5,17 +5,21 @@ block main
         h2 Quản lý User
 
     .user-container
-        table.user-table
-            thead
-                tr
-                    th #
-                    th FullName
-                    th Email
-                    th Ngày tạo
-                    th Hành động
-            tbody#userTable
-                tr
-                    td(colspan="5", style="text-align: center; padding: 2rem; color: #94a3b8;") Đang tải...
+        .table-responsive
+            table.user-table
+                thead
+                    tr
+                        th.d-none.d-md-table-cell #
+                        th FullName
+                        th.d-none.d-sm-table-cell Email
+                        th.d-none.d-lg-table-cell Ngày tạo
+                        th Hành động
+                tbody#userTable
+                    tr
+                        td(colspan="5", style="text-align: center; padding: 2rem; color: #94a3b8;") Đang tải...
+        
+        //- Mobile card view
+        #userCards.user-cards.d-md-none
 
     style.
         .user-header {
@@ -32,6 +36,72 @@ block main
             font-size: 1.75rem;
             font-weight: 700;
             color: var(--slate-900);
+        }
+
+        @media (max-width: 576px) {
+            .user-header h2 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Mobile card view */
+        .user-cards {
+            display: none;
+        }
+
+        .user-card {
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .user-card-name {
+            font-weight: 600;
+            color: var(--slate-900);
+            font-size: 1rem;
+        }
+
+        .user-card-email {
+            font-size: 0.85rem;
+            color: var(--slate-600);
+            margin-top: 0.25rem;
+            word-break: break-all;
+        }
+
+        .user-card-date {
+            font-size: 0.75rem;
+            color: var(--slate-400);
+            margin-top: 0.5rem;
+        }
+
+        .user-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--slate-100);
+        }
+
+        .user-card-actions button {
+            flex: 1;
+        }
+
+        @media (max-width: 767px) {
+            .user-container .table-responsive {
+                display: none;
+            }
+            .user-cards {
+                display: block;
+            }
         }
 
         .btn-add {
@@ -171,15 +241,20 @@ block main
                 .then(data => {
                     if (!data.success) return;
                     const tbody = document.getElementById('userTable');
+                    const cardsContainer = document.getElementById('userCards');
                     tbody.innerHTML = '';
+                    cardsContainer.innerHTML = '';
+                    
                     data.users.forEach((user, idx) => {
                         const createdAt = new Date(user.createdAt).toLocaleDateString('vi-VN');
+                        
+                        // Table row for desktop
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td>${idx + 1}</td>
+                            <td class="d-none d-md-table-cell">${idx + 1}</td>
                             <td>${user.fullName}</td>
-                            <td>${user.email}</td>
-                            <td>${createdAt}</td>
+                            <td class="d-none d-sm-table-cell">${user.email}</td>
+                            <td class="d-none d-lg-table-cell">${createdAt}</td>
                             <td>
                                 <div class="action-btns">
                                     <button class="btn-edit" onclick="resetUserPassword('${user._id}', '${user.fullName}')">Reset PW</button>
@@ -188,6 +263,24 @@ block main
                             </td>
                         `;
                         tbody.appendChild(row);
+                        
+                        // Card for mobile
+                        const card = document.createElement('div');
+                        card.className = 'user-card';
+                        card.innerHTML = `
+                            <div class="user-card-header">
+                                <div>
+                                    <div class="user-card-name">${user.fullName}</div>
+                                    <div class="user-card-email">${user.email}</div>
+                                    <div class="user-card-date">Tạo: ${createdAt}</div>
+                                </div>
+                            </div>
+                            <div class="user-card-actions">
+                                <button class="btn-edit" onclick="resetUserPassword('${user._id}', '${user.fullName}')">Reset PW</button>
+                                <button class="btn-delete" onclick="deleteUser('${user._id}')">Xóa</button>
+                            </div>
+                        `;
+                        cardsContainer.appendChild(card);
                     });
                 });
         }
