@@ -109,7 +109,7 @@ Mục tiêu chung: trở thành nền tảng dữ liệu mở về môi trườn
 
 ## 4. Nguyên tắc chung
 
-- **Mã nguồn mở:** giữ GPL‑3.0 cho code, ODC‑BY 1.0 cho dataset NGSI‑LD (xem [LICENSE](LICENSE), [DATA_LICENSE.md](DATA_LICENSE.md)).  
+- **Mã nguồn mở:** giữ GPL‑3.0 cho code, CC BY 4.0 cho dataset NGSI‑LD (xem [LICENSE](LICENSE), [DATA_LICENSE.md](DATA_LICENSE.md)).  
 - **Dữ liệu mở & FAIR:** mọi API NGSI‑LD phải có `@context`, URN rõ ràng, và metadata về nguồn gốc dữ liệu.  
 - **Tương thích chuẩn:** mọi mở rộng entity mới ưu tiên dựa trên FIWARE Smart Data Models và SOSA/SSN.  
 - **Trải nghiệm người dùng:** mọi tính năng backend mới đều nên có UI hoặc docs minh bạch trong [views/client/pages/docs/index.pug](views/client/pages/docs/index.pug).  
