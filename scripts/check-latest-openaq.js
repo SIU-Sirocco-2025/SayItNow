@@ -17,20 +17,20 @@ async function checkLatestData() {
 
     // Lấy 10 record mới nhất
     const latestRecords = await HCMCAirHour.find()
-      .sort({ from: -1 })
+      .sort({ to: -1 })
       .limit(10)
-      .select('from measurements.pm25.value');
+      .select('to measurements.pm25.value');
 
     console.log('📊 Latest 10 records in hcmc_air_hours:\n');
     latestRecords.forEach((record, index) => {
-      const date = new Date(record.from);
+      const date = new Date(record.to);
       const pm25 = record.measurements?.pm25?.value || 'N/A';
       console.log(`${index + 1}. ${date.toISOString()} (PM2.5: ${pm25})`);
     });
 
     // Kiểm tra có dữ liệu ngày 28 không
     const nov28Records = await HCMCAirHour.countDocuments({
-      from: {
+      to: {
         $gte: new Date('2025-11-28T00:00:00Z'),
         $lt: new Date('2025-11-29T00:00:00Z')
       }

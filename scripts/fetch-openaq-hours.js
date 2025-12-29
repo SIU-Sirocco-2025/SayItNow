@@ -115,8 +115,8 @@ function aggregateByHour(allRecords) {
 
 // Lấy mốc bắt đầu (last saved hour)
 async function getLastHourStart() {
-  const last = await HCMCAirHour.findOne().sort({ from: -1 }).lean();
-  if (last) return last.from; // Date UTC
+  const last = await HCMCAirHour.findOne().sort({ to: -1 }).lean();
+  if (last) return last.to; // Date UTC
   // Nếu chưa có dữ liệu: lùi 100 giờ để backfill nhẹ
   return new Date(Date.now() -100 * 60 * 60 * 1000);
 }
@@ -160,14 +160,14 @@ async function runOnce() {
 
     const hourDocs = aggregateByHour(allRecords);
     for (const doc of hourDocs) {
-      // Upsert theo from (UTC) để tránh trùng
+      // Upsert theo to (UTC) để tránh trùng
       await HCMCAirHour.findOneAndUpdate(
-        { from: doc.from },
+        { to: doc.to },
         doc,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
       const pm25 = doc.measurements.pm25?.value;
-      console.log(`[SAVE] hour from=${doc.window.fromLocal} pm25=${pm25 ?? 'N/A'}`);
+      console.log(`[SAVE] hour to=${doc.window.toLocal} pm25=${pm25 ?? 'N/A'}`);
     }
     console.log(`[DONE] Lưu ${hourDocs.length} khung giờ.`);
   } finally {

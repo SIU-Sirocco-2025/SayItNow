@@ -97,11 +97,15 @@ module.exports.latestPoints = async (req, res) => {
     const features = [];
     let idx = 0;
     for (const [modelName, Model] of entries) {
-      const doc = await Model.findOne()
+      const doc = await Model.findOne({
+          'current.pollution.ts': { $exists: true },
+          'current.pollution.aqius': { $ne: null }   // bỏ bản ghi AQI null
+        })
         .sort({ 'current.pollution.ts': -1 })
         .select('city state country location current.pollution.aqius current.pollution.ts')
         .lean();
-      const coords = doc?.location?.coordinates; // [lon, lat]
+
+      const coords = doc?.location?.coordinates;
       const aqius = doc?.current?.pollution?.aqius;
       const ts = doc?.current?.pollution?.ts;
 
@@ -113,7 +117,7 @@ module.exports.latestPoints = async (req, res) => {
           properties: {
             idx: String(idx),
             city: doc.city,
-            cityKey: normalize(doc.city), // thêm key đã chuẩn hoá để join với ranh giới quận nếu cần
+            cityKey: normalize(doc.city),
             state: doc.state,
             country: doc.country,
             aqius,
@@ -137,7 +141,7 @@ module.exports.latestPoints = async (req, res) => {
 module.exports.latestCityHour = async (req, res) => {
   try {
     const doc = await models.HCMCAirHour.findOne()
-      .sort({ from: -1 })
+      .sort({ to: -1 })
       .lean();
     if (!doc) {
       return res.json({ success: false, message: 'No hour data' });
@@ -167,7 +171,10 @@ module.exports.latestCityHour = async (req, res) => {
 module.exports.latestCityReading = async (req, res) => {
   try {
     const doc = await models.HCMCReading
-      .findOne({ 'current.pollution.ts': { $exists: true } })
+      .findOne({
+        'current.pollution.ts': { $exists: true },
+        'current.pollution.aqius': { $ne: null }   // chỉ lấy bản có AQI
+      })
       .sort({ 'current.pollution.ts': -1 })
       .lean();
     if (!doc) return res.json({ success: false });
